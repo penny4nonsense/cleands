@@ -1,0 +1,34 @@
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cleands"
+version = "0.1.0"
+description = "Statistical modeling and machine learning framework"
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [
+  { name = "Jason Parker", email = "jasonparker693@gmail.com" }
+]
+
+dependencies = [
+  "numpy>=1.26.4,<2.0",
+  "scipy>=1.13.1,<2.0",
+  "pandas>=2.2.2,<3.0",
+  "cvxopt>=1.3.2,<2.0"
+]
+
+[project.urls]
+Homepage = "https://github.com/penny4nonsense/cleands"
+Issues = "https://github.com/penny4nonsense/cleands/issues"
+
+# --- Setuptools package discovery ---
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["cleands*"]   # assumes your top-level package dir is 'cleands'
+
+# (Optional) If you have non-Python files to include:
+# [tool.setuptools.package-data]
+# "cleands" = ["py.typed", "data/*.csv"]
