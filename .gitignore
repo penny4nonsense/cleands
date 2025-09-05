@@ -1,0 +1,12 @@
+# Ignore Python cache
+__pycache__/
+*.pyc
+
+# Ignore IDE settings
+.idea/
+
+# Ignore Jupyter checkpoints
+.ipynb_checkpoints/
+
+# Ignore Sphinx build artifacts
+docs/_build/
