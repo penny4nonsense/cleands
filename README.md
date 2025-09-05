@@ -31,8 +31,6 @@ pip install cleands
 Full API documentation, usage guides, and examples are available here:
 
 - [cleands Documentation Index](https://penny4nonsense.github.io/cleands/)  
-- [API Reference](https://penny4nonsense.github.io/cleands/api/index.html)  
-- [Getting Started Guide](https://penny4nonsense.github.io/cleands/usage/quickstart.html)  
 
 *(Replace the links above with your actual GitHub Pages or Read the Docs URLs once deployed.)*
 

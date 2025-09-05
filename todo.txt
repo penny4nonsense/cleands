@@ -1,0 +1,82 @@
+
+Statistical tests (Wald, LM)
+Wrappers
+
+GLMs:
+    MVT Regression
+    Anova
+    GLM white
+    CLuster ses
+    Weighted least squares
+    Feasible gls
+    tidy_predict
+    classification with costs
+    Quantile regression
+
+Classification:
+    SVM
+    Weighted knn
+
+
+Ensembles:
+    adaboost
+    xgboost
+Shrinkage:
+    logistic_lasso
+    ridge etdc
+    Elastic net
+    LARs
+
+Neural nets
+GLMtrees
+
+Splines:
+    Splines
+    Lowess
+    MARS
+
+LDV:
+    Tobit
+    Truncated
+
+Clustering:
+    DB Scan
+    Optics
+    Gaussian Mixtures
+    Birch
+    Hierarchical
+    Ward
+    Affinity prop
+
+Dimension reduction:
+
+Distributions:
+    Uniform
+    t
+    F
+    Chi sq
+    Exp
+    Weib
+    Lognormal
+    Gamma
+    Double exp
+    Beta
+    Poisson
+    Binomial
+    EVT1
+    Tukey-Lambda
+    Hypergeometric
+    Negative hypergeom
+    Logistic
+    Irwin-Hall
+    Pareto
+    Kumaraswamy
+    von Mises-Fisher
+    Hotelling's T-sq
+    Laplace
+    Random walk
+    Rayleigh
+    Gumbel
+    Skewnormal
+    MVT Normal
+    Wishart
