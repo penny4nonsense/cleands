@@ -10,37 +10,89 @@ from functools import partial
 from ..base import prediction_model, PredictionModel, prediction_likelihood_model, variance_model
 from ..utils import *
 
+
 class linear_model(prediction_model, prediction_likelihood_model):
+    """Ordinary least squares linear regression.
+
+    Inherits from:
+        - prediction_model: supervised regression base.
+        - prediction_likelihood_model: provides log-likelihood evaluation.
+
+    Attributes:
+        params (np.ndarray): Estimated regression coefficients.
+    """
+
     def __init__(self, x, y, *args, **kwargs):
+        """Fit a linear regression model.
+
+        Args:
+            x (np.ndarray): Design matrix of shape (n_obs, n_features).
+            y (np.ndarray): Response vector.
+            *args: Additional arguments.
+            **kwargs: Additional keyword arguments.
+        """
         super(linear_model, self).__init__(x, y)
         self.params = self._fit(x, y, *args, **kwargs)
 
-    def _fit(self, x, y, *args, **kwargs): return np.linalg.solve(x.T @ x, x.T @ y)
+    def _fit(self, x, y, *args, **kwargs):
+        """Estimate regression coefficients via normal equations."""
+        return np.linalg.solve(x.T @ x, x.T @ y)
 
-    def predict(self, newdata): return newdata @ self.params
+    def predict(self, newdata: np.ndarray) -> np.ndarray:
+        """Predict responses for new data.
 
-    def evaluate_lnL(self, pred):
+        Args:
+            newdata (np.ndarray): Design matrix for prediction.
+
+        Returns:
+            np.ndarray: Predicted values.
+        """
+        return newdata @ self.params
+
+    def evaluate_lnL(self, pred: np.ndarray) -> float:
+        """Evaluate log-likelihood of predictions under Gaussian errors.
+
+        Args:
+            pred (np.ndarray): Predicted values.
+
+        Returns:
+            float: Log-likelihood value.
+        """
         return -self.n_obs / 2 * (np.log(2 * np.pi * (self.y - pred).var()) + 1)
 
-class logistic_regressor(linear_model,variance_model):
-    def __init__(self,*args,**kwargs):
-        super().__init__(*args,**kwargs)
+
+class logistic_regressor(linear_model, variance_model):
+    """Logistic regression with Newton–Raphson estimation.
+
+    Provides likelihood-based fit, variance-covariance matrix,
+    and pseudo-R² measures (McFadden, Ben-Akiva–Lerman).
+    """
+
+    def __init__(self, *args, **kwargs):
+        """Fit a logistic regression model using Newton–Raphson."""
+        super().__init__(*args, **kwargs)
         self.glance = pd.DataFrame(
-            {'mcfaddens.r.squared': self.mcfaddens_r_squared,
-             'ben.akiva.lerman.r.squared': self.ben_akiva_lerman_r_squared,
-             'self.df': self.n_feat,
-             'resid.df': self.degrees_of_freedom,
-             'aic': self.aic,
-             'bic': self.bic,
-             'log.likelihood': self.log_likelihood,
-             'deviance': self.deviance},
-            index = ['']
+            {
+                'mcfaddens.r.squared': self.mcfaddens_r_squared,
+                'ben.akiva.lerman.r.squared': self.ben_akiva_lerman_r_squared,
+                'self.df': self.n_feat,
+                'resid.df': self.degrees_of_freedom,
+                'aic': self.aic,
+                'bic': self.bic,
+                'log.likelihood': self.log_likelihood,
+                'deviance': self.deviance,
+            },
+            index=['']
         )
-    def _fit(self,x,y):
-        params,self.iters = newton(self.gradient,self.hessian,np.zeros(self.n_feat))
+
+    def _fit(self, x, y):
+        """Fit coefficients by Newton–Raphson optimization."""
+        params, self.iters = newton(self.gradient, self.hessian, np.zeros(self.n_feat))
         return params
+
     @property
     def vcov_params(self) -> np.ndarray:
+        """Variance-covariance matrix of parameters."""
         H = self.hessian(self.params)
         try:
             return -np.linalg.inv(H)
@@ -48,79 +100,120 @@ class logistic_regressor(linear_model,variance_model):
             return -np.linalg.pinv(H)
 
     def evaluate_lnL(self, pred: np.ndarray) -> float:
-        eps = 1e-15  # or 1e-12 depending on precision needs
+        """Log-likelihood for Bernoulli outcomes.
+
+        Args:
+            pred (np.ndarray): Predicted probabilities.
+
+        Returns:
+            float: Log-likelihood value.
+        """
+        eps = 1e-15
         pred = np.clip(pred, eps, 1 - eps)
         return self.y.T @ np.log(pred) + (1 - self.y).T @ np.log(1 - pred)
-    def gradient(self,coefs):return self.x.T@(self.y-expit(self.x@coefs))
-    def hessian(self,coefs):
-        x = self.x
-        if isinstance(x, (pd.DataFrame, pd.Series)): x = x.values
-        Fx = expit(x@coefs)
-        inside = np.diagflat(Fx*(1-Fx))
-        return -x.T@inside@x
-    def predict(self,target):return expit(target@self.params)
-    @property
-    def mcfaddens_r_squared(self): return 1-self.log_likelihood/self.null_likelihood
-    @property
-    def ben_akiva_lerman_r_squared(self):
-        return (self.y.T@self.fitted+(1-self.y).T@(1-self.fitted))/self.n_obs
 
-    # In glm.py, inside class logistic_regressor
+    def gradient(self, coefs: np.ndarray) -> np.ndarray:
+        """Gradient of the log-likelihood."""
+        return self.x.T @ (self.y - expit(self.x @ coefs))
+
+    def hessian(self, coefs: np.ndarray) -> np.ndarray:
+        """Hessian matrix of the log-likelihood."""
+        x = self.x.values if isinstance(self.x, (pd.DataFrame, pd.Series)) else self.x
+        Fx = expit(x @ coefs)
+        inside = np.diagflat(Fx * (1 - Fx))
+        return -x.T @ inside @ x
+
+    def predict(self, target: np.ndarray) -> np.ndarray:
+        """Predict probabilities for new data."""
+        return expit(target @ self.params)
+
+    @property
+    def mcfaddens_r_squared(self) -> float:
+        """McFadden's pseudo-R²."""
+        return 1 - self.log_likelihood / self.null_likelihood
+
+    @property
+    def ben_akiva_lerman_r_squared(self) -> float:
+        """Ben-Akiva–Lerman pseudo-R²."""
+        return (self.y.T @ self.fitted + (1 - self.y).T @ (1 - self.fitted)) / self.n_obs
 
     def marginal_effects(
-            self,
-            newx: Optional[Union[np.ndarray, pd.DataFrame]] = None,
-            average: bool = True,
+        self,
+        newx: Optional[Union[np.ndarray, pd.DataFrame]] = None,
+        average: bool = True,
     ) -> np.ndarray:
-        X = self.x if newx is None else newx
+        """Compute marginal effects of predictors.
 
-        # Accept pandas
+        Args:
+            newx (np.ndarray | pd.DataFrame, optional): New design matrix.
+                If None, use training data.
+            average (bool): If True, return average marginal effects.
+                If False, return case-specific effects.
+
+        Returns:
+            np.ndarray: Marginal effects.
+        """
+        X = self.x if newx is None else newx
         if isinstance(X, (pd.DataFrame, pd.Series)):
             X = X.values
-
-        # Optional convenience: if model has an intercept column of 1s and
-        # caller provided X with one fewer column, prepend ones.
         if X.ndim == 2 and X.shape[1] != self.n_feat:
             if self.x.ndim == 2 and np.allclose(self.x[:, 0], 1) and X.shape[1] == self.n_feat - 1:
                 X = np.hstack([np.ones((X.shape[0], 1)), X])
             else:
                 raise ValueError(f"newx has shape {X.shape}, but model expects {self.n_feat} features.")
-
         xb = X @ self.params
         Fx = expit(xb)
-        slope = Fx * (1.0 - Fx)  # derivative of expit
+        slope = Fx * (1.0 - Fx)
         effects = slope.reshape(-1, 1) * self.params.reshape(1, -1)
         return effects.mean(0) if average else effects
 
+
 class least_squares_regressor(linear_model, variance_model):
+    """Ordinary least squares regression with optional robust SEs."""
+
     def __init__(self, x, y, white: bool = False, hc: int = 3, *args, **kwargs):
+        """Initialize least squares regressor.
+
+        Args:
+            x (np.ndarray): Design matrix.
+            y (np.ndarray): Response vector.
+            white (bool): If True, use heteroskedasticity-consistent SEs.
+            hc (int): HC variant (1–5).
+        """
         super(least_squares_regressor, self).__init__(x, y, *args, **kwargs)
         self.white = white
         self.hc = hc
-        self.glance = pd.DataFrame({'r.squared': self.r_squared,
-                                    'adjusted.r.squared': self.adjusted_r_squared,
-                                    'self.df': self.n_feat,
-                                    'resid.df': self.degrees_of_freedom,
-                                    'aic': self.aic,
-                                    'bic': self.bic,
-                                    'log.likelihood': self.log_likelihood,
-                                    'deviance': self.deviance,
-                                    'resid.var': self.residual_variance}, index=[''])
+        self.glance = pd.DataFrame(
+            {
+                'r.squared': self.r_squared,
+                'adjusted.r.squared': self.adjusted_r_squared,
+                'self.df': self.n_feat,
+                'resid.df': self.degrees_of_freedom,
+                'aic': self.aic,
+                'bic': self.bic,
+                'log.likelihood': self.log_likelihood,
+                'deviance': self.deviance,
+                'resid.var': self.residual_variance,
+            }, index=['']
+        )
 
     @property
     def vcov_params(self):
+        """Variance-covariance matrix of parameters."""
         if self.white:
             return self.__white(self.hc)
         return np.linalg.inv(self.x.T @ self.x) * self.residual_variance
 
-    def __white(self, hc):
-        e = self.residuals.values if type(self.residuals) == pd.Series else self.residuals
+    def __white(self, hc: int) -> np.ndarray:
+        """White’s heteroskedasticity-consistent covariance estimator."""
+        e = self.residuals.values if isinstance(self.residuals, pd.Series) else self.residuals
         esq = self.__hc_correction(e ** 2, hc)
         meat = np.diagflat(esq)
         bread = np.linalg.inv(self.x.T @ self.x) @ self.x.T
         return bread @ meat @ bread.T
 
     def __hc_correction(self, esq, hc):
+        """Apply HC1–HC5 finite-sample corrections."""
         mx = 1 - np.diagonal(self.x @ np.linalg.solve(self.x.T @ self.x, self.x.T))
         match hc:
             case 1:
@@ -141,58 +234,87 @@ class least_squares_regressor(linear_model, variance_model):
                 delta = hstack(delta.reshape(-1, 1), self.n_obs * (1 - mx.reshape(-1, 1)) / p)
                 delta = delta.min(1) / 2
                 esq /= np.power(mx, delta)
-            case _:
-                pass
         return esq
-
-    @property
-    def _glance_dict(self):
-        return
-
 
 
 class poisson_regressor(linear_model):
+    """Poisson regression for count data."""
+
+    def __init__(self, x, y, *args, **kwargs):
+        """Fit a Poisson regression model."""
+        super().__init__(x, y, *args, **kwargs)
+        self.glance = pd.DataFrame(self._glance_dict, index=[''])
+
     def _fit(self, x, y):
+        """Fit coefficients by Newton–Raphson optimization."""
         params, self.iters = newton(self.gradient, self.hessian, np.zeros(self.n_feat))
         return params
 
     @property
-    def vcov_params(self): return -np.linalg.inv(self.hessian(self.params))
+    def vcov_params(self) -> np.ndarray:
+        """Variance-covariance matrix of parameters."""
+        return -np.linalg.inv(self.hessian(self.params))
 
-    def evaluate_lnL(self, pred):
-        return self.y.T @ np.log(pred) - np.ones((1, self.n_obs)) @ pred + np.ones((1, self.n_obs)) @ np.log(sp.special.factorial(self.y))
+    def evaluate_lnL(self, pred: np.ndarray) -> float:
+        """Log-likelihood for Poisson-distributed outcomes."""
+        return (
+            self.y.T @ np.log(pred)
+            - np.ones((1, self.n_obs)) @ pred
+            + np.ones((1, self.n_obs)) @ np.log(sp.special.factorial(self.y))
+        )
 
-    def gradient(self, coefs): return self.x.T @ (self.y - np.exp(self.x @ coefs))
+    def gradient(self, coefs: np.ndarray) -> np.ndarray:
+        """Gradient of the log-likelihood."""
+        return self.x.T @ (self.y - np.exp(self.x @ coefs))
 
-    def hessian(self, coefs):
+    def hessian(self, coefs: np.ndarray) -> np.ndarray:
+        """Hessian matrix of the log-likelihood."""
         Fx = np.exp(self.x @ coefs)
-        if type(Fx) == pd.DataFrame or type(Fx) == pd.Series: Fx = Fx.values
+        if isinstance(Fx, (pd.DataFrame, pd.Series)):
+            Fx = Fx.values
         return -self.x.T @ np.diagflat(Fx) @ self.x
 
-    def predict(self, target): return np.exp(target @ self.params)
+    def predict(self, target: np.ndarray) -> np.ndarray:
+        """Predict expected counts for new data."""
+        return np.exp(target @ self.params)
 
     @property
-    def _glance_dict(self):
-        return {'self.df': self.n_feat,
-                'resid.df': self.degrees_of_freedom,
-                'aic': self.aic,
-                'bic': self.bic,
-                'log.likelihood': self.log_likelihood,
-                'deviance': self.deviance}
+    def _glance_dict(self) -> dict:
+        """Model summary statistics for glance output."""
+        return {
+            'self.df': self.n_feat,
+            'resid.df': self.degrees_of_freedom,
+            'aic': self.aic,
+            'bic': self.bic,
+            'log.likelihood': self.log_likelihood,
+            'deviance': self.deviance
+        }
 
-
-LeastSquaresRegressor = partial(PredictionModel,model_type=least_squares_regressor)
-LogisticRegressor = partial(PredictionModel,model_type=logistic_regressor)
-PoissonRegressor = partial(PredictionModel,model_type=poisson_regressor)
 
 def backward_stepwise(model: Any,
                       criterion: str = "aic",
                       keep_vars: list[str] = None,
                       min_features: int = 1,
                       verbose: bool = False) -> Dict[str, Any]:
-    """
-    Generic backward stepwise for either supervised_model (x,y)
-    or SupervisedModel wrapper (x_vars, y_var, data).
+    """Perform backward stepwise feature selection.
+
+    Iteratively removes features to optimize a model fit according to an
+    information criterion (e.g., AIC, BIC, MSE).
+
+    Args:
+        model: Model object. Either:
+            - Raw supervised_model with `.x` and `.y`.
+            - SupervisedModel wrapper with `.x_vars`, `.y_var`, `.data`, `.model_type`.
+        criterion: Model selection criterion ("aic", "bic", "mse", etc.).
+        keep_vars: Variable names that must not be dropped.
+        min_features: Minimum number of features to retain.
+        verbose: If True, print progress messages.
+
+    Returns:
+        Dict[str, Any]: A dictionary with:
+            - "model": The best fitted model.
+            - "selected_features": List of selected feature names.
+            - "history": pd.DataFrame with stepwise history.
     """
     keep_vars = set(keep_vars or [])
 
@@ -239,7 +361,7 @@ def backward_stepwise(model: Any,
                 continue
         if not trial: break
 
-        j_best, sc_best, best_model = min(trial, key=lambda t: t[1]) if lower else max(trial, key=lambda t: t[1])
+        j_best, sc_best, best_model = (min(trial, key=lambda t: t[1]) if lower else max(trial, key=lambda t: t[1]))
         improved = (sc_best < best_score if lower else sc_best > best_score)
         if not improved: break
 
@@ -255,20 +377,6 @@ def backward_stepwise(model: Any,
             "selected_features":[feature_names[i] for i in current],
             "history":pd.DataFrame(history)}
 
-import numpy as np
-import pandas as pd
-from typing import Any, Dict, List, Optional
-
-def _is_intercept_col(col: np.ndarray, name: Optional[str]) -> bool:
-    if name is not None and name.strip().lower() == '(intercept)':
-        return True
-    return np.allclose(col, col[0])
-
-def _score_generic(model: Any, criterion: str) -> tuple[float, bool]:
-    c = criterion.lower()
-    val = getattr(model, c)
-    lower_is_better = c in ("aic", "bic", "mse", "misclassification_probability")
-    return float(val), lower_is_better
 
 def forward_stepwise(
     model: Any,
@@ -278,12 +386,27 @@ def forward_stepwise(
     prefer_intercept: bool = True,
     verbose: bool = False
 ) -> Dict[str, Any]:
-    """
-    Forward stepwise selection starting from intercept-only if present.
-    Accepts either:
-      - raw supervised_model with model.x, model.y
-      - SupervisedModel wrapper with .x_vars, .y_var, .data, .model_type
-    Returns: {'model', 'selected_features', 'history'}
+    """Perform forward stepwise feature selection.
+
+    Iteratively adds features to optimize a model according to a selection
+    criterion (e.g., AIC, BIC, MSE). Supports both raw models and SupervisedModel
+    wrappers, with optional intercept preference.
+
+    Args:
+        model: Model object. Either:
+            - Raw supervised_model with `.x` and `.y`.
+            - SupervisedModel wrapper with `.x_vars`, `.y_var`, `.data`, `.model_type`.
+        criterion: Model selection criterion ("aic", "bic", "mse", etc.).
+        keep_vars: Variables that must always be included.
+        max_features: Maximum number of features allowed to be selected.
+        prefer_intercept: If True, attempt to start with an intercept term (if detected).
+        verbose: If True, print progress messages.
+
+    Returns:
+        Dict[str, Any]: A dictionary with:
+            - "model": The best fitted model.
+            - "selected_features": List of selected feature names.
+            - "history": pd.DataFrame with stepwise history.
     """
     keep_vars = set(keep_vars or [])
 
@@ -488,10 +611,24 @@ def forward_stepwise(
         "history": pd.DataFrame(history),
     }
 
+
 def _metric_value(m: Any, metric: str) -> float:
-    """
-    Robustly extract metric from either a raw model or a SupervisedModel wrapper.
-    Tries attribute on the object, then on .model, then in .glance dataframe.
+    """Extract a metric value from a model or wrapper.
+
+    Tries, in order:
+      1) Direct attribute on the object.
+      2) Attribute on a wrapped `.model`.
+      3) Column in a `.glance` DataFrame.
+
+    Args:
+        m: Model object or wrapper.
+        metric: Metric name (e.g., "aic", "bic", "r_squared").
+
+    Returns:
+        float: The extracted metric value.
+
+    Raises:
+        AttributeError: If the metric cannot be found anywhere.
     """
     metric = metric.lower()
     # direct attribute
@@ -507,14 +644,37 @@ def _metric_value(m: Any, metric: str) -> float:
             return float(g.iloc[0][metric])
     raise AttributeError(f"Could not find metric '{metric}' on model.")
 
+
 def _lower_is_better(metric: str) -> bool:
+    """Determine if the given metric is minimized.
+
+    Args:
+        metric: Metric name.
+
+    Returns:
+        bool: True if lower values indicate better fit (e.g., AIC, BIC, MSE).
+    """
     metric = metric.lower()
     return metric in ("aic", "bic", "mse", "misclassification_probability")
 
+
 def _compare_models(m1: Any, m2: Any, metrics: List[str], tol: float = 1e-12) -> Tuple[Any, Dict[str, str]]:
-    """
-    Return the better of (m1, m2) by a majority vote across metrics.
-    Each metric contributes one 'vote'. Ties use the first metric as tie-breaker.
+    """Compare two models across multiple metrics by majority vote.
+
+    For each metric, the better model receives one vote. Ties on a metric
+    give no votes. If the total vote is tied, the first metric in `metrics`
+    is used as the final tie-breaker.
+
+    Args:
+        m1: First model to compare.
+        m2: Second model to compare.
+        metrics: List of metrics to evaluate (e.g., ["aic", "bic"]).
+        tol: Absolute tolerance for considering two values a tie.
+
+    Returns:
+        Tuple[Any, Dict[str, str]]: (winner_model, per_metric_winner)
+            - winner_model: The better of (m1, m2) by the voting rule.
+            - per_metric_winner: Dict mapping metric → {"m1","m2","tie"}.
     """
     votes = {"m1": 0, "m2": 0, "ties": 0}
     per_metric = {}
@@ -559,6 +719,7 @@ def _compare_models(m1: Any, m2: Any, metrics: List[str], tol: float = 1e-12) ->
 
     return winner, per_metric
 
+
 def stepwise(
     model: Any,
     direction: str = "both",
@@ -569,21 +730,33 @@ def stepwise(
     prefer_intercept: bool = True,
     verbose: bool = False,
 ) -> Dict[str, Any]:
-    """
-    Unified stepwise selector.
-    - direction='forwards' → forward_stepwise
-    - direction='backwards' → backward_stepwise
-    - direction='both' → run both and return the better result by a vote across {criterion, aic, bic}
-      (deduplicated if criterion is 'aic' or 'bic').
+    """Unified stepwise selection wrapper.
+
+    Routes to forward, backward, or both directions and returns the
+    best model by a vote across metrics when `direction="both"`.
+
+    Args:
+        model: Model object. Either:
+            - Raw supervised_model with `.x` and `.y`.
+            - SupervisedModel wrapper with `.x_vars`, `.y_var`, `.data`, `.model_type`.
+        direction: Stepwise direction:
+            - "forwards": Forward selection.
+            - "backwards": Backward elimination.
+            - "both": Run both and select the better.
+        criterion: Model selection criterion ("aic", "bic", "mse", etc.).
+        keep_vars: Variable names that must always be included.
+        min_features: Minimum number of features (for backward).
+        max_features: Maximum number of features (for forward).
+        prefer_intercept: If True, prefer/include an intercept where applicable.
+        verbose: If True, print selection progress.
 
     Returns:
-      {
-        'model': best_model,
-        'selected_features': list[str],
-        'history': pd.DataFrame,           # from the chosen direction
-        'direction_chosen': 'forwards'|'backwards',
-        'comparison' : {'metric': 'winner', ...}  # only when direction='both'
-      }
+        Dict[str, Any]: A dictionary with:
+            - "model": Best fitted model.
+            - "selected_features": List of chosen features.
+            - "history": pd.DataFrame of the chosen direction's history.
+            - "direction_chosen": One of {"forwards","backwards"}.
+            - "comparison": Dict of per-metric winners (only if direction="both").
     """
     direction = direction.lower()
     keep_vars = keep_vars or []
@@ -667,3 +840,101 @@ def stepwise(
             "comparison": per_metric,
         }
     return chosen
+
+
+class LeastSquaresRegressor(PredictionModel):
+    """Ordinary least squares (OLS) regression.
+
+    A high-level wrapper around :class:`least_squares_regressor` that provides a
+    formula interface and pandas-aware prediction methods. Fits a linear model
+    by minimizing the sum of squared residuals.
+
+    This class inherits from :class:`PredictionModel`, which handles parsing the
+    formula, extracting variables from a DataFrame, and exposing tidy/glance
+    summaries consistent with the rest of the package.
+
+    Examples:
+        Fit an OLS regression from a formula:
+
+        >>> model = LeastSquaresRegressor("y ~ x1 + x2", data=df)
+        >>> model.tidy         # coefficient table
+        >>> model.glance       # model summary
+        >>> preds = model.predict(df)
+
+    Attributes:
+        MODEL_TYPE (Type[supervised_model]): The underlying implementation
+            (:class:`least_squares_regressor`).
+        formula (str): Formula string used to specify the model.
+        x_vars (list[str]): Predictor variable names.
+        y_var (str): Response variable name.
+        data (pd.DataFrame): Parsed DataFrame containing predictors and response.
+        model (least_squares_regressor): Fitted underlying OLS model.
+    """
+
+    MODEL_TYPE = least_squares_regressor
+
+
+class LogisticRegressor(PredictionModel):
+    """Logistic regression for binary outcomes.
+
+    A high-level wrapper around :class:`logistic_regressor` that provides a
+    formula interface and pandas-aware prediction methods. Fits a generalized
+    linear model with a logit link, estimating probabilities for binary response
+    variables.
+
+    This class inherits from :class:`PredictionModel`, which handles parsing the
+    formula, extracting variables from a DataFrame, and exposing tidy/glance
+    summaries consistent with the rest of the package.
+
+    Examples:
+        Fit a logistic regression model from a formula:
+
+        >>> model = LogisticRegressor("y ~ x1 + x2", data=df)
+        >>> model.tidy          # coefficient table with log-odds
+        >>> model.glance        # model fit summary (AIC, log-likelihood, etc.)
+        >>> probs = model.predict(df)   # predicted probabilities
+
+    Attributes:
+        MODEL_TYPE (Type[supervised_model]): The underlying implementation
+            (:class:`logistic_regressor`).
+        formula (str): Formula string used to specify the model.
+        x_vars (list[str]): Predictor variable names.
+        y_var (str): Response variable name.
+        data (pd.DataFrame): Parsed DataFrame containing predictors and response.
+        model (logistic_regressor): Fitted underlying logistic regression model.
+    """
+
+    MODEL_TYPE = logistic_regressor
+
+
+class PoissonRegressor(PredictionModel):
+    """Poisson regression for count outcomes.
+
+    A high-level wrapper around :class:`poisson_regressor` that provides a
+    formula interface and pandas-aware prediction methods. Fits a generalized
+    linear model with a log link, appropriate for count data where the variance
+    is proportional to the mean.
+
+    This class inherits from :class:`PredictionModel`, which handles parsing the
+    formula, extracting variables from a DataFrame, and exposing tidy/glance
+    summaries consistent with the rest of the package.
+
+    Examples:
+        Fit a Poisson regression model from a formula:
+
+        >>> model = PoissonRegressor("y ~ x1 + x2", data=df)
+        >>> model.tidy          # coefficient table with log-incidence ratios
+        >>> model.glance        # model summary (deviance, AIC, etc.)
+        >>> rates = model.predict(df)   # expected counts
+
+    Attributes:
+        MODEL_TYPE (Type[supervised_model]): The underlying implementation
+            (:class:`poisson_regressor`).
+        formula (str): Formula string used to specify the model.
+        x_vars (list[str]): Predictor variable names.
+        y_var (str): Response variable name.
+        data (pd.DataFrame): Parsed DataFrame containing predictors and response.
+        model (poisson_regressor): Fitted underlying Poisson regression model.
+    """
+
+    MODEL_TYPE = poisson_regressor

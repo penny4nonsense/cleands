@@ -1,0 +1,7 @@
+cleands.base module
+===================
+
+.. automodule:: cleands.base
+   :members:
+   :undoc-members:
+   :show-inheritance:

@@ -290,11 +290,11 @@ def dimension_reduction_models(n: int, r:int, k: int, seed:Optional[int] = None)
     return outp
 
 def main() -> None:
-    # for model in prediction_models(3000, 5, seed = 90210):
-    #     model.print()
-    #     print('\n\n')
-    # print('\n\n')
-    # print('\n\n')
+    for model in prediction_models(3000, 5, seed = 90210):
+        model.print()
+        print('\n\n')
+    print('\n\n')
+    print('\n\n')
     # for model in classification_models(3000,5, n_clusters = 3, seed = 90210):
     #     model.print()
     #     print('\n\n')
@@ -311,9 +311,9 @@ def main() -> None:
     #     print('\n\n')
     # print('\n\n')
     # print('\n\n')
-    for model in dimension_reduction_models(100, 30, k=3, seed=90210):
-        model.print()
-        print('\n\n')
+    # for model in dimension_reduction_models(100, 30, k=3, seed=90210):
+    #     model.print()
+    #     print('\n\n')
 
 
 # Press the green button in the gutter to run the script.

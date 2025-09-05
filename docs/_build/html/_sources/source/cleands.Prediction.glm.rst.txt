@@ -1,0 +1,7 @@
+cleands.Prediction.glm module
+=============================
+
+.. automodule:: cleands.Prediction.glm
+   :members:
+   :undoc-members:
+   :show-inheritance:

@@ -1,0 +1,637 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>cleands.Prediction.glm module &mdash; cleands  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=92fd9be5" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="cleands.Prediction.knn module" href="cleands.Prediction.knn.html" />
+    <link rel="prev" title="cleands.Prediction.ensemble module" href="cleands.Prediction.ensemble.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            cleands
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="cleands.html">cleands package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="cleands.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="cleands.Classification.html">cleands.Classification package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cleands.Clustering.html">cleands.Clustering package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cleands.DimensionReduction.html">cleands.DimensionReduction package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cleands.Distribution.html">cleands.Distribution package</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="cleands.Prediction.html">cleands.Prediction package</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="cleands.Prediction.html#submodules">Submodules</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cleands.html#submodules">Submodules</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">cleands</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="cleands.html">cleands package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="cleands.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="cleands.Classification.html">cleands.Classification package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="cleands.Clustering.html">cleands.Clustering package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="cleands.DimensionReduction.html">cleands.DimensionReduction package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="cleands.Distribution.html">cleands.Distribution package</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="cleands.Prediction.html">cleands.Prediction package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="cleands.html#submodules">Submodules</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">cleands</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="cleands.html">cleands package</a></li>
+          <li class="breadcrumb-item"><a href="cleands.Prediction.html">cleands.Prediction package</a></li>
+      <li class="breadcrumb-item active">cleands.Prediction.glm module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/source/cleands.Prediction.glm.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-cleands.Prediction.glm">
+<span id="cleands-prediction-glm-module"></span><h1>cleands.Prediction.glm module<a class="headerlink" href="#module-cleands.Prediction.glm" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="cleands.Prediction.glm.linear_model">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cleands.Prediction.glm.</span></span><span class="sig-name descname"><span class="pre">linear_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/Prediction/glm.html#linear_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.Prediction.glm.linear_model" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="cleands.base.html#cleands.base.prediction_model" title="cleands.base.prediction_model"><code class="xref py py-class docutils literal notranslate"><span class="pre">prediction_model</span></code></a>, <a class="reference internal" href="cleands.base.html#cleands.base.prediction_likelihood_model" title="cleands.base.prediction_likelihood_model"><code class="xref py py-class docutils literal notranslate"><span class="pre">prediction_likelihood_model</span></code></a></p>
+<p>Ordinary least squares linear regression.</p>
+<dl class="simple">
+<dt>Inherits from:</dt><dd><ul class="simple">
+<li><p>prediction_model: supervised regression base.</p></li>
+<li><p>prediction_likelihood_model: provides log-likelihood evaluation.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>params</strong> (<em>np.ndarray</em>) – Estimated regression coefficients.</p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>y</strong> (<em>ndarray</em>)</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="cleands.Prediction.glm.linear_model.predict">
+<span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">newdata</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/Prediction/glm.html#linear_model.predict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.Prediction.glm.linear_model.predict" title="Link to this definition"></a></dt>
+<dd><p>Predict responses for new data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>newdata</strong> (<em>np.ndarray</em>) – Design matrix for prediction.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Predicted values.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cleands.Prediction.glm.linear_model.evaluate_lnL">
+<span class="sig-name descname"><span class="pre">evaluate_lnL</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pred</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/Prediction/glm.html#linear_model.evaluate_lnL"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.Prediction.glm.linear_model.evaluate_lnL" title="Link to this definition"></a></dt>
+<dd><p>Evaluate log-likelihood of predictions under Gaussian errors.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>pred</strong> (<em>np.ndarray</em>) – Predicted values.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Log-likelihood value.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cleands.Prediction.glm.logistic_regressor">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cleands.Prediction.glm.</span></span><span class="sig-name descname"><span class="pre">logistic_regressor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/Prediction/glm.html#logistic_regressor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.Prediction.glm.logistic_regressor" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#cleands.Prediction.glm.linear_model" title="cleands.Prediction.glm.linear_model"><code class="xref py py-class docutils literal notranslate"><span class="pre">linear_model</span></code></a>, <a class="reference internal" href="cleands.base.html#cleands.base.variance_model" title="cleands.base.variance_model"><code class="xref py py-class docutils literal notranslate"><span class="pre">variance_model</span></code></a></p>
+<p>Logistic regression with Newton–Raphson estimation.</p>
+<p>Provides likelihood-based fit, variance-covariance matrix,
+and pseudo-R² measures (McFadden, Ben-Akiva–Lerman).</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="cleands.Prediction.glm.logistic_regressor.vcov_params">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">vcov_params</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><a class="headerlink" href="#cleands.Prediction.glm.logistic_regressor.vcov_params" title="Link to this definition"></a></dt>
+<dd><p>Variance-covariance matrix of parameters.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cleands.Prediction.glm.logistic_regressor.evaluate_lnL">
+<span class="sig-name descname"><span class="pre">evaluate_lnL</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pred</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/Prediction/glm.html#logistic_regressor.evaluate_lnL"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.Prediction.glm.logistic_regressor.evaluate_lnL" title="Link to this definition"></a></dt>
+<dd><p>Log-likelihood for Bernoulli outcomes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>pred</strong> (<em>np.ndarray</em>) – Predicted probabilities.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Log-likelihood value.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cleands.Prediction.glm.logistic_regressor.gradient">
+<span class="sig-name descname"><span class="pre">gradient</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coefs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/Prediction/glm.html#logistic_regressor.gradient"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.Prediction.glm.logistic_regressor.gradient" title="Link to this definition"></a></dt>
+<dd><p>Gradient of the log-likelihood.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>coefs</strong> (<em>ndarray</em>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>ndarray</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cleands.Prediction.glm.logistic_regressor.hessian">
+<span class="sig-name descname"><span class="pre">hessian</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coefs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/Prediction/glm.html#logistic_regressor.hessian"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.Prediction.glm.logistic_regressor.hessian" title="Link to this definition"></a></dt>
+<dd><p>Hessian matrix of the log-likelihood.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>coefs</strong> (<em>ndarray</em>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>ndarray</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cleands.Prediction.glm.logistic_regressor.predict">
+<span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/Prediction/glm.html#logistic_regressor.predict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.Prediction.glm.logistic_regressor.predict" title="Link to this definition"></a></dt>
+<dd><p>Predict probabilities for new data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>target</strong> (<em>ndarray</em>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>ndarray</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="cleands.Prediction.glm.logistic_regressor.mcfaddens_r_squared">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">mcfaddens_r_squared</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#cleands.Prediction.glm.logistic_regressor.mcfaddens_r_squared" title="Link to this definition"></a></dt>
+<dd><p>McFadden’s pseudo-R².</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="cleands.Prediction.glm.logistic_regressor.ben_akiva_lerman_r_squared">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ben_akiva_lerman_r_squared</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#cleands.Prediction.glm.logistic_regressor.ben_akiva_lerman_r_squared" title="Link to this definition"></a></dt>
+<dd><p>Ben-Akiva–Lerman pseudo-R².</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cleands.Prediction.glm.logistic_regressor.marginal_effects">
+<span class="sig-name descname"><span class="pre">marginal_effects</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">newx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">average</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/Prediction/glm.html#logistic_regressor.marginal_effects"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.Prediction.glm.logistic_regressor.marginal_effects" title="Link to this definition"></a></dt>
+<dd><p>Compute marginal effects of predictors.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>newx</strong> (<em>np.ndarray</em><em> | </em><em>pd.DataFrame</em><em>, </em><em>optional</em>) – New design matrix.
+If None, use training data.</p></li>
+<li><p><strong>average</strong> (<em>bool</em>) – If True, return average marginal effects.
+If False, return case-specific effects.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Marginal effects.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cleands.Prediction.glm.least_squares_regressor">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cleands.Prediction.glm.</span></span><span class="sig-name descname"><span class="pre">least_squares_regressor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">white</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/Prediction/glm.html#least_squares_regressor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.Prediction.glm.least_squares_regressor" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#cleands.Prediction.glm.linear_model" title="cleands.Prediction.glm.linear_model"><code class="xref py py-class docutils literal notranslate"><span class="pre">linear_model</span></code></a>, <a class="reference internal" href="cleands.base.html#cleands.base.variance_model" title="cleands.base.variance_model"><code class="xref py py-class docutils literal notranslate"><span class="pre">variance_model</span></code></a></p>
+<p>Ordinary least squares regression with optional robust SEs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>y</strong> (<em>ndarray</em>)</p></li>
+<li><p><strong>white</strong> (<em>bool</em>)</p></li>
+<li><p><strong>hc</strong> (<em>int</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="cleands.Prediction.glm.least_squares_regressor.vcov_params">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">vcov_params</span></span><a class="headerlink" href="#cleands.Prediction.glm.least_squares_regressor.vcov_params" title="Link to this definition"></a></dt>
+<dd><p>Variance-covariance matrix of parameters.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cleands.Prediction.glm.poisson_regressor">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cleands.Prediction.glm.</span></span><span class="sig-name descname"><span class="pre">poisson_regressor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/Prediction/glm.html#poisson_regressor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.Prediction.glm.poisson_regressor" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#cleands.Prediction.glm.linear_model" title="cleands.Prediction.glm.linear_model"><code class="xref py py-class docutils literal notranslate"><span class="pre">linear_model</span></code></a></p>
+<p>Poisson regression for count data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>y</strong> (<em>ndarray</em>)</p>
+</dd>
+</dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="cleands.Prediction.glm.poisson_regressor.vcov_params">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">vcov_params</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><a class="headerlink" href="#cleands.Prediction.glm.poisson_regressor.vcov_params" title="Link to this definition"></a></dt>
+<dd><p>Variance-covariance matrix of parameters.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cleands.Prediction.glm.poisson_regressor.evaluate_lnL">
+<span class="sig-name descname"><span class="pre">evaluate_lnL</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pred</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/Prediction/glm.html#poisson_regressor.evaluate_lnL"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.Prediction.glm.poisson_regressor.evaluate_lnL" title="Link to this definition"></a></dt>
+<dd><p>Log-likelihood for Poisson-distributed outcomes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>pred</strong> (<em>ndarray</em>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cleands.Prediction.glm.poisson_regressor.gradient">
+<span class="sig-name descname"><span class="pre">gradient</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coefs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/Prediction/glm.html#poisson_regressor.gradient"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.Prediction.glm.poisson_regressor.gradient" title="Link to this definition"></a></dt>
+<dd><p>Gradient of the log-likelihood.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>coefs</strong> (<em>ndarray</em>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>ndarray</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cleands.Prediction.glm.poisson_regressor.hessian">
+<span class="sig-name descname"><span class="pre">hessian</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coefs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/Prediction/glm.html#poisson_regressor.hessian"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.Prediction.glm.poisson_regressor.hessian" title="Link to this definition"></a></dt>
+<dd><p>Hessian matrix of the log-likelihood.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>coefs</strong> (<em>ndarray</em>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>ndarray</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cleands.Prediction.glm.poisson_regressor.predict">
+<span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/Prediction/glm.html#poisson_regressor.predict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.Prediction.glm.poisson_regressor.predict" title="Link to this definition"></a></dt>
+<dd><p>Predict expected counts for new data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>target</strong> (<em>ndarray</em>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>ndarray</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cleands.Prediction.glm.backward_stepwise">
+<span class="sig-prename descclassname"><span class="pre">cleands.Prediction.glm.</span></span><span class="sig-name descname"><span class="pre">backward_stepwise</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">criterion</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'aic'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep_vars</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_features</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/Prediction/glm.html#backward_stepwise"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.Prediction.glm.backward_stepwise" title="Link to this definition"></a></dt>
+<dd><p>Perform backward stepwise feature selection.</p>
+<p>Iteratively removes features to optimize a model fit according to an
+information criterion (e.g., AIC, BIC, MSE).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model</strong> (<em>Any</em>) – Model object. Either:
+- Raw supervised_model with <cite>.x</cite> and <cite>.y</cite>.
+- SupervisedModel wrapper with <cite>.x_vars</cite>, <cite>.y_var</cite>, <cite>.data</cite>, <cite>.model_type</cite>.</p></li>
+<li><p><strong>criterion</strong> (<em>str</em>) – Model selection criterion (“aic”, “bic”, “mse”, etc.).</p></li>
+<li><p><strong>keep_vars</strong> (<em>list</em><em>[</em><em>str</em><em>]</em>) – Variable names that must not be dropped.</p></li>
+<li><p><strong>min_features</strong> (<em>int</em>) – Minimum number of features to retain.</p></li>
+<li><p><strong>verbose</strong> (<em>bool</em>) – If True, print progress messages.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>A dictionary with:</dt><dd><ul class="simple">
+<li><p>”model”: The best fitted model.</p></li>
+<li><p>”selected_features”: List of selected feature names.</p></li>
+<li><p>”history”: pd.DataFrame with stepwise history.</p></li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Dict[str, Any]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cleands.Prediction.glm.forward_stepwise">
+<span class="sig-prename descclassname"><span class="pre">cleands.Prediction.glm.</span></span><span class="sig-name descname"><span class="pre">forward_stepwise</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">criterion</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'aic'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep_vars</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_features</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefer_intercept</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/Prediction/glm.html#forward_stepwise"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.Prediction.glm.forward_stepwise" title="Link to this definition"></a></dt>
+<dd><p>Perform forward stepwise feature selection.</p>
+<p>Iteratively adds features to optimize a model according to a selection
+criterion (e.g., AIC, BIC, MSE). Supports both raw models and SupervisedModel
+wrappers, with optional intercept preference.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model</strong> (<em>Any</em>) – Model object. Either:
+- Raw supervised_model with <cite>.x</cite> and <cite>.y</cite>.
+- SupervisedModel wrapper with <cite>.x_vars</cite>, <cite>.y_var</cite>, <cite>.data</cite>, <cite>.model_type</cite>.</p></li>
+<li><p><strong>criterion</strong> (<em>str</em>) – Model selection criterion (“aic”, “bic”, “mse”, etc.).</p></li>
+<li><p><strong>keep_vars</strong> (<em>List</em><em>[</em><em>str</em><em>] </em><em>| </em><em>None</em>) – Variables that must always be included.</p></li>
+<li><p><strong>max_features</strong> (<em>int</em><em> | </em><em>None</em>) – Maximum number of features allowed to be selected.</p></li>
+<li><p><strong>prefer_intercept</strong> (<em>bool</em>) – If True, attempt to start with an intercept term (if detected).</p></li>
+<li><p><strong>verbose</strong> (<em>bool</em>) – If True, print progress messages.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>A dictionary with:</dt><dd><ul class="simple">
+<li><p>”model”: The best fitted model.</p></li>
+<li><p>”selected_features”: List of selected feature names.</p></li>
+<li><p>”history”: pd.DataFrame with stepwise history.</p></li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Dict[str, Any]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cleands.Prediction.glm.stepwise">
+<span class="sig-prename descclassname"><span class="pre">cleands.Prediction.glm.</span></span><span class="sig-name descname"><span class="pre">stepwise</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">direction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'both'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">criterion</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'aic'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep_vars</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_features</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_features</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefer_intercept</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/Prediction/glm.html#stepwise"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.Prediction.glm.stepwise" title="Link to this definition"></a></dt>
+<dd><p>Unified stepwise selection wrapper.</p>
+<p>Routes to forward, backward, or both directions and returns the
+best model by a vote across metrics when <cite>direction=”both”</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model</strong> (<em>Any</em>) – Model object. Either:
+- Raw supervised_model with <cite>.x</cite> and <cite>.y</cite>.
+- SupervisedModel wrapper with <cite>.x_vars</cite>, <cite>.y_var</cite>, <cite>.data</cite>, <cite>.model_type</cite>.</p></li>
+<li><p><strong>direction</strong> (<em>str</em>) – Stepwise direction:
+- “forwards”: Forward selection.
+- “backwards”: Backward elimination.
+- “both”: Run both and select the better.</p></li>
+<li><p><strong>criterion</strong> (<em>str</em>) – Model selection criterion (“aic”, “bic”, “mse”, etc.).</p></li>
+<li><p><strong>keep_vars</strong> (<em>List</em><em>[</em><em>str</em><em>] </em><em>| </em><em>None</em>) – Variable names that must always be included.</p></li>
+<li><p><strong>min_features</strong> (<em>int</em>) – Minimum number of features (for backward).</p></li>
+<li><p><strong>max_features</strong> (<em>int</em><em> | </em><em>None</em>) – Maximum number of features (for forward).</p></li>
+<li><p><strong>prefer_intercept</strong> (<em>bool</em>) – If True, prefer/include an intercept where applicable.</p></li>
+<li><p><strong>verbose</strong> (<em>bool</em>) – If True, print selection progress.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>A dictionary with:</dt><dd><ul class="simple">
+<li><p>”model”: Best fitted model.</p></li>
+<li><p>”selected_features”: List of chosen features.</p></li>
+<li><p>”history”: pd.DataFrame of the chosen direction’s history.</p></li>
+<li><p>”direction_chosen”: One of {“forwards”,”backwards”}.</p></li>
+<li><p>”comparison”: Dict of per-metric winners (only if direction=”both”).</p></li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Dict[str, Any]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cleands.Prediction.glm.LeastSquaresRegressor">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cleands.Prediction.glm.</span></span><span class="sig-name descname"><span class="pre">LeastSquaresRegressor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">formula</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/Prediction/glm.html#LeastSquaresRegressor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.Prediction.glm.LeastSquaresRegressor" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="cleands.base.html#cleands.base.PredictionModel" title="cleands.base.PredictionModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">PredictionModel</span></code></a></p>
+<p>Ordinary least squares (OLS) regression.</p>
+<p>A high-level wrapper around <a class="reference internal" href="#cleands.Prediction.glm.least_squares_regressor" title="cleands.Prediction.glm.least_squares_regressor"><code class="xref py py-class docutils literal notranslate"><span class="pre">least_squares_regressor</span></code></a> that provides a
+formula interface and pandas-aware prediction methods. Fits a linear model
+by minimizing the sum of squared residuals.</p>
+<p>This class inherits from <code class="xref py py-class docutils literal notranslate"><span class="pre">PredictionModel</span></code>, which handles parsing the
+formula, extracting variables from a DataFrame, and exposing tidy/glance
+summaries consistent with the rest of the package.</p>
+<p class="rubric">Examples</p>
+<p>Fit an OLS regression from a formula:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">LeastSquaresRegressor</span><span class="p">(</span><span class="s2">&quot;y ~ x1 + x2&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">tidy</span>         <span class="c1"># coefficient table</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">glance</span>       <span class="c1"># model summary</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">preds</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>MODEL_TYPE</strong> (<em>Type</em><em>[</em><a class="reference internal" href="cleands.base.html#cleands.base.supervised_model" title="cleands.base.supervised_model"><em>supervised_model</em></a><em>]</em>) – The underlying implementation
+(<a class="reference internal" href="#cleands.Prediction.glm.least_squares_regressor" title="cleands.Prediction.glm.least_squares_regressor"><code class="xref py py-class docutils literal notranslate"><span class="pre">least_squares_regressor</span></code></a>).</p></li>
+<li><p><strong>formula</strong> (<em>str</em>) – Formula string used to specify the model.</p></li>
+<li><p><strong>x_vars</strong> (<em>list</em><em>[</em><em>str</em><em>]</em>) – Predictor variable names.</p></li>
+<li><p><strong>y_var</strong> (<em>str</em>) – Response variable name.</p></li>
+<li><p><strong>data</strong> (<em>pd.DataFrame</em>) – Parsed DataFrame containing predictors and response.</p></li>
+<li><p><strong>model</strong> (<a class="reference internal" href="#cleands.Prediction.glm.least_squares_regressor" title="cleands.Prediction.glm.least_squares_regressor"><em>least_squares_regressor</em></a>) – Fitted underlying OLS model.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>formula</strong> (<em>str</em>)</p></li>
+<li><p><strong>data</strong> (<em>DataFrame</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cleands.Prediction.glm.LogisticRegressor">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cleands.Prediction.glm.</span></span><span class="sig-name descname"><span class="pre">LogisticRegressor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">formula</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/Prediction/glm.html#LogisticRegressor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.Prediction.glm.LogisticRegressor" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="cleands.base.html#cleands.base.PredictionModel" title="cleands.base.PredictionModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">PredictionModel</span></code></a></p>
+<p>Logistic regression for binary outcomes.</p>
+<p>A high-level wrapper around <a class="reference internal" href="#cleands.Prediction.glm.logistic_regressor" title="cleands.Prediction.glm.logistic_regressor"><code class="xref py py-class docutils literal notranslate"><span class="pre">logistic_regressor</span></code></a> that provides a
+formula interface and pandas-aware prediction methods. Fits a generalized
+linear model with a logit link, estimating probabilities for binary response
+variables.</p>
+<p>This class inherits from <code class="xref py py-class docutils literal notranslate"><span class="pre">PredictionModel</span></code>, which handles parsing the
+formula, extracting variables from a DataFrame, and exposing tidy/glance
+summaries consistent with the rest of the package.</p>
+<p class="rubric">Examples</p>
+<p>Fit a logistic regression model from a formula:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">LogisticRegressor</span><span class="p">(</span><span class="s2">&quot;y ~ x1 + x2&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">tidy</span>          <span class="c1"># coefficient table with log-odds</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">glance</span>        <span class="c1"># model fit summary (AIC, log-likelihood, etc.)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">probs</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>   <span class="c1"># predicted probabilities</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>MODEL_TYPE</strong> (<em>Type</em><em>[</em><a class="reference internal" href="cleands.base.html#cleands.base.supervised_model" title="cleands.base.supervised_model"><em>supervised_model</em></a><em>]</em>) – The underlying implementation
+(<a class="reference internal" href="#cleands.Prediction.glm.logistic_regressor" title="cleands.Prediction.glm.logistic_regressor"><code class="xref py py-class docutils literal notranslate"><span class="pre">logistic_regressor</span></code></a>).</p></li>
+<li><p><strong>formula</strong> (<em>str</em>) – Formula string used to specify the model.</p></li>
+<li><p><strong>x_vars</strong> (<em>list</em><em>[</em><em>str</em><em>]</em>) – Predictor variable names.</p></li>
+<li><p><strong>y_var</strong> (<em>str</em>) – Response variable name.</p></li>
+<li><p><strong>data</strong> (<em>pd.DataFrame</em>) – Parsed DataFrame containing predictors and response.</p></li>
+<li><p><strong>model</strong> (<a class="reference internal" href="#cleands.Prediction.glm.logistic_regressor" title="cleands.Prediction.glm.logistic_regressor"><em>logistic_regressor</em></a>) – Fitted underlying logistic regression model.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>formula</strong> (<em>str</em>)</p></li>
+<li><p><strong>data</strong> (<em>DataFrame</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cleands.Prediction.glm.PoissonRegressor">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cleands.Prediction.glm.</span></span><span class="sig-name descname"><span class="pre">PoissonRegressor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">formula</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/Prediction/glm.html#PoissonRegressor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.Prediction.glm.PoissonRegressor" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="cleands.base.html#cleands.base.PredictionModel" title="cleands.base.PredictionModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">PredictionModel</span></code></a></p>
+<p>Poisson regression for count outcomes.</p>
+<p>A high-level wrapper around <a class="reference internal" href="#cleands.Prediction.glm.poisson_regressor" title="cleands.Prediction.glm.poisson_regressor"><code class="xref py py-class docutils literal notranslate"><span class="pre">poisson_regressor</span></code></a> that provides a
+formula interface and pandas-aware prediction methods. Fits a generalized
+linear model with a log link, appropriate for count data where the variance
+is proportional to the mean.</p>
+<p>This class inherits from <code class="xref py py-class docutils literal notranslate"><span class="pre">PredictionModel</span></code>, which handles parsing the
+formula, extracting variables from a DataFrame, and exposing tidy/glance
+summaries consistent with the rest of the package.</p>
+<p class="rubric">Examples</p>
+<p>Fit a Poisson regression model from a formula:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">PoissonRegressor</span><span class="p">(</span><span class="s2">&quot;y ~ x1 + x2&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">tidy</span>          <span class="c1"># coefficient table with log-incidence ratios</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">glance</span>        <span class="c1"># model summary (deviance, AIC, etc.)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rates</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>   <span class="c1"># expected counts</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>MODEL_TYPE</strong> (<em>Type</em><em>[</em><a class="reference internal" href="cleands.base.html#cleands.base.supervised_model" title="cleands.base.supervised_model"><em>supervised_model</em></a><em>]</em>) – The underlying implementation
+(<a class="reference internal" href="#cleands.Prediction.glm.poisson_regressor" title="cleands.Prediction.glm.poisson_regressor"><code class="xref py py-class docutils literal notranslate"><span class="pre">poisson_regressor</span></code></a>).</p></li>
+<li><p><strong>formula</strong> (<em>str</em>) – Formula string used to specify the model.</p></li>
+<li><p><strong>x_vars</strong> (<em>list</em><em>[</em><em>str</em><em>]</em>) – Predictor variable names.</p></li>
+<li><p><strong>y_var</strong> (<em>str</em>) – Response variable name.</p></li>
+<li><p><strong>data</strong> (<em>pd.DataFrame</em>) – Parsed DataFrame containing predictors and response.</p></li>
+<li><p><strong>model</strong> (<a class="reference internal" href="#cleands.Prediction.glm.poisson_regressor" title="cleands.Prediction.glm.poisson_regressor"><em>poisson_regressor</em></a>) – Fitted underlying Poisson regression model.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>formula</strong> (<em>str</em>)</p></li>
+<li><p><strong>data</strong> (<em>DataFrame</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="cleands.Prediction.ensemble.html" class="btn btn-neutral float-left" title="cleands.Prediction.ensemble module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="cleands.Prediction.knn.html" class="btn btn-neutral float-right" title="cleands.Prediction.knn module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Jason Parker.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

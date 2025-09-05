@@ -1,0 +1,470 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>cleands.Classification.lda &mdash; cleands  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=92fd9be5" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            cleands
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../source/cleands.html">cleands package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../source/modules.html">cleands</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">cleands</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">cleands.Classification.lda</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for cleands.Classification.lda</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Linear and Quadratic Discriminant Analysis (LDA/QDA) classifiers.</span>
+
+<span class="sd">This module implements classical discriminant analysis methods:</span>
+
+<span class="sd">- `linear_discriminant_analysis` (LDA): assumes shared covariance across classes.</span>
+<span class="sd">  Provides a low-dimensional discriminant projection and class posterior</span>
+<span class="sd">  probabilities under a Gaussian generative model with equal covariance.</span>
+<span class="sd">- `quadratic_discriminant_analysis` (QDA): allows class-specific covariance</span>
+<span class="sd">  matrices with optional ridge-type regularization for numerical stability.</span>
+
+<span class="sd">Utility:</span>
+<span class="sd">    `_quad_form_rows(X, A)` efficiently computes row-wise quadratic forms</span>
+<span class="sd">    xᵢᵀ A xᵢ using `numpy.einsum`, which is used by QDA.</span>
+
+<span class="sd">Factory Aliases:</span>
+<span class="sd">    LinearDiscriminantAnalysis:  Wrapper for `linear_discriminant_analysis`</span>
+<span class="sd">        via `ClassificationModel`.</span>
+<span class="sd">    QuadraticDiscriminantAnalysis:  Wrapper for `quadratic_discriminant_analysis`</span>
+<span class="sd">        via `ClassificationModel`.</span>
+
+<span class="sd">Typical usage example:</span>
+
+<span class="sd">    &gt;&gt;&gt; from cleands.Classification.lda import LinearDiscriminantAnalysis</span>
+<span class="sd">    &gt;&gt;&gt; model = LinearDiscriminantAnalysis(x, y)</span>
+<span class="sd">    &gt;&gt;&gt; model.tidy</span>
+<span class="sd">    &gt;&gt;&gt; model.glance</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">..base</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">..utils</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span>
+
+
+<span class="k">def</span> <span class="nf">_quad_form_rows</span><span class="p">(</span><span class="n">X</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">A</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute row-wise quadratic forms xᵢᵀ A xᵢ.</span>
+
+<span class="sd">    Uses `numpy.einsum` for speed and numerical stability.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        X (np.ndarray): Matrix of shape (n_samples, n_features) containing row</span>
+<span class="sd">            vectors xᵢ.</span>
+<span class="sd">        A (np.ndarray): Square matrix of shape (n_features, n_features).</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        np.ndarray: Vector of length n_samples with values xᵢᵀ A xᵢ.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># einsum is fast and stable for this pattern</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ij,jk,ik-&gt;i&quot;</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">X</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="linear_discriminant_analysis">
+<a class="viewcode-back" href="../../../source/cleands.Classification.lda.html#cleands.Classification.lda.linear_discriminant_analysis">[docs]</a>
+<span class="k">class</span> <span class="nc">linear_discriminant_analysis</span><span class="p">(</span><span class="n">classification_model</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Linear Discriminant Analysis (LDA) classifier.</span>
+
+<span class="sd">    Fits class means and a pooled within-class covariance (shared across</span>
+<span class="sd">    classes) to derive a linear discriminant subspace and compute class</span>
+<span class="sd">    posterior probabilities under a Gaussian generative model.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        mean_vectors (list[np.ndarray]): Per-class mean vectors of shape</span>
+<span class="sd">            (n_features, 1).</span>
+<span class="sd">        priors (np.ndarray): Class prior probabilities of shape (n_classes,).</span>
+<span class="sd">        Sigma_within (np.ndarray): Pooled within-class covariance matrix of</span>
+<span class="sd">            shape (n_features, n_features).</span>
+<span class="sd">        overall_mean (np.ndarray): Overall mean vector of shape (n_features, 1).</span>
+<span class="sd">        Sigma_between (np.ndarray): Between-class scatter matrix of shape</span>
+<span class="sd">            (n_features, n_features).</span>
+<span class="sd">        eigenvalues (np.ndarray): Eigenvalues from generalized eigenproblem</span>
+<span class="sd">            `inv(S_w) S_b`, sorted descending.</span>
+<span class="sd">        eigenvectors (np.ndarray): Top `n_classes - 1` eigenvectors forming the</span>
+<span class="sd">            discriminant projection matrix of shape (n_features, n_classes-1).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize and fit the LDA model.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            x (np.ndarray or pd.DataFrame): Feature matrix (n_samples, n_features).</span>
+<span class="sd">            y (np.ndarray): Integer class labels (n_samples,).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">linear_discriminant_analysis</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mean_vectors</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="p">[</span><span class="n">y</span> <span class="o">==</span> <span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_classes</span><span class="p">)]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">priors</span> <span class="o">=</span> <span class="n">itemprob</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Sigma_within</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">n_feat</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_feat</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">mean</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mean_vectors</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">x</span><span class="p">[</span><span class="n">y</span> <span class="o">==</span> <span class="n">i</span><span class="p">]:</span>
+                <span class="n">row</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">Sigma_within</span> <span class="o">+=</span> <span class="p">(</span><span class="n">row</span> <span class="o">-</span> <span class="n">mean</span><span class="p">)</span> <span class="o">@</span> <span class="p">(</span><span class="n">row</span> <span class="o">-</span> <span class="n">mean</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">overall_mean</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Sigma_between</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">n_feat</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_feat</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">mean</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mean_vectors</span><span class="p">):</span>
+            <span class="n">n_class</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">y</span> <span class="o">==</span> <span class="n">i</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Sigma_between</span> <span class="o">+=</span> <span class="n">n_class</span> <span class="o">*</span> <span class="p">(</span><span class="n">mean</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">overall_mean</span><span class="p">)</span> <span class="o">@</span> <span class="p">(</span><span class="n">mean</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">overall_mean</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">eigenvalues</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">eigenvectors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">eig</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Sigma_within</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Sigma_between</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">eigenvalues</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">flip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">eigenvalues</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">eigenvectors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fliplr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">eigenvectors</span><span class="p">)[:,</span> <span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">n_classes</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">eigenvectors</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">eigenvectors</span>
+
+<div class="viewcode-block" id="linear_discriminant_analysis.discriminant">
+<a class="viewcode-back" href="../../../source/cleands.Classification.lda.html#cleands.Classification.lda.linear_discriminant_analysis.discriminant">[docs]</a>
+    <span class="k">def</span> <span class="nf">discriminant</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Project data into the discriminant space.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            target (np.ndarray or pd.DataFrame): Feature matrix (n_samples, n_features).</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            np.ndarray: Discriminant scores of shape (n_samples, n_classes-1).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">target</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">eigenvectors</span></div>
+
+
+<div class="viewcode-block" id="linear_discriminant_analysis.predict_proba">
+<a class="viewcode-back" href="../../../source/cleands.Classification.lda.html#cleands.Classification.lda.linear_discriminant_analysis.predict_proba">[docs]</a>
+    <span class="k">def</span> <span class="nf">predict_proba</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute posterior probabilities for each class.</span>
+
+<span class="sd">        Implements the LDA log-posterior up to a constant and returns</span>
+<span class="sd">        softmax-normalized probabilities.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            target (np.ndarray or pd.DataFrame): Feature matrix (n_samples, n_features).</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            np.ndarray: Class probabilities of shape (n_samples, n_classes).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">outp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">target</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_classes</span><span class="p">))</span>
+        <span class="n">Sw_inv</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Sigma_within</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">mean_vec</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mean_vectors</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">target</span><span class="p">):</span>
+                <span class="n">tmp</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="n">mean_vec</span>
+                <span class="n">outp</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">tmp</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">Sw_inv</span> <span class="o">@</span> <span class="n">tmp</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">priors</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="n">outp</span> <span class="o">-=</span> <span class="n">outp</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">outp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">outp</span><span class="p">)</span>
+        <span class="n">outp</span> <span class="o">/=</span> <span class="n">outp</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">outp</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="quadratic_discriminant_analysis">
+<a class="viewcode-back" href="../../../source/cleands.Classification.lda.html#cleands.Classification.lda.quadratic_discriminant_analysis">[docs]</a>
+<span class="k">class</span> <span class="nc">quadratic_discriminant_analysis</span><span class="p">(</span><span class="n">classification_model</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Quadratic Discriminant Analysis (QDA) classifier.</span>
+
+<span class="sd">    QDA models each class with its own Gaussian distribution:</span>
+<span class="sd">    x | y = k ~ N(μ_k, Σ_k). Predictions use the quadratic log-density</span>
+<span class="sd">    with class-specific covariance, allowing non-linear decision boundaries.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        classes (np.ndarray): Sorted unique class labels of shape (n_classes,).</span>
+<span class="sd">        n_classes (int): Number of classes.</span>
+<span class="sd">        priors (np.ndarray): Class prior probabilities of shape (n_classes,).</span>
+<span class="sd">        means (np.ndarray): Per-class mean vectors, shape (n_classes, n_features).</span>
+<span class="sd">        covs (np.ndarray): Per-class covariance matrices,</span>
+<span class="sd">            shape (n_classes, n_features, n_features).</span>
+<span class="sd">        inv_covs (np.ndarray): Inverses of covariance matrices, same shape as `covs`.</span>
+<span class="sd">        log_dets (np.ndarray): Log-determinants of covariance matrices, shape (n_classes,).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">y</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">priors</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">reg</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-6</span><span class="p">,</span>
+        <span class="n">sample_weight</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize and fit the QDA model.</span>
+
+<span class="sd">        Uses (optionally weighted) MLEs for class means and covariances with</span>
+<span class="sd">        ridge-type regularization to ensure positive definiteness.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            x (np.ndarray or pd.DataFrame): Feature matrix (n_samples, n_features).</span>
+<span class="sd">            y (np.ndarray): Integer class labels (n_samples,).</span>
+<span class="sd">            priors (np.ndarray, optional): Class prior probabilities of shape</span>
+<span class="sd">                (n_classes,). If None, estimated from sample weights. Defaults to None.</span>
+<span class="sd">            reg (float, optional): Nonnegative regularization added to each</span>
+<span class="sd">                class covariance (λ I) for numerical stability. Defaults to 1e-6.</span>
+<span class="sd">            sample_weight (np.ndarray, optional): Nonnegative weights of shape</span>
+<span class="sd">                (n_samples,). If None, uses uniform weights. Defaults to None.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: On invalid `sample_weight` shape or priors shape/values.</span>
+<span class="sd">            np.linalg.LinAlgError: If a class covariance is not PD even after</span>
+<span class="sd">                regularization.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+
+        <span class="c1"># Validate sample weights</span>
+        <span class="k">if</span> <span class="n">sample_weight</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">w</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_obs</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">w</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">sample_weight</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">w</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">w</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_obs</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;sample_weight must be shape (n_obs,).&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">w</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;sample_weight must sum to a positive value.&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Classes and encoded indices</span>
+        <span class="n">classes</span><span class="p">,</span> <span class="n">y_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">return_inverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">classes</span> <span class="o">=</span> <span class="n">classes</span>                    <span class="c1"># store labels</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_classes</span> <span class="o">=</span> <span class="n">classes</span><span class="o">.</span><span class="n">size</span>             <span class="c1"># &lt;-- keep this an INT</span>
+        <span class="n">k_classes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_classes</span>
+
+        <span class="c1"># Priors</span>
+        <span class="k">if</span> <span class="n">priors</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">cw</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">bincount</span><span class="p">(</span><span class="n">y_idx</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">w</span><span class="p">,</span> <span class="n">minlength</span><span class="o">=</span><span class="n">k_classes</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+            <span class="n">priors</span> <span class="o">=</span> <span class="n">cw</span> <span class="o">/</span> <span class="n">cw</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">priors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">priors</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">priors</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="p">(</span><span class="n">k_classes</span><span class="p">,):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;priors must be shape (</span><span class="si">{</span><span class="n">k_classes</span><span class="si">}</span><span class="s2">,)&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">priors</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">or</span> <span class="n">priors</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;priors must be nonnegative and sum to a positive value.&quot;</span><span class="p">)</span>
+            <span class="n">priors</span> <span class="o">=</span> <span class="n">priors</span> <span class="o">/</span> <span class="n">priors</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">priors</span> <span class="o">=</span> <span class="n">priors</span>
+
+        <span class="c1"># Means, covariances, inverses, log determinants</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">means</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">k_classes</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_feat</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">covs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">k_classes</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_feat</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_feat</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inv_covs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">covs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log_dets</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">k_classes</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">k_classes</span><span class="p">):</span>
+            <span class="n">mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">y_idx</span> <span class="o">==</span> <span class="n">k</span><span class="p">)</span>
+            <span class="n">wk</span> <span class="o">=</span> <span class="n">w</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
+            <span class="n">Xk</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
+            <span class="n">W</span> <span class="o">=</span> <span class="n">wk</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">W</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Class </span><span class="si">{</span><span class="n">classes</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="si">}</span><span class="s2"> has zero total weight.&quot;</span><span class="p">)</span>
+
+            <span class="n">mu</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">average</span><span class="p">(</span><span class="n">Xk</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">wk</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">means</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">mu</span>
+
+            <span class="n">Xc</span> <span class="o">=</span> <span class="n">Xk</span> <span class="o">-</span> <span class="n">mu</span>
+            <span class="n">cov</span> <span class="o">=</span> <span class="p">(</span><span class="n">Xc</span><span class="o">.</span><span class="n">T</span> <span class="o">*</span> <span class="n">wk</span><span class="p">)</span> <span class="o">@</span> <span class="n">Xc</span> <span class="o">/</span> <span class="n">W</span>  <span class="c1"># MLE covariance</span>
+            <span class="k">if</span> <span class="n">reg</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">cov</span> <span class="o">=</span> <span class="n">cov</span> <span class="o">+</span> <span class="n">reg</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_feat</span><span class="p">)</span>
+
+            <span class="n">sign</span><span class="p">,</span> <span class="n">logdet</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">slogdet</span><span class="p">(</span><span class="n">cov</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">sign</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">cov</span> <span class="o">=</span> <span class="n">cov</span> <span class="o">+</span> <span class="nb">max</span><span class="p">(</span><span class="n">reg</span><span class="p">,</span> <span class="mf">1e-8</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_feat</span><span class="p">)</span>
+                <span class="n">sign</span><span class="p">,</span> <span class="n">logdet</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">slogdet</span><span class="p">(</span><span class="n">cov</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">sign</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">LinAlgError</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">&quot;Covariance for class </span><span class="si">{</span><span class="n">classes</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="si">}</span><span class="s2"> is not PD even after regularization.&quot;</span>
+                    <span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">covs</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">cov</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">inv_covs</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">cov</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">log_dets</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">logdet</span>
+
+<div class="viewcode-block" id="quadratic_discriminant_analysis.decision_function">
+<a class="viewcode-back" href="../../../source/cleands.Classification.lda.html#cleands.Classification.lda.quadratic_discriminant_analysis.decision_function">[docs]</a>
+    <span class="k">def</span> <span class="nf">decision_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute unnormalized class scores (log-posterior up to a constant).</span>
+
+<span class="sd">        For each class k:</span>
+<span class="sd">            score_k(x) = log π_k - 0.5 * log|Σ_k| - 0.5 * (x - μ_k)ᵀ Σ_k⁻¹ (x - μ_k)</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            x (np.ndarray or pd.DataFrame): Feature matrix (n_samples, n_features).</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            np.ndarray: Scores of shape (n_samples, n_classes).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_is_fitted</span><span class="p">()</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;X must be a 2D array of shape (n_samples, n_features).&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_feat</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;X has </span><span class="si">{</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2"> features; expected </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n_feat</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="n">k_classes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_classes</span>  <span class="c1"># int</span>
+        <span class="n">scores</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">k_classes</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">k_classes</span><span class="p">):</span>
+            <span class="n">mu</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">means</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+            <span class="n">inv_cov</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inv_covs</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+            <span class="n">quad</span> <span class="o">=</span> <span class="n">_quad_form_rows</span><span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">mu</span><span class="p">,</span> <span class="n">inv_cov</span><span class="p">)</span>
+            <span class="n">scores</span><span class="p">[:,</span> <span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">priors</span><span class="p">[</span><span class="n">k</span><span class="p">])</span> <span class="o">-</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">log_dets</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">-</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">quad</span>
+        <span class="k">return</span> <span class="n">scores</span></div>
+
+
+<div class="viewcode-block" id="quadratic_discriminant_analysis.predict_proba">
+<a class="viewcode-back" href="../../../source/cleands.Classification.lda.html#cleands.Classification.lda.quadratic_discriminant_analysis.predict_proba">[docs]</a>
+    <span class="k">def</span> <span class="nf">predict_proba</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute class posterior probabilities via softmax over scores.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            x (np.ndarray or pd.DataFrame): Feature matrix (n_samples, n_features).</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            np.ndarray: Class probabilities of shape (n_samples, n_classes).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">scores</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">decision_function</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="n">scores</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">P</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">scores</span> <span class="o">-</span> <span class="n">m</span><span class="p">)</span>
+        <span class="n">P</span> <span class="o">/=</span> <span class="n">P</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">P</span></div>
+
+
+    <span class="k">def</span> <span class="nf">_check_is_fitted</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Ensure the model has been fitted before scoring/predicting.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            AttributeError: If any required fitted attributes are missing.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">attrs</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;means&quot;</span><span class="p">,</span> <span class="s2">&quot;covs&quot;</span><span class="p">,</span> <span class="s2">&quot;inv_covs&quot;</span><span class="p">,</span> <span class="s2">&quot;log_dets&quot;</span><span class="p">,</span> <span class="s2">&quot;priors&quot;</span><span class="p">)</span>
+        <span class="n">missing</span> <span class="o">=</span> <span class="p">[</span><span class="n">a</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">attrs</span> <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="p">)]</span>
+        <span class="k">if</span> <span class="n">missing</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> is not fitted. Missing: </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">missing</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="LinearDiscriminantAnalysis">
+<a class="viewcode-back" href="../../../source/cleands.Classification.lda.html#cleands.Classification.lda.LinearDiscriminantAnalysis">[docs]</a>
+<span class="k">class</span> <span class="nc">LinearDiscriminantAnalysis</span><span class="p">(</span><span class="n">ClassificationModel</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convenience wrapper for Linear Discriminant Analysis (LDA).</span>
+
+<span class="sd">    LDA projects data into a lower-dimensional space that maximizes</span>
+<span class="sd">    class separability, assuming normally distributed features with</span>
+<span class="sd">    equal covariance matrices. Provides a formula/DataFrame interface</span>
+<span class="sd">    for the :class:`linear_discriminant_analysis`.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        MODEL_TYPE: Underlying model type, fixed to</span>
+<span class="sd">            :class:`linear_discriminant_analysis`.</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">        &gt;&gt;&gt; model = LinearDiscriminantAnalysis.from_formula(&quot;y ~ x1 + x2&quot;, data=df)</span>
+<span class="sd">        &gt;&gt;&gt; model.classify(df[[&quot;x1&quot;, &quot;x2&quot;]])</span>
+<span class="sd">        &gt;&gt;&gt; model.predict_proba(df[[&quot;x1&quot;, &quot;x2&quot;]])</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">MODEL_TYPE</span> <span class="o">=</span> <span class="n">linear_discriminant_analysis</span></div>
+
+
+
+<div class="viewcode-block" id="QuadraticDiscriminantAnalysis">
+<a class="viewcode-back" href="../../../source/cleands.Classification.lda.html#cleands.Classification.lda.QuadraticDiscriminantAnalysis">[docs]</a>
+<span class="k">class</span> <span class="nc">QuadraticDiscriminantAnalysis</span><span class="p">(</span><span class="n">ClassificationModel</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convenience wrapper for Quadratic Discriminant Analysis (QDA).</span>
+
+<span class="sd">    QDA is similar to LDA but allows each class to have its own</span>
+<span class="sd">    covariance matrix, resulting in quadratic rather than linear</span>
+<span class="sd">    decision boundaries. Provides a formula/DataFrame interface</span>
+<span class="sd">    for the :class:`quadratic_discriminant_analysis`.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        MODEL_TYPE: Underlying model type, fixed to</span>
+<span class="sd">            :class:`quadratic_discriminant_analysis`.</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">        &gt;&gt;&gt; model = QuadraticDiscriminantAnalysis.from_formula(&quot;y ~ x1 + x2 + x3&quot;, data=df)</span>
+<span class="sd">        &gt;&gt;&gt; model.classify(df[[&quot;x1&quot;, &quot;x2&quot;, &quot;x3&quot;]])</span>
+<span class="sd">        &gt;&gt;&gt; model.predict_proba(df[[&quot;x1&quot;, &quot;x2&quot;, &quot;x3&quot;]])</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">MODEL_TYPE</span> <span class="o">=</span> <span class="n">quadratic_discriminant_analysis</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Jason Parker.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

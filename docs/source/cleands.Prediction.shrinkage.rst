@@ -1,0 +1,7 @@
+cleands.Prediction.shrinkage module
+===================================
+
+.. automodule:: cleands.Prediction.shrinkage
+   :members:
+   :undoc-members:
+   :show-inheritance:

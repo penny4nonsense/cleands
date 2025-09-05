@@ -1,0 +1,374 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>cleands.Classification.ensemble module &mdash; cleands  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=92fd9be5" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="cleands.Classification.glm module" href="cleands.Classification.glm.html" />
+    <link rel="prev" title="cleands.Classification package" href="cleands.Classification.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            cleands
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="cleands.html">cleands package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="cleands.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="cleands.Classification.html">cleands.Classification package</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="cleands.Classification.html#submodules">Submodules</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="cleands.Clustering.html">cleands.Clustering package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cleands.DimensionReduction.html">cleands.DimensionReduction package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cleands.Distribution.html">cleands.Distribution package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cleands.Prediction.html">cleands.Prediction package</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cleands.html#submodules">Submodules</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">cleands</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="cleands.html">cleands package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="cleands.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="cleands.Classification.html">cleands.Classification package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="cleands.Clustering.html">cleands.Clustering package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="cleands.DimensionReduction.html">cleands.DimensionReduction package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="cleands.Distribution.html">cleands.Distribution package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="cleands.Prediction.html">cleands.Prediction package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="cleands.html#submodules">Submodules</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">cleands</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="cleands.html">cleands package</a></li>
+          <li class="breadcrumb-item"><a href="cleands.Classification.html">cleands.Classification package</a></li>
+      <li class="breadcrumb-item active">cleands.Classification.ensemble module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/source/cleands.Classification.ensemble.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-cleands.Classification.ensemble">
+<span id="cleands-classification-ensemble-module"></span><h1>cleands.Classification.ensemble module<a class="headerlink" href="#module-cleands.Classification.ensemble" title="Link to this heading"></a></h1>
+<p>Ensemble classification models.</p>
+<p>This module provides ensemble classifiers for improved predictive accuracy
+and stability, using bootstrap aggregation (bagging) and randomization
+strategies.</p>
+<dl class="simple">
+<dt>Classes:</dt><dd><dl class="simple">
+<dt>bagging_logistic_classifier:</dt><dd><p>Ensemble of logistic classifiers fit on bootstrap samples.</p>
+</dd>
+<dt>bagging_recursive_partitioning_classifier:</dt><dd><p>Ensemble of recursive partitioning classifiers (decision trees).</p>
+</dd>
+</dl>
+</dd>
+<dt>Factory Aliases:</dt><dd><dl class="simple">
+<dt>random_forest_classifier:</dt><dd><p>Partially-applied constructor for randomized recursive partitioning
+(random forest-style) classifier.</p>
+</dd>
+<dt>BaggingLogisticClassifier:</dt><dd><p>Wrapper for constructing a bagged logistic classifier via ClassificationModel.</p>
+</dd>
+<dt>RandomForestClassifier:</dt><dd><p>Wrapper for constructing a random forest classifier via ClassificationModel.</p>
+</dd>
+<dt>BaggingRecursivePartitioningClassifier:</dt><dd><p>Wrapper for constructing a bagged tree classifier via ClassificationModel.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="cleands.Classification.ensemble.bagging_logistic_classifier">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cleands.Classification.ensemble.</span></span><span class="sig-name descname"><span class="pre">bagging_logistic_classifier</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">probability</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bootstraps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/Classification/ensemble.html#bagging_logistic_classifier"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.Classification.ensemble.bagging_logistic_classifier" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="cleands.Classification.glm.html#cleands.Classification.glm.logistic_classifier" title="cleands.Classification.glm.logistic_classifier"><code class="xref py py-class docutils literal notranslate"><span class="pre">logistic_classifier</span></code></a></p>
+<p>Bagged ensemble of logistic classifiers.</p>
+<p>Trains multiple logistic classifiers on bootstrap resamples of the data,
+then aggregates their predictions for improved robustness and variance
+reduction.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>seed</strong> (<em>int</em><em>, </em><em>optional</em>) – Random seed for reproducibility.</p></li>
+<li><p><strong>n_boot</strong> (<em>int</em>) – Number of bootstrap samples.</p></li>
+<li><p><strong>bootstraps</strong> (<em>list</em><em>[</em><a class="reference internal" href="cleands.Classification.glm.html#cleands.Classification.glm.logistic_classifier" title="cleands.Classification.glm.logistic_classifier"><em>logistic_classifier</em></a><em>]</em>) – List of fitted base classifiers.</p></li>
+<li><p><strong>bootstrap_params</strong> (<em>np.ndarray</em>) – Matrix of parameter estimates across bootstraps.</p></li>
+<li><p><strong>params</strong> (<em>np.ndarray</em>) – Averaged parameter estimates across bootstraps.</p></li>
+<li><p><strong>model</strong> (<em>abstract_logistic_regressor</em>) – Aggregated logistic regression model.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>probability</strong> (<em>float</em>)</p></li>
+<li><p><strong>seed</strong> (<em>int</em>)</p></li>
+<li><p><strong>bootstraps</strong> (<em>int</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="cleands.Classification.ensemble.bagging_logistic_classifier.predict_proba">
+<span class="sig-name descname"><span class="pre">predict_proba</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">newx</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/Classification/ensemble.html#bagging_logistic_classifier.predict_proba"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.Classification.ensemble.bagging_logistic_classifier.predict_proba" title="Link to this definition"></a></dt>
+<dd><p>Predict class probabilities by majority vote from bootstrapped models.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>newx</strong> (<em>np.ndarray</em><em> or </em><em>pd.DataFrame</em>) – Feature matrix of shape (n_samples, n_features).</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>Predicted probabilities of shape (n_samples, 2).</dt><dd><p>Column 0 = probability of class 0, Column 1 = probability of class 1.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cleands.Classification.ensemble.bagging_recursive_partitioning_classifier">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cleands.Classification.ensemble.</span></span><span class="sig-name descname"><span class="pre">bagging_recursive_partitioning_classifier</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bootstraps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sign_level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.95</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/Classification/ensemble.html#bagging_recursive_partitioning_classifier"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.Classification.ensemble.bagging_recursive_partitioning_classifier" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="cleands.Classification.tree.html#cleands.Classification.tree.recursive_partitioning_classifier" title="cleands.Classification.tree.recursive_partitioning_classifier"><code class="xref py py-class docutils literal notranslate"><span class="pre">recursive_partitioning_classifier</span></code></a></p>
+<p>Bagged ensemble of recursive partitioning classifiers (decision trees).</p>
+<p>Builds multiple trees on bootstrap resamples and selects the best-performing
+model (closest to ensemble fit) for stability. Can also be randomized to
+emulate random forest behavior.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>seed</strong> (<em>int</em><em>, </em><em>optional</em>) – Random seed for reproducibility.</p></li>
+<li><p><strong>n_boot</strong> (<em>int</em>) – Number of bootstrap samples.</p></li>
+<li><p><strong>bootstraps</strong> (<em>list</em><em>[</em><a class="reference internal" href="cleands.Classification.tree.html#cleands.Classification.tree.recursive_partitioning_classifier" title="cleands.Classification.tree.recursive_partitioning_classifier"><em>recursive_partitioning_classifier</em></a><em>]</em>) – List of fitted base trees.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>seed</strong> (<em>int</em>)</p></li>
+<li><p><strong>bootstraps</strong> (<em>int</em>)</p></li>
+<li><p><strong>sign_level</strong> (<em>float</em>)</p></li>
+<li><p><strong>max_level</strong> (<em>int</em>)</p></li>
+<li><p><strong>random_x</strong> (<em>bool</em>)</p></li>
+<li><p><strong>weights</strong> (<em>ndarray</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="cleands.Classification.ensemble.bagging_recursive_partitioning_classifier.predict_proba">
+<span class="sig-name descname"><span class="pre">predict_proba</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fitted</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/Classification/ensemble.html#bagging_recursive_partitioning_classifier.predict_proba"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.Classification.ensemble.bagging_recursive_partitioning_classifier.predict_proba" title="Link to this definition"></a></dt>
+<dd><p>Predict class probabilities by aggregating bootstrap trees.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>target</strong> (<em>np.ndarray</em><em> or </em><em>pd.DataFrame</em>) – Feature matrix of shape (n_samples, n_features).</p></li>
+<li><p><strong>fitted</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, use fitted model attributes. Defaults to False.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Predicted class probabilities of shape (n_samples, n_classes).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cleands.Classification.ensemble.random_forest_classifier">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cleands.Classification.ensemble.</span></span><span class="sig-name descname"><span class="pre">random_forest_classifier</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bootstraps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sign_level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.95</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/Classification/ensemble.html#random_forest_classifier"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.Classification.ensemble.random_forest_classifier" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#cleands.Classification.ensemble.bagging_recursive_partitioning_classifier" title="cleands.Classification.ensemble.bagging_recursive_partitioning_classifier"><code class="xref py py-class docutils literal notranslate"><span class="pre">bagging_recursive_partitioning_classifier</span></code></a></p>
+<p>Random Forest classifier using recursive partitioning trees.</p>
+<p>This class implements a random forest by combining multiple
+recursive partitioning classifiers with bootstrapping and random
+feature sub-sampling. At each split, only a random subset of
+predictors is considered, reducing correlation between trees.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>np.ndarray</em>) – Training feature matrix of shape (n_obs, n_feat).</p></li>
+<li><p><strong>y</strong> (<em>np.ndarray</em>) – Training class labels of shape (n_obs,).</p></li>
+<li><p><strong>seed</strong> (<em>int</em><em>, </em><em>optional</em>) – Random seed for reproducibility.</p></li>
+<li><p><strong>bootstraps</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of bootstrap resamples. Defaults to 1000.</p></li>
+<li><p><strong>sign_level</strong> (<em>float</em><em>, </em><em>optional</em>) – Significance level for splitting. Defaults to 0.95.</p></li>
+<li><p><strong>max_level</strong> (<em>int</em><em>, </em><em>optional</em>) – Maximum tree depth. Defaults to 2.</p></li>
+<li><p><strong>weights</strong> (<em>np.ndarray</em><em>, </em><em>optional</em>) – Optional observation weights.</p></li>
+<li><p><strong>random_x</strong> (<em>bool</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Inherits:</dt><dd><p>bagging_recursive_partitioning_classifier: Provides the ensemble
+logic and base classification tree structure.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cleands.Classification.ensemble.BaggingLogisticClassifier">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cleands.Classification.ensemble.</span></span><span class="sig-name descname"><span class="pre">BaggingLogisticClassifier</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">formula</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/Classification/ensemble.html#BaggingLogisticClassifier"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.Classification.ensemble.BaggingLogisticClassifier" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="cleands.base.html#cleands.base.ClassificationModel" title="cleands.base.ClassificationModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">ClassificationModel</span></code></a></p>
+<p>Convenience wrapper for bagging logistic classification.</p>
+<p>Applies the unified <code class="xref py py-class docutils literal notranslate"><span class="pre">ClassificationModel</span></code> interface to the
+<a class="reference internal" href="#cleands.Classification.ensemble.bagging_logistic_classifier" title="cleands.Classification.ensemble.bagging_logistic_classifier"><code class="xref py py-class docutils literal notranslate"><span class="pre">bagging_logistic_classifier</span></code></a>, enabling construction from
+formulas and DataFrames.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>MODEL_TYPE</strong> (<em>ClassVar</em><em>[</em><em>Type</em><em>[</em><a class="reference internal" href="cleands.base.html#cleands.base.supervised_model" title="cleands.base.supervised_model"><em>cleands.base.supervised_model</em></a><em>]</em><em>]</em>) – Underlying model type, fixed to
+<a class="reference internal" href="#cleands.Classification.ensemble.bagging_logistic_classifier" title="cleands.Classification.ensemble.bagging_logistic_classifier"><code class="xref py py-class docutils literal notranslate"><span class="pre">bagging_logistic_classifier</span></code></a>.</p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>formula</strong> (<em>str</em>)</p></li>
+<li><p><strong>data</strong> (<em>DataFrame</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">BaggingLogisticClassifier</span><span class="o">.</span><span class="n">from_formula</span><span class="p">(</span><span class="s2">&quot;y ~ x1 + x2&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">classify</span><span class="p">(</span><span class="n">df</span><span class="p">[[</span><span class="s2">&quot;x1&quot;</span><span class="p">,</span> <span class="s2">&quot;x2&quot;</span><span class="p">]])</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cleands.Classification.ensemble.BaggingRecursivePartitioningClassifier">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cleands.Classification.ensemble.</span></span><span class="sig-name descname"><span class="pre">BaggingRecursivePartitioningClassifier</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">formula</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/Classification/ensemble.html#BaggingRecursivePartitioningClassifier"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.Classification.ensemble.BaggingRecursivePartitioningClassifier" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="cleands.base.html#cleands.base.ClassificationModel" title="cleands.base.ClassificationModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">ClassificationModel</span></code></a></p>
+<p>Convenience wrapper for bagging recursive partitioning classification.</p>
+<p>Provides a formula/DataFrame interface for the
+<a class="reference internal" href="#cleands.Classification.ensemble.bagging_recursive_partitioning_classifier" title="cleands.Classification.ensemble.bagging_recursive_partitioning_classifier"><code class="xref py py-class docutils literal notranslate"><span class="pre">bagging_recursive_partitioning_classifier</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>MODEL_TYPE</strong> (<em>ClassVar</em><em>[</em><em>Type</em><em>[</em><a class="reference internal" href="cleands.base.html#cleands.base.supervised_model" title="cleands.base.supervised_model"><em>cleands.base.supervised_model</em></a><em>]</em><em>]</em>) – Underlying model type, fixed to
+<a class="reference internal" href="#cleands.Classification.ensemble.bagging_recursive_partitioning_classifier" title="cleands.Classification.ensemble.bagging_recursive_partitioning_classifier"><code class="xref py py-class docutils literal notranslate"><span class="pre">bagging_recursive_partitioning_classifier</span></code></a>.</p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>formula</strong> (<em>str</em>)</p></li>
+<li><p><strong>data</strong> (<em>DataFrame</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">BaggingRecursivePartitioningClassifier</span><span class="o">.</span><span class="n">from_formula</span><span class="p">(</span><span class="s2">&quot;y ~ x1 + x2&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">,</span> <span class="n">max_level</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">classify</span><span class="p">(</span><span class="n">df</span><span class="p">[[</span><span class="s2">&quot;x1&quot;</span><span class="p">,</span> <span class="s2">&quot;x2&quot;</span><span class="p">]])</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cleands.Classification.ensemble.RandomForestClassifier">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cleands.Classification.ensemble.</span></span><span class="sig-name descname"><span class="pre">RandomForestClassifier</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">formula</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/Classification/ensemble.html#RandomForestClassifier"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.Classification.ensemble.RandomForestClassifier" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="cleands.base.html#cleands.base.ClassificationModel" title="cleands.base.ClassificationModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">ClassificationModel</span></code></a></p>
+<p>Convenience wrapper for random forest classification.</p>
+<p>Provides a formula/DataFrame interface for the
+<a class="reference internal" href="#cleands.Classification.ensemble.random_forest_classifier" title="cleands.Classification.ensemble.random_forest_classifier"><code class="xref py py-class docutils literal notranslate"><span class="pre">random_forest_classifier</span></code></a>, which implements an ensemble of
+recursive partitioning classifiers with random feature sub-sampling.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>MODEL_TYPE</strong> (<em>ClassVar</em><em>[</em><em>Type</em><em>[</em><a class="reference internal" href="cleands.base.html#cleands.base.supervised_model" title="cleands.base.supervised_model"><em>cleands.base.supervised_model</em></a><em>]</em><em>]</em>) – Underlying model type, fixed to
+<a class="reference internal" href="#cleands.Classification.ensemble.random_forest_classifier" title="cleands.Classification.ensemble.random_forest_classifier"><code class="xref py py-class docutils literal notranslate"><span class="pre">random_forest_classifier</span></code></a>.</p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>formula</strong> (<em>str</em>)</p></li>
+<li><p><strong>data</strong> (<em>DataFrame</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">RandomForestClassifier</span><span class="o">.</span><span class="n">from_formula</span><span class="p">(</span><span class="s2">&quot;y ~ x1 + x2 + x3&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">classify</span><span class="p">(</span><span class="n">df</span><span class="p">[[</span><span class="s2">&quot;x1&quot;</span><span class="p">,</span> <span class="s2">&quot;x2&quot;</span><span class="p">,</span> <span class="s2">&quot;x3&quot;</span><span class="p">]])</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="cleands.Classification.html" class="btn btn-neutral float-left" title="cleands.Classification package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="cleands.Classification.glm.html" class="btn btn-neutral float-right" title="cleands.Classification.glm module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Jason Parker.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
