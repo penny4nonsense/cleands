@@ -1,0 +1,452 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>cleands.Prediction.ensemble module &mdash; cleands  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=92fd9be5" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="cleands.Prediction.glm module" href="cleands.Prediction.glm.html" />
+    <link rel="prev" title="cleands.Prediction package" href="cleands.Prediction.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            cleands
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="cleands.html">cleands package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="cleands.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="cleands.Classification.html">cleands.Classification package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cleands.Clustering.html">cleands.Clustering package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cleands.DimensionReduction.html">cleands.DimensionReduction package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cleands.Distribution.html">cleands.Distribution package</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="cleands.Prediction.html">cleands.Prediction package</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="cleands.Prediction.html#submodules">Submodules</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cleands.html#submodules">Submodules</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">cleands</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="cleands.html">cleands package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="cleands.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="cleands.Classification.html">cleands.Classification package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="cleands.Clustering.html">cleands.Clustering package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="cleands.DimensionReduction.html">cleands.DimensionReduction package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="cleands.Distribution.html">cleands.Distribution package</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="cleands.Prediction.html">cleands.Prediction package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="cleands.html#submodules">Submodules</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">cleands</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="cleands.html">cleands package</a></li>
+          <li class="breadcrumb-item"><a href="cleands.Prediction.html">cleands.Prediction package</a></li>
+      <li class="breadcrumb-item active">cleands.Prediction.ensemble module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/source/cleands.Prediction.ensemble.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-cleands.Prediction.ensemble">
+<span id="cleands-prediction-ensemble-module"></span><h1>cleands.Prediction.ensemble module<a class="headerlink" href="#module-cleands.Prediction.ensemble" title="Link to this heading"></a></h1>
+<p>Ensemble models for prediction tasks.</p>
+<p>This module implements bootstrap aggregating (bagging) methods for regression
+and classification, extending base learners such as least squares, logistic
+regression, and recursive partitioning (decision trees). It also defines
+convenience wrappers for random forest–style ensembles.</p>
+<dl class="simple">
+<dt>Classes:</dt><dd><dl class="simple">
+<dt>bootstrap_model:</dt><dd><p>Base container for storing bootstrap resamples of a supervised model.</p>
+</dd>
+<dt>bagging_least_squares_regressor:</dt><dd><p>Bagging ensemble of least squares regressors. Produces averaged
+parameter estimates and predictions with bootstrap variance estimation.</p>
+</dd>
+<dt>bagging_logistic_regressor:</dt><dd><p>Bagging ensemble of logistic regressors. Averages coefficients across
+bootstrap samples to improve stability and predictive performance.</p>
+</dd>
+<dt>bagging_recursive_partitioning_regressor:</dt><dd><p>Bagging ensemble of recursive partitioning regressors (decision trees).
+Supports optional feature subsampling to mimic random forests.
+Selects the bootstrap tree closest to the full-sample fit for final
+structure, while predictions are aggregated across bootstraps.</p>
+</dd>
+</dl>
+</dd>
+<dt>Functions:</dt><dd><dl class="simple">
+<dt>random_forest_regressor:</dt><dd><p>Partial constructor of bagging_recursive_partitioning_regressor with
+feature subsampling enabled (random_x=True), equivalent to a regression
+random forest.</p>
+</dd>
+<dt>BaggingLogisticRegressor:</dt><dd><p>Partial wrapper that constructs a SupervisedModel around
+bagging_logistic_regressor for formula-notation usage.</p>
+</dd>
+<dt>BaggingRecursivePartitioningRegressor:</dt><dd><p>Partial wrapper for bagging_recursive_partitioning_regressor.</p>
+</dd>
+<dt>RandomForestRegressor:</dt><dd><p>Partial wrapper for random_forest_regressor.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>All ensembles rely on the <cite>bootstrap</cite> utility from utils.py, which
+generates bootstrap resamples of the training data.</p></li>
+<li><p>These models are intended as drop-in replacements for their base learners
+but with improved stability through aggregation.</p></li>
+</ul>
+<dl class="py class">
+<dt class="sig sig-object py" id="cleands.Prediction.ensemble.bootstrap_model">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cleands.Prediction.ensemble.</span></span><span class="sig-name descname"><span class="pre">bootstrap_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bootstraps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/Prediction/ensemble.html#bootstrap_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.Prediction.ensemble.bootstrap_model" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+<p>Generic bootstrap wrapper for supervised models.</p>
+<p>Creates and stores a collection of bootstrap-fitted models for a given
+<cite>model_type</cite>, providing a common structure you can extend.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model_type</strong> (<em>Type</em><em>[</em><a class="reference internal" href="cleands.base.html#cleands.base.supervised_model" title="cleands.base.supervised_model"><em>supervised_model</em></a><em>]</em>) – The underlying model class to fit.</p></li>
+<li><p><strong>model</strong> (<a class="reference internal" href="cleands.base.html#cleands.base.supervised_model" title="cleands.base.supervised_model"><em>supervised_model</em></a>) – The model fit on the original (non-bootstrapped) data.</p></li>
+<li><p><strong>seed</strong> (<em>Optional</em><em>[</em><em>int</em><em>]</em>) – Seed for reproducibility of bootstrap sampling.</p></li>
+<li><p><strong>n_boot</strong> (<em>int</em>) – Number of bootstrap resamples.</p></li>
+<li><p><strong>bootstraps</strong> (<em>list</em><em>[</em><a class="reference internal" href="cleands.base.html#cleands.base.supervised_model" title="cleands.base.supervised_model"><em>supervised_model</em></a><em>]</em>) – List of models fit on bootstrap samples.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>x</strong> (<em>ndarray</em>)</p></li>
+<li><p><strong>y</strong> (<em>ndarray</em>)</p></li>
+<li><p><strong>model_type</strong> (<em>Type</em><em>[</em><a class="reference internal" href="cleands.base.html#cleands.base.supervised_model" title="cleands.base.supervised_model"><em>supervised_model</em></a><em>]</em>)</p></li>
+<li><p><strong>seed</strong> (<em>int</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>bootstraps</strong> (<em>int</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cleands.Prediction.ensemble.bagging_least_squares_regressor">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cleands.Prediction.ensemble.</span></span><span class="sig-name descname"><span class="pre">bagging_least_squares_regressor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bootstraps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/Prediction/ensemble.html#bagging_least_squares_regressor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.Prediction.ensemble.bagging_least_squares_regressor" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="cleands.Prediction.glm.html#cleands.Prediction.glm.least_squares_regressor" title="cleands.Prediction.glm.least_squares_regressor"><code class="xref py py-class docutils literal notranslate"><span class="pre">least_squares_regressor</span></code></a></p>
+<p>Bagged OLS regressor.</p>
+<p>Trains many OLS models on bootstrap resamples and aggregates:
+- <cite>params</cite> is set to the mean of bootstrap coefficient vectors.
+- Predictions are the mean of bootstrap predictions.
+- <cite>vcov_params</cite> is the bootstrap covariance of coefficients.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>y</strong> (<em>ndarray</em>)</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="cleands.Prediction.ensemble.bagging_least_squares_regressor.predict">
+<span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">newx</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/Prediction/ensemble.html#bagging_least_squares_regressor.predict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.Prediction.ensemble.bagging_least_squares_regressor.predict" title="Link to this definition"></a></dt>
+<dd><p>Predict by averaging bootstrap model predictions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>newx</strong> (<em>np.ndarray</em>) – Feature matrix for prediction.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Mean prediction across bootstraps.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="cleands.Prediction.ensemble.bagging_least_squares_regressor.vcov_params">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">vcov_params</span></span><a class="headerlink" href="#cleands.Prediction.ensemble.bagging_least_squares_regressor.vcov_params" title="Link to this definition"></a></dt>
+<dd><p>Bootstrap covariance of parameter estimates.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(p x p) covariance matrix from bootstrap params.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cleands.Prediction.ensemble.bagging_logistic_regressor">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cleands.Prediction.ensemble.</span></span><span class="sig-name descname"><span class="pre">bagging_logistic_regressor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bootstraps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/Prediction/ensemble.html#bagging_logistic_regressor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.Prediction.ensemble.bagging_logistic_regressor" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="cleands.Prediction.glm.html#cleands.Prediction.glm.logistic_regressor" title="cleands.Prediction.glm.logistic_regressor"><code class="xref py py-class docutils literal notranslate"><span class="pre">logistic_regressor</span></code></a></p>
+<p>Bagged logistic regressor.</p>
+<p>Trains many logistic models on bootstrap resamples and aggregates:
+- <cite>params</cite> is the mean of bootstrap coefficient vectors.
+- Predictions are the mean of bootstrap probability predictions.
+- <cite>vcov_params</cite> is the bootstrap covariance of coefficients.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>y</strong> (<em>ndarray</em>)</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="cleands.Prediction.ensemble.bagging_logistic_regressor.predict">
+<span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/Prediction/ensemble.html#bagging_logistic_regressor.predict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.Prediction.ensemble.bagging_logistic_regressor.predict" title="Link to this definition"></a></dt>
+<dd><p>Predict by averaging bootstrap probability predictions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>target</strong> (<em>np.ndarray</em>) – Feature matrix for prediction.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Mean predicted probabilities across bootstraps.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="cleands.Prediction.ensemble.bagging_logistic_regressor.vcov_params">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">vcov_params</span></span><a class="headerlink" href="#cleands.Prediction.ensemble.bagging_logistic_regressor.vcov_params" title="Link to this definition"></a></dt>
+<dd><p>Bootstrap covariance of parameter estimates.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(p x p) covariance matrix from bootstrap params.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cleands.Prediction.ensemble.bagging_recursive_partitioning_regressor">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cleands.Prediction.ensemble.</span></span><span class="sig-name descname"><span class="pre">bagging_recursive_partitioning_regressor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bootstraps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sign_level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.95</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/Prediction/ensemble.html#bagging_recursive_partitioning_regressor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.Prediction.ensemble.bagging_recursive_partitioning_regressor" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="cleands.Prediction.tree.html#cleands.Prediction.tree.recursive_partitioning_regressor" title="cleands.Prediction.tree.recursive_partitioning_regressor"><code class="xref py py-class docutils literal notranslate"><span class="pre">recursive_partitioning_regressor</span></code></a></p>
+<p>Bagged regression trees (recursive partitioning).</p>
+<p>Fits multiple trees on bootstrap samples, then chooses the single tree
+whose fitted values are closest (MSE) to the bagged fit; the chosen tree’s
+learned structure is copied onto <cite>self</cite> for efficient prediction.</p>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>If <cite>random_x=True</cite> via the <cite>random_forest_regressor</cite> partial, each tree
+samples a subset of features at each split (random subspace), similar
+to Random Forests.</p></li>
+</ul>
+<dl class="py method">
+<dt class="sig sig-object py" id="cleands.Prediction.ensemble.bagging_recursive_partitioning_regressor.predict">
+<span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">newx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fitted</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/Prediction/ensemble.html#bagging_recursive_partitioning_regressor.predict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.Prediction.ensemble.bagging_recursive_partitioning_regressor.predict" title="Link to this definition"></a></dt>
+<dd><p>Predict by averaging over bootstrap trees (or on original feature order if fitted=True).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>newx</strong> (<em>np.ndarray</em>) – Feature matrix for prediction.</p></li>
+<li><p><strong>fitted</strong> (<em>bool</em>) – If True, <cite>newx</cite> is assumed already aligned to the selected
+tree’s internal column order; otherwise, alignment is handled.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Mean prediction across bootstrap trees.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cleands.Prediction.ensemble.random_forest_regressor">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cleands.Prediction.ensemble.</span></span><span class="sig-name descname"><span class="pre">random_forest_regressor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bootstraps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sign_level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.95</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/Prediction/ensemble.html#random_forest_regressor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.Prediction.ensemble.random_forest_regressor" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#cleands.Prediction.ensemble.bagging_recursive_partitioning_regressor" title="cleands.Prediction.ensemble.bagging_recursive_partitioning_regressor"><code class="xref py py-class docutils literal notranslate"><span class="pre">bagging_recursive_partitioning_regressor</span></code></a></p>
+<p>Random Forest regressor using recursive partitioning trees.</p>
+<p>This class implements a random forest by combining multiple
+recursive partitioning trees with bootstrapping and feature
+sub-sampling. At each split, only a random subset of predictors
+is considered, reducing correlation between trees.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>np.ndarray</em>) – Training feature matrix of shape (n_obs, n_feat).</p></li>
+<li><p><strong>y</strong> (<em>np.ndarray</em>) – Training response vector of shape (n_obs,).</p></li>
+<li><p><strong>seed</strong> (<em>int</em><em>, </em><em>optional</em>) – Random seed for reproducibility.</p></li>
+<li><p><strong>bootstraps</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of bootstrap resamples. Defaults to 1000.</p></li>
+<li><p><strong>sign_level</strong> (<em>float</em><em>, </em><em>optional</em>) – Significance level for splitting. Defaults to 0.95.</p></li>
+<li><p><strong>max_level</strong> (<em>int</em><em>, </em><em>optional</em>) – Maximum tree depth. If None, grows until no valid splits remain.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Inherits:</dt><dd><p>bagging_recursive_partitioning_regressor: Provides the ensemble
+logic and base tree structure.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cleands.Prediction.ensemble.BaggingLogisticRegressor">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cleands.Prediction.ensemble.</span></span><span class="sig-name descname"><span class="pre">BaggingLogisticRegressor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">formula</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/Prediction/ensemble.html#BaggingLogisticRegressor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.Prediction.ensemble.BaggingLogisticRegressor" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="cleands.base.html#cleands.base.PredictionModel" title="cleands.base.PredictionModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">PredictionModel</span></code></a></p>
+<p>Convenience wrapper for bagging logistic regression.</p>
+<p>This class applies the unified <code class="xref py py-class docutils literal notranslate"><span class="pre">PredictionModel</span></code> interface
+to the <a class="reference internal" href="#cleands.Prediction.ensemble.bagging_logistic_regressor" title="cleands.Prediction.ensemble.bagging_logistic_regressor"><code class="xref py py-class docutils literal notranslate"><span class="pre">bagging_logistic_regressor</span></code></a>, enabling construction
+from formulas and DataFrames.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>MODEL_TYPE</strong> (<em>ClassVar</em><em>[</em><em>Type</em><em>[</em><a class="reference internal" href="cleands.base.html#cleands.base.supervised_model" title="cleands.base.supervised_model"><em>cleands.base.supervised_model</em></a><em>]</em><em>]</em>) – Underlying model type, fixed to
+<a class="reference internal" href="#cleands.Prediction.ensemble.bagging_logistic_regressor" title="cleands.Prediction.ensemble.bagging_logistic_regressor"><code class="xref py py-class docutils literal notranslate"><span class="pre">bagging_logistic_regressor</span></code></a>.</p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>formula</strong> (<em>str</em>)</p></li>
+<li><p><strong>data</strong> (<em>DataFrame</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">BaggingLogisticRegressor</span><span class="o">.</span><span class="n">from_formula</span><span class="p">(</span><span class="s2">&quot;y ~ x1 + x2&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">df</span><span class="p">[[</span><span class="s2">&quot;x1&quot;</span><span class="p">,</span> <span class="s2">&quot;x2&quot;</span><span class="p">]])</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cleands.Prediction.ensemble.BaggingRecursivePartitioningRegressor">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cleands.Prediction.ensemble.</span></span><span class="sig-name descname"><span class="pre">BaggingRecursivePartitioningRegressor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">formula</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/Prediction/ensemble.html#BaggingRecursivePartitioningRegressor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.Prediction.ensemble.BaggingRecursivePartitioningRegressor" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="cleands.base.html#cleands.base.PredictionModel" title="cleands.base.PredictionModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">PredictionModel</span></code></a></p>
+<p>Convenience wrapper for bagging recursive partitioning regression.</p>
+<p>Provides a formula/DataFrame interface for the
+<a class="reference internal" href="#cleands.Prediction.ensemble.bagging_recursive_partitioning_regressor" title="cleands.Prediction.ensemble.bagging_recursive_partitioning_regressor"><code class="xref py py-class docutils literal notranslate"><span class="pre">bagging_recursive_partitioning_regressor</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>MODEL_TYPE</strong> (<em>ClassVar</em><em>[</em><em>Type</em><em>[</em><a class="reference internal" href="cleands.base.html#cleands.base.supervised_model" title="cleands.base.supervised_model"><em>cleands.base.supervised_model</em></a><em>]</em><em>]</em>) – Underlying model type, fixed to
+<a class="reference internal" href="#cleands.Prediction.ensemble.bagging_recursive_partitioning_regressor" title="cleands.Prediction.ensemble.bagging_recursive_partitioning_regressor"><code class="xref py py-class docutils literal notranslate"><span class="pre">bagging_recursive_partitioning_regressor</span></code></a>.</p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>formula</strong> (<em>str</em>)</p></li>
+<li><p><strong>data</strong> (<em>DataFrame</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">BaggingRecursivePartitioningRegressor</span><span class="o">.</span><span class="n">from_formula</span><span class="p">(</span><span class="s2">&quot;y ~ x1 + x2&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">df</span><span class="p">[[</span><span class="s2">&quot;x1&quot;</span><span class="p">,</span> <span class="s2">&quot;x2&quot;</span><span class="p">]])</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cleands.Prediction.ensemble.RandomForestRegressor">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cleands.Prediction.ensemble.</span></span><span class="sig-name descname"><span class="pre">RandomForestRegressor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">formula</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/Prediction/ensemble.html#RandomForestRegressor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.Prediction.ensemble.RandomForestRegressor" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="cleands.base.html#cleands.base.PredictionModel" title="cleands.base.PredictionModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">PredictionModel</span></code></a></p>
+<p>Convenience wrapper for random forest regression.</p>
+<p>Provides a formula/DataFrame interface for the
+<a class="reference internal" href="#cleands.Prediction.ensemble.random_forest_regressor" title="cleands.Prediction.ensemble.random_forest_regressor"><code class="xref py py-class docutils literal notranslate"><span class="pre">random_forest_regressor</span></code></a>, which implements an ensemble of
+recursive partitioning trees with random feature sub-sampling.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>MODEL_TYPE</strong> (<em>ClassVar</em><em>[</em><em>Type</em><em>[</em><a class="reference internal" href="cleands.base.html#cleands.base.supervised_model" title="cleands.base.supervised_model"><em>cleands.base.supervised_model</em></a><em>]</em><em>]</em>) – Underlying model type, fixed to
+<a class="reference internal" href="#cleands.Prediction.ensemble.random_forest_regressor" title="cleands.Prediction.ensemble.random_forest_regressor"><code class="xref py py-class docutils literal notranslate"><span class="pre">random_forest_regressor</span></code></a>.</p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>formula</strong> (<em>str</em>)</p></li>
+<li><p><strong>data</strong> (<em>DataFrame</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">RandomForestRegressor</span><span class="o">.</span><span class="n">from_formula</span><span class="p">(</span><span class="s2">&quot;y ~ x1 + x2 + x3&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">df</span><span class="p">[[</span><span class="s2">&quot;x1&quot;</span><span class="p">,</span> <span class="s2">&quot;x2&quot;</span><span class="p">,</span> <span class="s2">&quot;x3&quot;</span><span class="p">]])</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="cleands.Prediction.html" class="btn btn-neutral float-left" title="cleands.Prediction package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="cleands.Prediction.glm.html" class="btn btn-neutral float-right" title="cleands.Prediction.glm module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Jason Parker.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

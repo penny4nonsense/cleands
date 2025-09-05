@@ -1,0 +1,306 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>cleands.Clustering.kmeans module &mdash; cleands  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=92fd9be5" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="cleands.DimensionReduction package" href="cleands.DimensionReduction.html" />
+    <link rel="prev" title="cleands.Clustering package" href="cleands.Clustering.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            cleands
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="cleands.html">cleands package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="cleands.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="cleands.Classification.html">cleands.Classification package</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="cleands.Clustering.html">cleands.Clustering package</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="cleands.Clustering.html#submodules">Submodules</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="cleands.DimensionReduction.html">cleands.DimensionReduction package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cleands.Distribution.html">cleands.Distribution package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cleands.Prediction.html">cleands.Prediction package</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cleands.html#submodules">Submodules</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">cleands</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="cleands.html">cleands package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="cleands.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="cleands.Classification.html">cleands.Classification package</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="cleands.Clustering.html">cleands.Clustering package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="cleands.DimensionReduction.html">cleands.DimensionReduction package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="cleands.Distribution.html">cleands.Distribution package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="cleands.Prediction.html">cleands.Prediction package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="cleands.html#submodules">Submodules</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">cleands</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="cleands.html">cleands package</a></li>
+          <li class="breadcrumb-item"><a href="cleands.Clustering.html">cleands.Clustering package</a></li>
+      <li class="breadcrumb-item active">cleands.Clustering.kmeans module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/source/cleands.Clustering.kmeans.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-cleands.Clustering.kmeans">
+<span id="cleands-clustering-kmeans-module"></span><h1>cleands.Clustering.kmeans module<a class="headerlink" href="#module-cleands.Clustering.kmeans" title="Link to this heading"></a></h1>
+<p>k-means clustering models.</p>
+<p>This module implements a basic version of k-means clustering (<cite>simple_k_means</cite>)
+and a multi-start variant (<cite>k_means</cite>). It also includes helper functions to
+evaluate the optimal number of clusters using the total within-group sum of
+squares (TWSS) and the “elbow method”.</p>
+<dl class="simple">
+<dt>Classes:</dt><dd><dl class="simple">
+<dt>simple_k_means:</dt><dd><p>Basic k-means clustering algorithm with iterative centroid updates.</p>
+</dd>
+<dt>k_means:</dt><dd><p>Extension of <cite>simple_k_means</cite> that runs multiple random initializations
+(n_start) and selects the solution with the lowest TWSS.</p>
+</dd>
+</dl>
+</dd>
+<dt>Functions:</dt><dd><dl class="simple">
+<dt>total_within_group_sum_of_squares_for_different_k:</dt><dd><p>Computes TWSS across different k values (1..k_max).</p>
+</dd>
+<dt>select_k:</dt><dd><p>Heuristic to choose optimal k using the elbow method based on TWSS ratios.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="cleands.Clustering.kmeans.simple_k_means">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cleands.Clustering.kmeans.</span></span><span class="sig-name descname"><span class="pre">simple_k_means</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_iters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/Clustering/kmeans.html#simple_k_means"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.Clustering.kmeans.simple_k_means" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="cleands.base.html#cleands.base.clustering_model" title="cleands.base.clustering_model"><code class="xref py py-class docutils literal notranslate"><span class="pre">clustering_model</span></code></a></p>
+<p>Basic k-means clustering.</p>
+<p>Iteratively assigns points to the nearest cluster centroid and updates
+centroids until convergence or the maximum number of iterations is reached.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>np.ndarray</em>) – Data matrix of shape (n_samples, n_features).</p></li>
+<li><p><strong>k</strong> (<em>int</em>) – Number of clusters.</p></li>
+<li><p><strong>max_iters</strong> (<em>int</em><em>, </em><em>optional</em>) – Maximum iterations. Defaults to 100.</p></li>
+<li><p><strong>seed</strong> (<em>int</em><em> | </em><em>None</em><em>, </em><em>optional</em>) – Random seed for reproducibility. Defaults to None.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Variables<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>n_clusters</strong> (<em>int</em>) – Number of clusters.</p></li>
+<li><p><strong>iters</strong> (<em>int</em>) – Number of iterations performed.</p></li>
+<li><p><strong>_means</strong> (<em>np.ndarray</em>) – Cluster centroids of shape (k, n_features).</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="cleands.Clustering.kmeans.simple_k_means.cluster">
+<span class="sig-name descname"><span class="pre">cluster</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">newx</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/Clustering/kmeans.html#simple_k_means.cluster"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.Clustering.kmeans.simple_k_means.cluster" title="Link to this definition"></a></dt>
+<dd><p>Cluster new data based on learned centroids.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>newx</strong> (<em>np.ndarray</em>) – New data matrix of shape (m, n_features).</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Cluster assignments of shape (m,).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cleands.Clustering.kmeans.k_means">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cleands.Clustering.kmeans.</span></span><span class="sig-name descname"><span class="pre">k_means</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_iters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/Clustering/kmeans.html#k_means"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.Clustering.kmeans.k_means" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#cleands.Clustering.kmeans.simple_k_means" title="cleands.Clustering.kmeans.simple_k_means"><code class="xref py py-class docutils literal notranslate"><span class="pre">simple_k_means</span></code></a></p>
+<p>Multi-start k-means clustering.</p>
+<p>Runs multiple random initializations (<code class="docutils literal notranslate"><span class="pre">n_start</span></code>) of <code class="docutils literal notranslate"><span class="pre">simple_k_means</span></code> and
+selects the model with the lowest total within-group sum of squares (TWSS).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>np.ndarray</em>) – Data matrix of shape (n_samples, n_features).</p></li>
+<li><p><strong>k</strong> (<em>int</em>) – Number of clusters.</p></li>
+<li><p><strong>max_iters</strong> (<em>int</em><em>, </em><em>optional</em>) – Maximum iterations for each run. Defaults to 100.</p></li>
+<li><p><strong>seed</strong> (<em>int</em><em> | </em><em>None</em><em>, </em><em>optional</em>) – Random seed. Defaults to None.</p></li>
+<li><p><strong>n_start</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of random initializations. Defaults to 10.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Variables<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>n_clusters</strong> (<em>int</em>) – Number of clusters.</p></li>
+<li><p><strong>iters</strong> (<em>int</em>) – Iterations used by the best model.</p></li>
+<li><p><strong>means</strong> (<em>np.ndarray</em>) – Centroids of the best solution.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cleands.Clustering.kmeans.total_within_group_sum_of_squares_for_different_k">
+<span class="sig-prename descclassname"><span class="pre">cleands.Clustering.kmeans.</span></span><span class="sig-name descname"><span class="pre">total_within_group_sum_of_squares_for_different_k</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k_max</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/Clustering/kmeans.html#total_within_group_sum_of_squares_for_different_k"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.Clustering.kmeans.total_within_group_sum_of_squares_for_different_k" title="Link to this definition"></a></dt>
+<dd><p>Compute TWSS across different values of <code class="docutils literal notranslate"><span class="pre">k</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>np.ndarray</em>) – Data matrix of shape (n_samples, n_features).</p></li>
+<li><p><strong>k_max</strong> (<em>int</em><em>, </em><em>optional</em>) – Maximum number of clusters to evaluate. Defaults to 10.</p></li>
+<li><p><strong>*args</strong> – Passed to <code class="docutils literal notranslate"><span class="pre">k_means</span></code>.</p></li>
+<li><p><strong>**kwargs</strong> – Passed to <code class="docutils literal notranslate"><span class="pre">k_means</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>TWSS values indexed by <code class="docutils literal notranslate"><span class="pre">k</span></code> (1..k_max).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cleands.Clustering.kmeans.select_k">
+<span class="sig-prename descclassname"><span class="pre">cleands.Clustering.kmeans.</span></span><span class="sig-name descname"><span class="pre">select_k</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k_max</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/Clustering/kmeans.html#select_k"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.Clustering.kmeans.select_k" title="Link to this definition"></a></dt>
+<dd><p>Select the optimal number of clusters using the elbow method.</p>
+<p>Uses the ratio of successive TWSS differences to detect the “elbow point.”</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>np.ndarray</em>) – Data matrix of shape (n_samples, n_features).</p></li>
+<li><p><strong>k_max</strong> (<em>int</em><em>, </em><em>optional</em>) – Maximum number of clusters to test. Defaults to 10.</p></li>
+<li><p><strong>*args</strong> – Passed to <code class="docutils literal notranslate"><span class="pre">k_means</span></code>.</p></li>
+<li><p><strong>**kwargs</strong> – Passed to <code class="docutils literal notranslate"><span class="pre">k_means</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Estimated optimal number of clusters.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cleands.Clustering.kmeans.kMeans">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cleands.Clustering.kmeans.</span></span><span class="sig-name descname"><span class="pre">kMeans</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">formula</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/Clustering/kmeans.html#kMeans"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.Clustering.kmeans.kMeans" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="cleands.base.html#cleands.base.ClusteringModel" title="cleands.base.ClusteringModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">ClusteringModel</span></code></a></p>
+<p>Convenience wrapper for k-means clustering.</p>
+<p>The k-means algorithm partitions observations into a fixed number of
+clusters by minimizing within-cluster sum of squares. This wrapper
+provides a formula/DataFrame interface for the
+<a class="reference internal" href="#cleands.Clustering.kmeans.k_means" title="cleands.Clustering.kmeans.k_means"><code class="xref py py-class docutils literal notranslate"><span class="pre">k_means</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>MODEL_TYPE</strong> (<em>ClassVar</em><em>[</em><em>Type</em><em>[</em><a class="reference internal" href="cleands.base.html#cleands.base.supervised_model" title="cleands.base.supervised_model"><em>cleands.base.supervised_model</em></a><em>]</em><em>]</em>) – Underlying model type, fixed to
+<a class="reference internal" href="#cleands.Clustering.kmeans.k_means" title="cleands.Clustering.kmeans.k_means"><code class="xref py py-class docutils literal notranslate"><span class="pre">k_means</span></code></a>.</p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>formula</strong> (<em>str</em>)</p></li>
+<li><p><strong>data</strong> (<em>DataFrame</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">kMeans</span><span class="o">.</span><span class="n">from_formula</span><span class="p">(</span><span class="s2">&quot;~ x1 + x2&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">clusters</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">cluster_from_df</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">means</span>  <span class="c1"># cluster centroids</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="cleands.Clustering.html" class="btn btn-neutral float-left" title="cleands.Clustering package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="cleands.DimensionReduction.html" class="btn btn-neutral float-right" title="cleands.DimensionReduction package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Jason Parker.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,814 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>cleands.formula &mdash; cleands  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=92fd9be5" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            cleands
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../source/cleands.html">cleands package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../source/modules.html">cleands</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">cleands</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">cleands.formula</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for cleands.formula</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Formula parsing utilities for building design matrices from strings.</span>
+
+<span class="sd">This module provides a lightweight, NumPy/Pandas-friendly parser for model</span>
+<span class="sd">formulas. It supports:</span>
+
+<span class="sd">- Intercept handling via the special column &quot;(intercept)&quot;.</span>
+<span class="sd">- Basic terms (column names), interactions with &quot;:&quot; and products with &quot;*&quot;.</span>
+<span class="sd">- Inclusion/exclusion using &quot;+&quot; and &quot;-&quot; (handled via `make_pretty_minus`).</span>
+<span class="sd">- Parentheses grouping.</span>
+<span class="sd">- Powers using &quot;**&quot; (or &quot;^&quot; if `USE_CARET=True`).</span>
+<span class="sd">- &quot;As-is&quot; expressions via `I(&lt;python expression&gt;)`, evaluated against `data`.</span>
+<span class="sd">- A curated set of NumPy elementwise functions (see `NUMPY_FUNCS`).</span>
+<span class="sd">- Special polynomial generators such as &quot;quadratic(x1,x2)&quot;, &quot;cubic(...)&quot;, etc.</span>
+
+<span class="sd">Key entry points:</span>
+<span class="sd">    - parse(): returns x_vars, y_var, conditionals, and the processed DataFrame.</span>
+<span class="sd">    - design helpers such as generate_interactions().</span>
+
+<span class="sd">Notes:</span>
+<span class="sd">    - The parser mutates a *copy* of the input DataFrame and returns it.</span>
+<span class="sd">    - (intercept) is always added as a column with value 1 unless excluded.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">chain</span><span class="p">,</span> <span class="n">combinations</span><span class="p">,</span> <span class="n">combinations_with_replacement</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
+
+<span class="c1">################################################################################</span>
+<span class="c1">#################################  Constants  ##################################</span>
+<span class="c1">################################################################################</span>
+
+<span class="n">USE_CARET</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="sd">&quot;&quot;&quot;Whether to accept &#39;^&#39; as a power operator (translated to &#39;**&#39;).&quot;&quot;&quot;</span>
+
+<span class="n">LOGGING</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="sd">&quot;&quot;&quot;Enable debug prints from parse steps when True.&quot;&quot;&quot;</span>
+
+<span class="n">NUMPY_FUNCS</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;around&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">around</span><span class="p">(</span><span class="n">x</span><span class="p">),</span>
+    <span class="s1">&#39;rint&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">rint</span><span class="p">(</span><span class="n">x</span><span class="p">),</span>
+    <span class="s1">&#39;fix&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">fix</span><span class="p">(</span><span class="n">x</span><span class="p">),</span>
+    <span class="s1">&#39;floor&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">x</span><span class="p">),</span>
+    <span class="s1">&#39;ceil&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">x</span><span class="p">),</span>
+    <span class="s1">&#39;trunc&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">trunc</span><span class="p">(</span><span class="n">x</span><span class="p">),</span>
+    <span class="s1">&#39;diff&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">x</span><span class="p">),</span>
+    <span class="s1">&#39;ediff1d&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ediff1d</span><span class="p">(</span><span class="n">x</span><span class="p">),</span>
+    <span class="s1">&#39;exp&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">x</span><span class="p">),</span>
+    <span class="s1">&#39;expm1&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">expm1</span><span class="p">(</span><span class="n">x</span><span class="p">),</span>
+    <span class="s1">&#39;exp2&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">exp2</span><span class="p">(</span><span class="n">x</span><span class="p">),</span>
+    <span class="s1">&#39;log&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">x</span><span class="p">),</span>
+    <span class="s1">&#39;log10&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">x</span><span class="p">),</span>
+    <span class="s1">&#39;log2&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="n">x</span><span class="p">),</span>
+    <span class="s1">&#39;log1p&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">log1p</span><span class="p">(</span><span class="n">x</span><span class="p">),</span>
+    <span class="s1">&#39;i0&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">i0</span><span class="p">(</span><span class="n">x</span><span class="p">),</span>
+    <span class="s1">&#39;sinc&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">sinc</span><span class="p">(</span><span class="n">x</span><span class="p">),</span>
+    <span class="s1">&#39;signbit&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">signbit</span><span class="p">(</span><span class="n">x</span><span class="p">),</span>
+    <span class="s1">&#39;spacing&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">spacing</span><span class="p">(</span><span class="n">x</span><span class="p">),</span>
+    <span class="s1">&#39;reciprocal&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">reciprocal</span><span class="p">(</span><span class="n">x</span><span class="p">),</span>
+    <span class="s1">&#39;positive&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">positive</span><span class="p">(</span><span class="n">x</span><span class="p">),</span>
+    <span class="s1">&#39;negative&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">negative</span><span class="p">(</span><span class="n">x</span><span class="p">),</span>
+    <span class="s1">&#39;angle&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">angle</span><span class="p">(</span><span class="n">x</span><span class="p">),</span>
+    <span class="s1">&#39;real&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="n">x</span><span class="p">),</span>
+    <span class="s1">&#39;imag&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">imag</span><span class="p">(</span><span class="n">x</span><span class="p">),</span>
+    <span class="s1">&#39;conj&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">conj</span><span class="p">(</span><span class="n">x</span><span class="p">),</span>
+    <span class="s1">&#39;conjugate&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">conjugate</span><span class="p">(</span><span class="n">x</span><span class="p">),</span>
+    <span class="s1">&#39;sqrt&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">x</span><span class="p">),</span>
+    <span class="s1">&#39;cbrt&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">cbrt</span><span class="p">(</span><span class="n">x</span><span class="p">),</span>
+    <span class="s1">&#39;square&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">x</span><span class="p">),</span>
+    <span class="s1">&#39;absolute&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">absolute</span><span class="p">(</span><span class="n">x</span><span class="p">),</span>
+    <span class="s1">&#39;fabs&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">fabs</span><span class="p">(</span><span class="n">x</span><span class="p">),</span>
+    <span class="s1">&#39;sign&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">x</span><span class="p">),</span>
+    <span class="s1">&#39;nan_to_num&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span><span class="n">x</span><span class="p">),</span>
+    <span class="s1">&#39;real_if_close&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">real_if_close</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="c1">################################################################################</span>
+<span class="c1">##############################  Helper functions  ##############################</span>
+<span class="c1">################################################################################</span>
+
+<div class="viewcode-block" id="bind">
+<a class="viewcode-back" href="../../source/cleands.formula.html#cleands.formula.bind">[docs]</a>
+<span class="k">def</span> <span class="nf">bind</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Flatten a list of lists by one level.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        x (list): List whose elements are iterables to be chained.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        list: Single flattened list.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">chain</span><span class="p">(</span><span class="o">*</span><span class="n">x</span><span class="p">))</span></div>
+
+
+
+<div class="viewcode-block" id="unique">
+<a class="viewcode-back" href="../../source/cleands.formula.html#cleands.formula.unique">[docs]</a>
+<span class="k">def</span> <span class="nf">unique</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return list with original order but unique entries.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        x (list): Input list.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        list: De-duplicated list preserving first occurrence order.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">outp</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">x</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">item</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">outp</span><span class="p">:</span>
+            <span class="n">outp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">outp</span></div>
+
+
+
+<div class="viewcode-block" id="split_expression">
+<a class="viewcode-back" href="../../source/cleands.formula.html#cleands.formula.split_expression">[docs]</a>
+<span class="k">def</span> <span class="nf">split_expression</span><span class="p">(</span><span class="n">expression</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">delimiter</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;+&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Split an expression by a delimiter respecting parentheses depth.</span>
+
+<span class="sd">    This avoids splitting inside nested parentheses.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        expression (str): Expression string to split.</span>
+<span class="sd">        delimiter (str): Delimiter character (default: &#39;+&#39;).</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        list[str]: The top-level fragments.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Preprocess the expression to remove spaces for easier processing</span>
+    <span class="n">expression</span> <span class="o">=</span> <span class="n">expression</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+
+    <span class="n">parts</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># To store the split parts of the expression</span>
+    <span class="n">current_part</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># To build the current part of the expression</span>
+    <span class="n">depth</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># Track the depth of parentheses nesting</span>
+
+    <span class="k">for</span> <span class="n">char</span> <span class="ow">in</span> <span class="n">expression</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">char</span> <span class="o">==</span> <span class="n">delimiter</span> <span class="ow">and</span> <span class="n">depth</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1"># Join the characters of the current part and add it to the parts list</span>
+            <span class="n">parts</span> <span class="o">+=</span> <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">current_part</span><span class="p">)]</span>
+            <span class="n">current_part</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">depth</span> <span class="o">+=</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">char</span> <span class="o">==</span> <span class="s1">&#39;(&#39;</span> <span class="k">else</span> <span class="o">-</span><span class="mi">1</span> <span class="k">if</span> <span class="n">char</span> <span class="o">==</span> <span class="s1">&#39;)&#39;</span> <span class="k">else</span> <span class="mi">0</span>
+            <span class="n">current_part</span> <span class="o">+=</span> <span class="p">[</span><span class="n">char</span><span class="p">]</span>
+
+    <span class="c1"># Add the last part to the parts list, if it&#39;s not empty</span>
+    <span class="k">if</span> <span class="n">current_part</span><span class="p">:</span> <span class="n">parts</span> <span class="o">+=</span> <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">current_part</span><span class="p">)]</span>
+    <span class="k">return</span> <span class="n">parts</span></div>
+
+
+
+<div class="viewcode-block" id="match_parens">
+<a class="viewcode-back" href="../../source/cleands.formula.html#cleands.formula.match_parens">[docs]</a>
+<span class="k">def</span> <span class="nf">match_parens</span><span class="p">(</span><span class="n">expression</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;If `expression` is fully parenthesized, return the inside; else None.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        expression (str): Candidate string like &quot;(a+b)&quot;.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Optional[str]: Inner content without outer parentheses if valid; otherwise None.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">expression</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">!=</span><span class="s1">&#39;(&#39;</span> <span class="ow">or</span> <span class="n">expression</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">!=</span><span class="s1">&#39;)&#39;</span><span class="p">:</span> <span class="k">return</span> <span class="kc">None</span>
+    <span class="n">current_depth</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">depth</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">expression</span> <span class="o">=</span> <span class="n">expression</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">char</span> <span class="ow">in</span> <span class="n">expression</span><span class="p">:</span>
+        <span class="n">current_depth</span> <span class="o">+=</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">char</span> <span class="o">==</span> <span class="s1">&#39;(&#39;</span> <span class="k">else</span> <span class="o">-</span><span class="mi">1</span> <span class="k">if</span> <span class="n">char</span> <span class="o">==</span> <span class="s1">&#39;)&#39;</span> <span class="k">else</span> <span class="mi">0</span>
+        <span class="n">depth</span> <span class="o">+=</span> <span class="p">[</span><span class="n">current_depth</span><span class="p">]</span>
+    <span class="k">if</span> <span class="nb">any</span><span class="p">([</span><span class="n">item</span><span class="o">&lt;</span><span class="mi">0</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">depth</span><span class="p">]):</span> <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">return</span> <span class="n">expression</span></div>
+
+
+
+<div class="viewcode-block" id="make_pretty_minus">
+<a class="viewcode-back" href="../../source/cleands.formula.html#cleands.formula.make_pretty_minus">[docs]</a>
+<span class="k">def</span> <span class="nf">make_pretty_minus</span><span class="p">(</span><span class="n">expression</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Normalize &#39;-&#39; to &#39;+-&#39; at top level to simplify inclusion/exclusion logic.</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">        &quot;x - y + z&quot; -&gt; &quot;x+-y+z&quot; (and leading &#39;+&#39; removed if present)</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        expression (str): Raw expression.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        str: Normalized expression.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">outp</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;+-&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">split_expression</span><span class="p">(</span><span class="n">expression</span><span class="p">,</span><span class="s1">&#39;-&#39;</span><span class="p">))</span>
+    <span class="n">outp</span> <span class="o">=</span> <span class="n">outp</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;++&#39;</span><span class="p">,</span> <span class="s1">&#39;+&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">outp</span><span class="p">)</span><span class="o">!=</span><span class="mi">0</span> <span class="ow">and</span> <span class="n">outp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;+&#39;</span><span class="p">:</span> <span class="n">outp</span> <span class="o">=</span> <span class="n">outp</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+    <span class="k">return</span> <span class="n">outp</span></div>
+
+
+
+<div class="viewcode-block" id="bin">
+<a class="viewcode-back" href="../../source/cleands.formula.html#cleands.formula.bin">[docs]</a>
+<span class="k">def</span> <span class="nf">bin</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Count occurrences of each element in a list.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        x (list): Input list.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: Mapping item -&gt; count.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">{</span><span class="n">item</span><span class="p">:</span><span class="nb">sum</span><span class="p">([</span><span class="mi">1</span> <span class="k">for</span> <span class="n">newbie</span> <span class="ow">in</span> <span class="n">x</span> <span class="k">if</span> <span class="n">newbie</span><span class="o">==</span><span class="n">item</span><span class="p">])</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">unique</span><span class="p">(</span><span class="n">x</span><span class="p">)}</span></div>
+
+
+<span class="c1">################################################################################</span>
+<span class="c1">#############################  Expression Parsing  #############################</span>
+<span class="c1">################################################################################</span>
+
+<div class="viewcode-block" id="parse">
+<a class="viewcode-back" href="../../source/cleands.formula.html#cleands.formula.parse">[docs]</a>
+<span class="k">def</span> <span class="nf">parse</span><span class="p">(</span><span class="n">formula</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Parse a full formula into design metadata and a processed DataFrame.</span>
+
+<span class="sd">    Syntax:</span>
+<span class="sd">        y ~ rhs [| conditionals]</span>
+
+<span class="sd">    Where `rhs` can contain:</span>
+<span class="sd">        - column names</span>
+<span class="sd">        - interactions with &#39;:&#39; (e.g., a:b)</span>
+<span class="sd">        - products with &#39;*&#39; (expanded to main effects + interactions unless</span>
+<span class="sd">          distribution is detected)</span>
+<span class="sd">        - &#39;+&#39; and &#39;-&#39; to include/exclude terms</span>
+<span class="sd">        - powers via &#39;**&#39; (or &#39;^&#39; if `USE_CARET=True`)</span>
+<span class="sd">        - &#39;.&#39; to include all columns</span>
+<span class="sd">        - special generators like &#39;quadratic(a,b)&#39;, etc.</span>
+<span class="sd">        - &#39;I(expr)&#39; to evaluate raw Python/NumPy expressions on columns</span>
+
+<span class="sd">    The function:</span>
+<span class="sd">      - adds &#39;(intercept)&#39; to `data`,</span>
+<span class="sd">      - parses the left-hand side (y),</span>
+<span class="sd">      - returns selected x-vars (after inclusion/exclusion),</span>
+<span class="sd">      - returns optional `conditionals` to be passed downstream.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        formula (str): Full formula string.</span>
+<span class="sd">        data (pd.DataFrame): Source data.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Tuple[list[str], str, list[str], pd.DataFrame]:</span>
+<span class="sd">            - x_vars: Ordered unique design column names (includes &#39;(intercept)&#39; unless removed).</span>
+<span class="sd">            - y_var: Dependent variable name.</span>
+<span class="sd">            - conditionals: Parsed conditional columns (after inclusion/exclusion).</span>
+<span class="sd">            - processed: A copy of data with derived columns added, restricted to</span>
+<span class="sd">              [y_var] + x_vars + conditionals.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">y_var</span><span class="p">,</span> <span class="n">rhs</span> <span class="o">=</span> <span class="n">formula</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;~&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="s1">&#39;|&#39;</span> <span class="ow">in</span> <span class="n">formula</span><span class="p">:</span>
+        <span class="n">rhs</span><span class="p">,</span> <span class="n">conditionals</span> <span class="o">=</span> <span class="n">formula</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;|&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">conditionals</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;(intercept)&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">parse_term</span><span class="p">(</span><span class="n">y_var</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+    <span class="n">x_vars_included</span><span class="p">,</span> <span class="n">x_vars_excluded</span> <span class="o">=</span> <span class="n">parse_expression</span><span class="p">(</span><span class="n">rhs</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+    <span class="n">conditionals_included</span><span class="p">,</span> <span class="n">conditionals_excluded</span> <span class="o">=</span> <span class="n">parse_expression</span><span class="p">(</span><span class="n">conditionals</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+    <span class="n">x_vars_included</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;(intercept)&#39;</span><span class="p">]</span><span class="o">+</span><span class="n">x_vars_included</span>
+    <span class="n">x_vars</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">x_vars_included</span> <span class="k">if</span> <span class="n">item</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">x_vars_excluded</span> <span class="ow">and</span> <span class="n">item</span> <span class="o">!=</span> <span class="n">y_var</span><span class="p">]</span>
+    <span class="n">conditionals</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">conditionals_included</span> <span class="k">if</span> <span class="n">item</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">conditionals_excluded</span> <span class="ow">and</span> <span class="n">item</span> <span class="o">!=</span> <span class="n">y_var</span><span class="p">]</span>
+    <span class="n">x_vars</span> <span class="o">=</span> <span class="n">unique</span><span class="p">(</span><span class="n">x_vars</span><span class="p">)</span>
+    <span class="n">conditionals</span> <span class="o">=</span> <span class="n">unique</span><span class="p">(</span><span class="n">conditionals</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">x_vars</span><span class="p">,</span> <span class="n">y_var</span><span class="p">,</span> <span class="n">conditionals</span><span class="p">,</span> <span class="n">data</span><span class="p">[[</span><span class="n">y_var</span><span class="p">]</span><span class="o">+</span><span class="n">x_vars</span><span class="o">+</span><span class="n">conditionals</span><span class="p">]</span></div>
+
+
+
+<div class="viewcode-block" id="parse_expression">
+<a class="viewcode-back" href="../../source/cleands.formula.html#cleands.formula.parse_expression">[docs]</a>
+<span class="k">def</span> <span class="nf">parse_expression</span><span class="p">(</span><span class="n">expression</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Parse a right-hand-side-like expression into included and excluded terms.</span>
+
+<span class="sd">    This function orchestrates:</span>
+<span class="sd">      1) normalization (`make_pretty_minus`, removing &quot;np.&quot; / &quot;numpy.&quot;, caret handling),</span>
+<span class="sd">      2) attempting `parse_basic`,</span>
+<span class="sd">      3) falling back to `parse_complex`.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        expression (str): RHS-like expression (may be empty).</span>
+<span class="sd">        data (pd.DataFrame): DataFrame to mutate with derived columns.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        tuple[list[str], list[str]]: (included_terms, excluded_terms)</span>
+
+<span class="sd">    Notes:</span>
+<span class="sd">        - Returns `None` on failure, but callers typically rely on truthiness and</span>
+<span class="sd">          do not expect `None` in normal flows.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">expression</span> <span class="o">=</span> <span class="n">expression</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+    <span class="n">expression</span> <span class="o">=</span> <span class="n">make_pretty_minus</span><span class="p">(</span><span class="n">expression</span><span class="p">)</span>
+    <span class="n">expression</span> <span class="o">=</span> <span class="n">expression</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;np.&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+    <span class="n">expression</span> <span class="o">=</span> <span class="n">expression</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;numpy.&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">USE_CARET</span><span class="p">:</span> <span class="n">expression</span> <span class="o">=</span> <span class="n">expression</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;^&#39;</span><span class="p">,</span><span class="s1">&#39;**&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">result</span><span class="o">:=</span><span class="n">parse_basic</span><span class="p">(</span><span class="n">expression</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">LOGGING</span><span class="p">:</span> <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;simple&#39;</span><span class="p">,</span><span class="n">expression</span><span class="p">,</span><span class="n">result</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">result</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">result</span>
+    <span class="k">if</span> <span class="n">result</span><span class="o">:=</span><span class="n">parse_complex</span><span class="p">(</span><span class="n">expression</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">LOGGING</span><span class="p">:</span> <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;complex&#39;</span><span class="p">,</span><span class="n">expression</span><span class="p">,</span><span class="n">result</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">result</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">result</span>
+    <span class="k">return</span> <span class="kc">None</span></div>
+
+
+
+<div class="viewcode-block" id="parse_basic">
+<a class="viewcode-back" href="../../source/cleands.formula.html#cleands.formula.parse_basic">[docs]</a>
+<span class="k">def</span> <span class="nf">parse_basic</span><span class="p">(</span><span class="n">expression</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Handle simple cases: literals, parentheses, single terms, all-cols, powers, sums.</span>
+
+<span class="sd">    Rules (order matters):</span>
+<span class="sd">        - Empty string -&gt; ([], [])</span>
+<span class="sd">        - Parenthesized -&gt; parse inner</span>
+<span class="sd">        - &quot;1&quot; -&gt; intercept</span>
+<span class="sd">        - Valid term -&gt; [term]</span>
+<span class="sd">        - &quot;.&quot; -&gt; all current columns</span>
+<span class="sd">        - &quot;(... )**k&quot; -&gt; expand to interactions up to power k</span>
+<span class="sd">        - &quot;a+b+...&quot; -&gt; sum of sub-expressions (recursively parsed)</span>
+<span class="sd">        - &quot;-expr&quot; -&gt; invert included/excluded sets (for minus handling)</span>
+<span class="sd">        - Special power funcs (e.g., &quot;quadratic(a,b)&quot;)</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        expression (str): Candidate expression.</span>
+<span class="sd">        data (pd.DataFrame): Data to mutate with derived columns.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Optional[tuple[list[str], list[str]]]: (included, excluded) or None.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">expression</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[],</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="n">match</span> <span class="o">:=</span> <span class="n">match_parens</span><span class="p">(</span><span class="n">expression</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">parse_expression</span><span class="p">(</span><span class="n">match</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">expression</span> <span class="o">==</span> <span class="s1">&#39;1&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[</span><span class="s1">&#39;(intercept)&#39;</span><span class="p">],</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="n">parse_term</span><span class="p">(</span><span class="n">expression</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">expression</span><span class="p">],</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="n">expression</span> <span class="o">==</span> <span class="s1">&#39;.&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="n">match</span> <span class="o">:=</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;^\((.*)\)\*\*(\d*)$&#39;</span><span class="p">,</span><span class="n">expression</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">match_parens</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;(</span><span class="si">{</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">):</span>
+            <span class="n">power</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+            <span class="n">expression</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">included</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+            <span class="n">excluded</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+            <span class="n">included</span><span class="p">,</span> <span class="n">excluded</span> <span class="o">=</span> <span class="n">parse_expression</span><span class="p">(</span><span class="n">expression</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">excluded</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Expression </span><span class="si">{</span><span class="n">expression</span><span class="si">}</span><span class="s1"> seems to have excluded terms in a power&#39;</span><span class="p">)</span>
+            <span class="n">included</span> <span class="o">+=</span> <span class="n">generate_interactions</span><span class="p">(</span><span class="n">included</span><span class="p">,</span> <span class="n">power</span><span class="o">=</span><span class="n">power</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">included</span><span class="p">,</span> <span class="n">excluded</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">terms</span> <span class="o">:=</span> <span class="n">split_expression</span><span class="p">(</span><span class="n">expression</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">included</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">excluded</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="n">terms</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">result</span> <span class="o">:=</span> <span class="n">parse_expression</span><span class="p">(</span><span class="n">term</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+                <span class="n">included</span> <span class="o">+=</span> <span class="n">result</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">excluded</span> <span class="o">+=</span> <span class="n">result</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">included</span><span class="p">,</span> <span class="n">excluded</span>
+    <span class="k">if</span> <span class="n">expression</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">==</span><span class="s1">&#39;-&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">result</span> <span class="o">:=</span> <span class="n">parse_expression</span><span class="p">(</span><span class="n">expression</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">data</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Expression </span><span class="si">{</span><span class="n">expression</span><span class="si">}</span><span class="s1"> cannot be inverted&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">result</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">included</span> <span class="o">:=</span> <span class="n">check_special_power_funcs</span><span class="p">(</span><span class="n">expression</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">included</span><span class="p">,</span> <span class="p">[]</span>
+    <span class="k">return</span> <span class="kc">None</span></div>
+
+
+
+<div class="viewcode-block" id="parse_complex">
+<a class="viewcode-back" href="../../source/cleands.formula.html#cleands.formula.parse_complex">[docs]</a>
+<span class="k">def</span> <span class="nf">parse_complex</span><span class="p">(</span><span class="n">expression</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Handle products &#39;*&#39; and interactions &#39;:&#39; with distribution/expansion logic.</span>
+
+<span class="sd">    Strategy:</span>
+<span class="sd">        - Try splitting by &#39;*&#39; via `parse_complex_expression_by_splitting_on_string`.</span>
+<span class="sd">          If distributed=True, the product was distributable and we return terms.</span>
+<span class="sd">          Otherwise, we add generated interactions.</span>
+<span class="sd">        - Try &#39;:&#39; similarly; ensure resulting string is a valid interaction.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        expression (str): Candidate expression with &#39;*&#39; or &#39;:&#39;.</span>
+<span class="sd">        data (pd.DataFrame): Data to mutate.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Optional[Tuple[list[str], list[str]]]: (included, excluded) or None.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: If negations are detected in product/interaction contexts or</span>
+<span class="sd">            invalid interaction strings are produced.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">included</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+    <span class="n">excluded</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">if</span> <span class="n">result</span> <span class="o">:=</span> <span class="n">parse_complex_expression_by_splitting_on_string</span><span class="p">(</span><span class="n">expression</span><span class="p">,</span><span class="n">data</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;error&#39;</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Expression </span><span class="si">{</span><span class="n">expression</span><span class="si">}</span><span class="s1"> found negations in product&#39;</span><span class="p">)</span>
+        <span class="n">distributed</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;distributed&#39;</span><span class="p">]</span>
+        <span class="n">included</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;terms&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">distributed</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">included</span><span class="p">,</span> <span class="n">excluded</span>
+        <span class="n">included</span> <span class="o">+=</span> <span class="n">generate_interactions</span><span class="p">(</span><span class="n">included</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">included</span><span class="p">,</span> <span class="n">excluded</span>
+    <span class="k">if</span> <span class="n">result</span> <span class="o">:=</span> <span class="n">parse_complex_expression_by_splitting_on_string</span><span class="p">(</span><span class="n">expression</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;:&#39;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;error&#39;</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Expression </span><span class="si">{</span><span class="n">expression</span><span class="si">}</span><span class="s1"> found negations in interaction&#39;</span><span class="p">)</span>
+        <span class="n">included</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;terms&#39;</span><span class="p">]</span>
+        <span class="n">expression</span> <span class="o">=</span> <span class="s1">&#39;:&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">included</span><span class="p">)</span>
+        <span class="n">included</span> <span class="o">=</span> <span class="p">[</span><span class="n">expression</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">is_interaction</span><span class="p">(</span><span class="n">expression</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">included</span><span class="p">,</span> <span class="n">excluded</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Expression </span><span class="si">{</span><span class="n">expression</span><span class="si">}</span><span class="s1"> cannot parse an interaction&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="kc">None</span></div>
+
+
+
+<div class="viewcode-block" id="parse_complex_expression_by_splitting_on_string">
+<a class="viewcode-back" href="../../source/cleands.formula.html#cleands.formula.parse_complex_expression_by_splitting_on_string">[docs]</a>
+<span class="k">def</span> <span class="nf">parse_complex_expression_by_splitting_on_string</span><span class="p">(</span>
+    <span class="n">expression</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+    <span class="n">delimiter</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;*&#39;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span><span class="n">Any</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Split by a delimiter (&#39;*&#39; or &#39;:&#39;) and attempt recursive parsing/distribution.</span>
+
+<span class="sd">    For &#39;*&#39;:</span>
+<span class="sd">        - If any sub-expression yields multiple included terms (and no excluded),</span>
+<span class="sd">          attempt distribution across the product.</span>
+<span class="sd">        - If distribution succeeds, return the distributed terms with</span>
+<span class="sd">          {&#39;error&#39;: False, &#39;distributed&#39;: True, &#39;terms&#39;: [...]}.</span>
+<span class="sd">        - Otherwise, return the collected simple terms and mark</span>
+<span class="sd">          {&#39;error&#39;: False, &#39;distributed&#39;: False, &#39;terms&#39;: [...]}, leaving the caller</span>
+<span class="sd">          to generate interactions.</span>
+
+<span class="sd">    For &#39;:&#39;:</span>
+<span class="sd">        - Just return the list of terms; the caller will validate/construct the</span>
+<span class="sd">          final interaction string.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        expression (str): Input expression.</span>
+<span class="sd">        data (pd.DataFrame): Data to mutate during parsing/evaluation.</span>
+<span class="sd">        delimiter (str): Either &#39;*&#39; or &#39;:&#39;.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Optional[Dict[str, Any]]: A dictionary with keys:</span>
+<span class="sd">            - &#39;error&#39; (bool): True if excluded terms invalidated the operation.</span>
+<span class="sd">            - &#39;distributed&#39; (bool): True if product distribution occurred.</span>
+<span class="sd">            - &#39;terms&#39; (list[str] | None): Collected raw terms when successful.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">mod_expression</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">expression</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;**&#39;</span><span class="p">,</span><span class="s1">&#39;&lt;SPECIAL_DELIMITER&gt;&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">terms</span> <span class="o">:=</span> <span class="n">split_expression</span><span class="p">(</span><span class="n">mod_expression</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="n">delimiter</span><span class="p">))</span><span class="o">&gt;</span><span class="mi">1</span><span class="p">:</span>
+        <span class="n">new_terms</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">term</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">terms</span><span class="p">):</span>
+            <span class="n">unmod_term</span> <span class="o">=</span> <span class="n">term</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;&lt;SPECIAL_DELIMITER&gt;&#39;</span><span class="p">,</span><span class="s1">&#39;**&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">result</span> <span class="o">:=</span> <span class="n">parse_basic</span><span class="p">(</span><span class="n">unmod_term</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+                <span class="n">included</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">excluded</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">excluded</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;error&#39;</span><span class="p">:</span><span class="kc">True</span><span class="p">,</span> <span class="s1">&#39;distributed&#39;</span><span class="p">:</span><span class="kc">False</span><span class="p">,</span> <span class="s1">&#39;terms&#39;</span><span class="p">:</span><span class="kc">None</span><span class="p">}</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">included</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">1</span><span class="p">:</span>
+                    <span class="n">retp</span> <span class="o">=</span> <span class="p">[</span><span class="n">terms</span><span class="p">[:</span><span class="n">i</span><span class="p">]</span><span class="o">+</span><span class="p">[</span><span class="n">included</span><span class="p">[</span><span class="n">j</span><span class="p">]]</span><span class="o">+</span><span class="n">terms</span><span class="p">[(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">):]</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">included</span><span class="p">))]</span>
+                    <span class="n">retp</span> <span class="o">=</span> <span class="p">[</span><span class="n">parse_expression</span><span class="p">(</span><span class="n">delimiter</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">item</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;&lt;SPECIAL_DELIMITER&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;**&#39;</span><span class="p">),</span><span class="n">data</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">retp</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="n">bind</span><span class="p">([</span><span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">retp</span><span class="p">]):</span>
+                        <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;error&#39;</span><span class="p">:</span><span class="kc">True</span><span class="p">,</span> <span class="s1">&#39;distributed&#39;</span><span class="p">:</span><span class="kc">False</span><span class="p">,</span> <span class="s1">&#39;terms&#39;</span><span class="p">:</span><span class="kc">None</span><span class="p">}</span>
+                    <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;error&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s1">&#39;distributed&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s1">&#39;terms&#39;</span><span class="p">:</span> <span class="n">bind</span><span class="p">([</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">retp</span><span class="p">])}</span>
+                <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">included</span><span class="p">)</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+                    <span class="n">new_terms</span> <span class="o">+=</span> <span class="p">[</span><span class="n">unmod_term</span><span class="p">]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="o">...</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;error&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s1">&#39;distributed&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s1">&#39;terms&#39;</span><span class="p">:</span> <span class="n">new_terms</span><span class="p">}</span>
+    <span class="k">return</span> <span class="kc">None</span></div>
+
+
+<span class="c1">################################################################################</span>
+<span class="c1">################################  Term parsing  ################################</span>
+<span class="c1">################################################################################</span>
+
+<div class="viewcode-block" id="parse_term">
+<a class="viewcode-back" href="../../source/cleands.formula.html#cleands.formula.parse_term">[docs]</a>
+<span class="k">def</span> <span class="nf">parse_term</span><span class="p">(</span><span class="n">term</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Parse a single term by attempting NumPy func, interaction, or as-is.</span>
+
+<span class="sd">    Order:</span>
+<span class="sd">        1) in_numpy()</span>
+<span class="sd">        2) is_interaction()</span>
+<span class="sd">        3) is_as_is()</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        term (str): A candidate term string.</span>
+<span class="sd">        data (pd.DataFrame): Data to be mutated if term is derived.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        bool: True if the term was successfully parsed/applied to `data`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">term</span> <span class="o">=</span> <span class="n">term</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">in_numpy</span><span class="p">(</span><span class="n">term</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span> <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">if</span> <span class="n">is_interaction</span><span class="p">(</span><span class="n">term</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span> <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">if</span> <span class="n">is_as_is</span><span class="p">(</span><span class="n">term</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span> <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">return</span> <span class="kc">False</span></div>
+
+
+
+<div class="viewcode-block" id="is_interaction">
+<a class="viewcode-back" href="../../source/cleands.formula.html#cleands.formula.is_interaction">[docs]</a>
+<span class="k">def</span> <span class="nf">is_interaction</span><span class="p">(</span><span class="n">expression</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create interaction column for colon-separated terms.</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">        &quot;a:b:c&quot; -&gt; data[&quot;a:b:c&quot;] = data[&quot;a&quot;] * data[&quot;b&quot;] * data[&quot;c&quot;]</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        expression (str): Interaction expression with &#39;:&#39;.</span>
+<span class="sd">        data (pd.DataFrame): Data to mutate.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        bool: True if an interaction was created; False otherwise.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">terms</span><span class="o">:=</span><span class="n">split_expression</span><span class="p">(</span><span class="n">expression</span><span class="p">,</span> <span class="s1">&#39;:&#39;</span><span class="p">))</span><span class="o">&gt;</span><span class="mi">1</span><span class="p">:</span>
+        <span class="n">outp</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;(intercept)&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="n">terms</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">parse_term</span><span class="p">(</span><span class="n">term</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+                <span class="k">return</span> <span class="kc">False</span>
+            <span class="n">outp</span> <span class="o">*=</span> <span class="n">data</span><span class="p">[</span><span class="n">term</span><span class="p">]</span>
+        <span class="n">data</span><span class="p">[</span><span class="n">expression</span><span class="p">]</span> <span class="o">=</span> <span class="n">outp</span>
+        <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">return</span> <span class="kc">False</span></div>
+
+
+
+<div class="viewcode-block" id="in_numpy">
+<a class="viewcode-back" href="../../source/cleands.formula.html#cleands.formula.in_numpy">[docs]</a>
+<span class="k">def</span> <span class="nf">in_numpy</span><span class="p">(</span><span class="n">expression</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Evaluate a recognized NumPy unary function or treat as existing column.</span>
+
+<span class="sd">    If `expression` matches a key in `NUMPY_FUNCS` in the form &quot;&lt;func&gt;(col)&quot;,</span>
+<span class="sd">    the new column is added as that function applied to `data[col]`. If the</span>
+<span class="sd">    expression is already a column name, this returns True.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        expression (str): Either a column name or &quot;&lt;func&gt;(col)&quot;.</span>
+<span class="sd">        data (pd.DataFrame): Data to mutate.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        bool: True if the expression is a known column or created successfully.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">expression</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span> <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">function</span> <span class="ow">in</span> <span class="n">NUMPY_FUNCS</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">pattern</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;^&#39;</span> <span class="o">+</span> <span class="n">re</span><span class="o">.</span><span class="n">escape</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="o">+</span> <span class="sa">r</span><span class="s1">&#39;\((.*)\)$&#39;</span>
+        <span class="k">if</span> <span class="n">match</span> <span class="o">:=</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="n">expression</span><span class="p">):</span>
+            <span class="n">inside</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">inside</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+                <span class="n">data</span><span class="p">[</span><span class="n">expression</span><span class="p">]</span> <span class="o">=</span> <span class="n">function</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">inside</span><span class="p">])</span>
+                <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">return</span> <span class="kc">False</span></div>
+
+
+
+<div class="viewcode-block" id="is_as_is">
+<a class="viewcode-back" href="../../source/cleands.formula.html#cleands.formula.is_as_is">[docs]</a>
+<span class="k">def</span> <span class="nf">is_as_is</span><span class="p">(</span><span class="n">expression</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Evaluate a raw Python/NumPy expression with `I(...)`.</span>
+
+<span class="sd">    Replaces bare column names in the interior with `data[&#39;col&#39;]` and ensures</span>
+<span class="sd">    bare NumPy function names are qualified with `np.` if present in NUMPY_FUNCS.</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">        I((x1 + x2)**2) or I(sqrt(x))</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        expression (str): Expression beginning with &#39;I&#39;.</span>
+<span class="sd">        data (pd.DataFrame): Data to evaluate against.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        bool: True if successfully evaluated and assigned; False otherwise.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">expression</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">!=</span><span class="s1">&#39;I&#39;</span><span class="p">:</span> <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="n">match</span> <span class="o">:=</span> <span class="n">match_parens</span><span class="p">(</span><span class="n">expression</span><span class="p">[</span><span class="mi">1</span><span class="p">:]):</span>
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="n">match</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;data[</span><span class="se">\&#39;</span><span class="si">{</span><span class="n">item</span><span class="si">}</span><span class="se">\&#39;</span><span class="s1">]&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">NUMPY_FUNCS</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\.&#39;</span><span class="o">+</span><span class="n">name</span><span class="o">+</span><span class="sa">r</span><span class="s1">&#39;\(&#39;</span><span class="p">,</span> <span class="n">match</span><span class="p">)</span> <span class="ow">and</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">name</span><span class="o">+</span><span class="sa">r</span><span class="s1">&#39;\(&#39;</span><span class="p">,</span> <span class="n">match</span><span class="p">):</span>
+                <span class="n">match</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">name</span><span class="p">,</span><span class="s1">&#39;np.&#39;</span><span class="o">+</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">data</span><span class="p">[</span><span class="n">expression</span><span class="p">]</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="n">match</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">return</span> <span class="kc">False</span></div>
+
+
+<span class="c1">################################################################################</span>
+<span class="c1">#########################  Generation of Interactions  #########################</span>
+<span class="c1">################################################################################</span>
+
+<div class="viewcode-block" id="generate_interactions">
+<a class="viewcode-back" href="../../source/cleands.formula.html#cleands.formula.generate_interactions">[docs]</a>
+<span class="k">def</span> <span class="nf">generate_interactions</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">power</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate all unique interaction terms up to a given order.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        x (list[str]): Base term names (already validated/created in `data`).</span>
+<span class="sd">        data (pd.DataFrame): Data to mutate with interactions.</span>
+<span class="sd">        power (Optional[int]): Maximum interaction order. Defaults to len(x).</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        list[str]: Sorted, unique interaction strings that were generated.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: If any generated term fails to create an interaction in `data`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">unique</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
+    <span class="k">if</span> <span class="n">power</span><span class="o">==</span><span class="kc">None</span><span class="p">:</span> <span class="n">power</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">unique</span><span class="p">(</span><span class="n">bind</span><span class="p">([</span><span class="n">unique</span><span class="p">([</span><span class="s2">&quot;:&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">combinations</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">r</span><span class="o">=</span><span class="n">i</span><span class="p">)])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">power</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]))</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+        <span class="n">terms</span> <span class="o">=</span> <span class="n">split_expression</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s2">&quot;:&quot;</span><span class="p">)</span>
+        <span class="n">terms</span> <span class="o">=</span> <span class="n">unique</span><span class="p">(</span><span class="n">terms</span><span class="p">)</span>
+        <span class="n">terms</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+        <span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;:&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">terms</span><span class="p">)</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">unique</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">any</span><span class="p">([</span><span class="ow">not</span> <span class="n">is_interaction</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">x</span><span class="p">]):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Terms </span><span class="si">{</span><span class="n">x</span><span class="si">}</span><span class="s1"> failed to generate interactions&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">x</span></div>
+
+
+<span class="c1">################################################################################</span>
+<span class="c1">##########################  Special power functions  ###########################</span>
+<span class="c1">################################################################################</span>
+
+<div class="viewcode-block" id="special_power">
+<a class="viewcode-back" href="../../source/cleands.formula.html#cleands.formula.special_power">[docs]</a>
+<span class="k">def</span> <span class="nf">special_power</span><span class="p">(</span><span class="n">terms</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">power</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Generate special-power terms (linear, quadratic, etc.) for a set of terms.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        terms (list[str]): Base terms to expand.</span>
+<span class="sd">        data (pd.DataFrame): DataFrame where generated columns will be stored.</span>
+<span class="sd">        power (int, optional): Maximum power to generate. Defaults to 1.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        list[str]: Names of generated terms stored in ``data``.</span>
+
+<span class="sd">    Notes:</span>
+<span class="sd">        - For a single term ``x``, quadratic produces ``x`` and ``I(x**2)``.</span>
+<span class="sd">        - For multiple terms, interaction powers like ``I(x*y)`` and ``I(x**2*y)`` may be created.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">outp</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">terms</span> <span class="o">+=</span> <span class="p">[</span><span class="s1">&#39;1&#39;</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">pairing</span> <span class="ow">in</span> <span class="n">combinations_with_replacement</span><span class="p">(</span><span class="n">terms</span><span class="p">,</span> <span class="n">r</span><span class="o">=</span><span class="n">power</span><span class="p">):</span>
+        <span class="n">pairing</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">pairing</span> <span class="k">if</span> <span class="n">item</span><span class="o">!=</span><span class="s1">&#39;1&#39;</span><span class="p">]</span>
+        <span class="k">match</span> <span class="nb">len</span><span class="p">(</span><span class="n">pairing</span><span class="p">):</span>
+            <span class="k">case</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="k">case</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">expression</span> <span class="o">=</span> <span class="n">pairing</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">case</span><span class="w"> </span><span class="k">_</span><span class="p">:</span>
+                <span class="n">pairing</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+                <span class="n">mydict</span> <span class="o">=</span> <span class="nb">bin</span><span class="p">(</span><span class="n">pairing</span><span class="p">)</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">mydict</span><span class="p">)</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+                    <span class="n">term</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">mydict</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="n">power</span> <span class="o">=</span> <span class="n">mydict</span><span class="p">[</span><span class="n">term</span><span class="p">]</span>
+                    <span class="n">expression</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;I(</span><span class="si">{</span><span class="sa">f</span><span class="s2">&quot;(</span><span class="si">{</span><span class="n">term</span><span class="si">}</span><span class="s2">)**</span><span class="si">{</span><span class="n">power</span><span class="si">}</span><span class="s2">&quot;</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="n">split_expression</span><span class="p">(</span><span class="n">term</span><span class="p">))</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">term</span><span class="si">}</span><span class="s2">**</span><span class="si">{</span><span class="n">power</span><span class="si">}</span><span class="s2">&quot;</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">power</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">term</span><span class="si">}</span><span class="s2">&quot;</span><span class="si">}</span><span class="s1">)&#39;</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">expression</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;I(</span><span class="si">{</span><span class="s2">&quot;*&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="sa">f</span><span class="s2">&quot;((</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">)**</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">)&quot;</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="n">split_expression</span><span class="p">(</span><span class="n">key</span><span class="p">))</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="sa">f</span><span class="s2">&quot;(</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">**</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">)&quot;</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">value</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">&quot;</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">key</span><span class="p">,</span><span class="w"> </span><span class="n">value</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="nb">bin</span><span class="p">(</span><span class="n">pairing</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">()])</span><span class="si">}</span><span class="s1">)&#39;</span>
+
+        <span class="k">if</span> <span class="n">parse_term</span><span class="p">(</span><span class="n">expression</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+            <span class="n">outp</span> <span class="o">+=</span> <span class="p">[</span><span class="n">expression</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Expression: </span><span class="si">{</span><span class="n">expression</span><span class="si">}</span><span class="s1"> could not be parsed as a term&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">outp</span></div>
+
+
+
+<span class="n">special_power_funcs</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;linear&#39;</span><span class="p">:</span> <span class="n">partial</span><span class="p">(</span><span class="n">special_power</span><span class="p">,</span> <span class="n">power</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+    <span class="s1">&#39;quadratic&#39;</span><span class="p">:</span> <span class="n">partial</span><span class="p">(</span><span class="n">special_power</span><span class="p">,</span> <span class="n">power</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span>
+    <span class="s1">&#39;cubic&#39;</span><span class="p">:</span> <span class="n">partial</span><span class="p">(</span><span class="n">special_power</span><span class="p">,</span> <span class="n">power</span><span class="o">=</span><span class="mi">3</span><span class="p">),</span>
+    <span class="s1">&#39;quartic&#39;</span><span class="p">:</span> <span class="n">partial</span><span class="p">(</span><span class="n">special_power</span><span class="p">,</span> <span class="n">power</span><span class="o">=</span><span class="mi">4</span><span class="p">),</span>
+    <span class="s1">&#39;quintic&#39;</span><span class="p">:</span> <span class="n">partial</span><span class="p">(</span><span class="n">special_power</span><span class="p">,</span> <span class="n">power</span><span class="o">=</span><span class="mi">5</span><span class="p">),</span>
+    <span class="s1">&#39;sextic&#39;</span><span class="p">:</span> <span class="n">partial</span><span class="p">(</span><span class="n">special_power</span><span class="p">,</span> <span class="n">power</span><span class="o">=</span><span class="mi">6</span><span class="p">),</span>
+    <span class="s1">&#39;hexic&#39;</span><span class="p">:</span> <span class="n">partial</span><span class="p">(</span><span class="n">special_power</span><span class="p">,</span> <span class="n">power</span><span class="o">=</span><span class="mi">6</span><span class="p">),</span>
+    <span class="s1">&#39;septic&#39;</span><span class="p">:</span> <span class="n">partial</span><span class="p">(</span><span class="n">special_power</span><span class="p">,</span> <span class="n">power</span><span class="o">=</span><span class="mi">7</span><span class="p">),</span>
+    <span class="s1">&#39;octic&#39;</span><span class="p">:</span> <span class="n">partial</span><span class="p">(</span><span class="n">special_power</span><span class="p">,</span> <span class="n">power</span><span class="o">=</span><span class="mi">8</span><span class="p">),</span>
+    <span class="s1">&#39;nonic&#39;</span><span class="p">:</span> <span class="n">partial</span><span class="p">(</span><span class="n">special_power</span><span class="p">,</span> <span class="n">power</span><span class="o">=</span><span class="mi">9</span><span class="p">),</span>
+    <span class="s1">&#39;decic&#39;</span><span class="p">:</span> <span class="n">partial</span><span class="p">(</span><span class="n">special_power</span><span class="p">,</span> <span class="n">power</span><span class="o">=</span><span class="mi">10</span><span class="p">),</span>
+    <span class="s1">&#39;duodecic&#39;</span><span class="p">:</span> <span class="n">partial</span><span class="p">(</span><span class="n">special_power</span><span class="p">,</span> <span class="n">power</span><span class="o">=</span><span class="mi">12</span><span class="p">),</span>
+    <span class="s1">&#39;vigintic&#39;</span><span class="p">:</span> <span class="n">partial</span><span class="p">(</span><span class="n">special_power</span><span class="p">,</span> <span class="n">power</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+<span class="p">}</span>
+<span class="sd">&quot;&quot;&quot;Registry mapping special polynomial keywords to generator callables.&quot;&quot;&quot;</span>
+
+
+<div class="viewcode-block" id="check_special_power_funcs">
+<a class="viewcode-back" href="../../source/cleands.formula.html#cleands.formula.check_special_power_funcs">[docs]</a>
+<span class="k">def</span> <span class="nf">check_special_power_funcs</span><span class="p">(</span><span class="n">expression</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Detect and expand special polynomial helpers like &#39;quadratic(...)&#39;.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        expression (str): Expression beginning with a registered keyword.</span>
+<span class="sd">        data (pd.DataFrame): Data to mutate with generated terms.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Optional[list[str]]: Generated term list if matched; otherwise None.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span><span class="n">func</span> <span class="ow">in</span> <span class="n">special_power_funcs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">expression</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">key</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">match</span><span class="o">:=</span><span class="n">match_parens</span><span class="p">(</span><span class="n">expression</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">key</span><span class="p">):]):</span>
+                <span class="n">terms</span> <span class="o">=</span> <span class="n">split_expression</span><span class="p">(</span><span class="n">match</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="n">terms</span><span class="o">=</span><span class="n">terms</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">result</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="o">...</span>
+    <span class="k">return</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Jason Parker.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

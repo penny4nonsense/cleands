@@ -1,0 +1,542 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>cleands.utils module &mdash; cleands  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=92fd9be5" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="cleands" href="modules.html" />
+    <link rel="prev" title="cleands.formula module" href="cleands.formula.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            cleands
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="cleands.html">cleands package</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="cleands.html#subpackages">Subpackages</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="cleands.html#submodules">Submodules</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="cleands.base.html">cleands.base module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cleands.formula.html">cleands.formula module</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">cleands.utils module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#cleands.utils.one_hot_encode"><code class="docutils literal notranslate"><span class="pre">one_hot_encode()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cleands.utils.itemfreq"><code class="docutils literal notranslate"><span class="pre">itemfreq()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cleands.utils.itemprob"><code class="docutils literal notranslate"><span class="pre">itemprob()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cleands.utils.expit"><code class="docutils literal notranslate"><span class="pre">expit()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cleands.utils.hstack"><code class="docutils literal notranslate"><span class="pre">hstack()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cleands.utils.vstack"><code class="docutils literal notranslate"><span class="pre">vstack()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cleands.utils.bind"><code class="docutils literal notranslate"><span class="pre">bind()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cleands.utils.grid_search"><code class="docutils literal notranslate"><span class="pre">grid_search()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cleands.utils.gradient_descent"><code class="docutils literal notranslate"><span class="pre">gradient_descent()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cleands.utils.newton"><code class="docutils literal notranslate"><span class="pre">newton()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cleands.utils.add_intercept"><code class="docutils literal notranslate"><span class="pre">add_intercept()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cleands.utils.test_train_split"><code class="docutils literal notranslate"><span class="pre">test_train_split()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cleands.utils.test_split_pandas"><code class="docutils literal notranslate"><span class="pre">test_split_pandas()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cleands.utils.k_fold_cross_validation"><code class="docutils literal notranslate"><span class="pre">k_fold_cross_validation()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cleands.utils.bootstrap"><code class="docutils literal notranslate"><span class="pre">bootstrap()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cleands.utils.set_product"><code class="docutils literal notranslate"><span class="pre">set_product()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cleands.utils.intercept"><code class="docutils literal notranslate"><span class="pre">intercept()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cleands.utils.C"><code class="docutils literal notranslate"><span class="pre">C()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">cleands</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="cleands.html">cleands package</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="cleands.html#subpackages">Subpackages</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="cleands.html#submodules">Submodules</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="cleands.base.html">cleands.base module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="cleands.formula.html">cleands.formula module</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">cleands.utils module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">cleands</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="cleands.html">cleands package</a></li>
+      <li class="breadcrumb-item active">cleands.utils module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/source/cleands.utils.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-cleands.utils">
+<span id="cleands-utils-module"></span><h1>cleands.utils module<a class="headerlink" href="#module-cleands.utils" title="Link to this heading"></a></h1>
+<p>Utility functions for statistical modeling and machine learning.</p>
+<p>This module provides helper routines for array manipulation, encoding,
+optimization, resampling, and dataset splitting. Many of these utilities
+are thin wrappers around NumPy/SciPy/Pandas functionality but standardized
+for consistent use across the CleanDS framework.</p>
+<dl class="simple">
+<dt>Key features:</dt><dd><ul class="simple">
+<li><p>Encoding: one-hot, frequency, and probability encoding of categorical arrays.</p></li>
+<li><p>Math helpers: numerically stable sigmoid (<cite>expit</cite>), horizontal/vertical stack.</p></li>
+<li><p>Optimization: gradient descent, Newton’s method, grid search.</p></li>
+<li><p>Resampling: train/test split, k-fold cross-validation, bootstrap sampling.</p></li>
+<li><p>Combinatorics: set product and binomial coefficient matrix constructor (<cite>C</cite>).</p></li>
+<li><p>Intercept helpers: add or append intercept columns to data matrices.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py function">
+<dt class="sig sig-object py" id="cleands.utils.one_hot_encode">
+<span class="sig-prename descclassname"><span class="pre">cleands.utils.</span></span><span class="sig-name descname"><span class="pre">one_hot_encode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/utils.html#one_hot_encode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.utils.one_hot_encode" title="Link to this definition"></a></dt>
+<dd><p>Convert integer vector to one-hot encoded matrix.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>x</strong> (<em>np.ndarray</em>) – Integer labels of shape (n,).</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>One-hot encoded array of shape (n, k),</dt><dd><p>where k = x.max() + 1.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cleands.utils.itemfreq">
+<span class="sig-prename descclassname"><span class="pre">cleands.utils.</span></span><span class="sig-name descname"><span class="pre">itemfreq</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">classes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/utils.html#itemfreq"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.utils.itemfreq" title="Link to this definition"></a></dt>
+<dd><p>Frequency count of integer labels.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>np.ndarray</em>) – Integer labels.</p></li>
+<li><p><strong>axis</strong> (<em>Optional</em><em>[</em><em>int</em><em>]</em>) – Axis to count over. Defaults to None (flattened).</p></li>
+<li><p><strong>classes</strong> (<em>Optional</em><em>[</em><em>int</em><em>]</em>) – Number of classes to assume. Defaults to x.max()+1.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Frequency counts.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cleands.utils.itemprob">
+<span class="sig-prename descclassname"><span class="pre">cleands.utils.</span></span><span class="sig-name descname"><span class="pre">itemprob</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">classes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/utils.html#itemprob"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.utils.itemprob" title="Link to this definition"></a></dt>
+<dd><p>Relative frequencies (probabilities) of integer labels.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>np.ndarray</em>) – Integer labels.</p></li>
+<li><p><strong>axis</strong> (<em>Optional</em><em>[</em><em>int</em><em>]</em>) – Axis to compute proportions along.</p></li>
+<li><p><strong>classes</strong> (<em>Optional</em><em>[</em><em>int</em><em>]</em>) – Number of classes to assume. Defaults to x.max()+1.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Probabilities across classes.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cleands.utils.expit">
+<span class="sig-prename descclassname"><span class="pre">cleands.utils.</span></span><span class="sig-name descname"><span class="pre">expit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/utils.html#expit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.utils.expit" title="Link to this definition"></a></dt>
+<dd><p>Numerically stable sigmoid function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>x</strong> (<em>np.ndarray</em>) – Input array.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Sigmoid-transformed values in (0,1).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cleands.utils.hstack">
+<span class="sig-prename descclassname"><span class="pre">cleands.utils.</span></span><span class="sig-name descname"><span class="pre">hstack</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/utils.html#hstack"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.utils.hstack" title="Link to this definition"></a></dt>
+<dd><p>Column-wise stack with auto-reshaping of 1D arrays.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>*args</strong> (<em>np.ndarray</em>) – Arrays to stack.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Horizontally stacked 2D array.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cleands.utils.vstack">
+<span class="sig-prename descclassname"><span class="pre">cleands.utils.</span></span><span class="sig-name descname"><span class="pre">vstack</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/utils.html#vstack"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.utils.vstack" title="Link to this definition"></a></dt>
+<dd><p>Row-wise stack with auto-reshaping of 1D arrays.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>*args</strong> (<em>np.ndarray</em>) – Arrays to stack.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Vertically stacked 2D array.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cleands.utils.bind">
+<span class="sig-prename descclassname"><span class="pre">cleands.utils.</span></span><span class="sig-name descname"><span class="pre">bind</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/utils.html#bind"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.utils.bind" title="Link to this definition"></a></dt>
+<dd><p>Concatenate arrays along first axis.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>*args</strong> (<em>np.ndarray</em>) – Arrays to concatenate.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Concatenated array.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cleands.utils.grid_search">
+<span class="sig-prename descclassname"><span class="pre">cleands.utils.</span></span><span class="sig-name descname"><span class="pre">grid_search</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">space</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maximize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/utils.html#grid_search"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.utils.grid_search" title="Link to this definition"></a></dt>
+<dd><p>Perform grid search by evaluating a function on a search space.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>func</strong> (<em>Callable</em>) – Function mapping space -&gt; score array.</p></li>
+<li><p><strong>space</strong> (<em>np.ndarray</em>) – Search points.</p></li>
+<li><p><strong>axis</strong> (<em>Optional</em><em>[</em><em>int</em><em>]</em>) – Axis to reduce along.</p></li>
+<li><p><strong>maximize</strong> (<em>bool</em>) – Whether to maximize (default False).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Index of optimum along axis.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cleands.utils.gradient_descent">
+<span class="sig-prename descclassname"><span class="pre">cleands.utils.</span></span><span class="sig-name descname"><span class="pre">gradient_descent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gradient</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">init_x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">learning_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.005</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_reps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maximize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">obj</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step_shrink</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol_step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">armijo_c1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-4</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/utils.html#gradient_descent"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.utils.gradient_descent" title="Link to this definition"></a></dt>
+<dd><p>Basic gradient method with robust stopping and optional Armijo backtracking.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>gradient</strong> (<em>Callable</em><em>[</em><em>[</em><em>ndarray</em><em>]</em><em>, </em><em>ndarray</em><em>]</em>) – Gradient function g(x).</p></li>
+<li><p><strong>init_x</strong> (<em>ndarray</em>) – Initial point.</p></li>
+<li><p><strong>learning_rate</strong> (<em>float</em>) – Initial step size.</p></li>
+<li><p><strong>threshold</strong> (<em>float</em>) – Convergence threshold on ||g(x)||_2.</p></li>
+<li><p><strong>max_reps</strong> (<em>int</em>) – Maximum iterations.</p></li>
+<li><p><strong>maximize</strong> (<em>bool</em>) – If True, performs gradient ascent.</p></li>
+<li><p><strong>obj</strong> (<em>Callable</em><em>[</em><em>[</em><em>ndarray</em><em>]</em><em>, </em><em>float</em><em>] </em><em>| </em><em>None</em>) – Optional objective function f(x). If provided, perform Armijo backtracking.</p></li>
+<li><p><strong>step_shrink</strong> (<em>float</em>) – Backtracking multiplier in (0,1) when Armijo fails.</p></li>
+<li><p><strong>min_step</strong> (<em>float</em>) – Minimum allowable step size during backtracking before giving up.</p></li>
+<li><p><strong>tol_step</strong> (<em>float</em>) – Convergence threshold on parameter step size ||Δx||_2.</p></li>
+<li><p><strong>armijo_c1</strong> (<em>float</em>) – Armijo constant (typically 1e-4).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Final iterate and convergence flag.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(x, converged)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cleands.utils.newton">
+<span class="sig-prename descclassname"><span class="pre">cleands.utils.</span></span><span class="sig-name descname"><span class="pre">newton</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gradient</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hessian</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">init_x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_reps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tolerance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-14</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/utils.html#newton"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.utils.newton" title="Link to this definition"></a></dt>
+<dd><p>Newton-Raphson optimizer for root-finding/maximum likelihood.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>gradient</strong> (<em>Callable</em>) – Gradient function.</p></li>
+<li><p><strong>hessian</strong> (<em>Callable</em>) – Hessian function.</p></li>
+<li><p><strong>init_x</strong> (<em>np.ndarray</em>) – Initial guess.</p></li>
+<li><p><strong>max_reps</strong> (<em>int</em>) – Max iterations.</p></li>
+<li><p><strong>tolerance</strong> (<em>float</em>) – Stopping threshold for update size.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>(solution, iterations) if converged.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Tuple[np.ndarray, int]</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>Exception</strong> – If convergence not achieved.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cleands.utils.add_intercept">
+<span class="sig-prename descclassname"><span class="pre">cleands.utils.</span></span><span class="sig-name descname"><span class="pre">add_intercept</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_vars</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_var</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/utils.html#add_intercept"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.utils.add_intercept" title="Link to this definition"></a></dt>
+<dd><p>Add an intercept column to a DataFrame and feature list.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x_vars</strong> (<em>list</em><em>[</em><em>str</em><em>]</em>) – Feature variable names.</p></li>
+<li><p><strong>y_var</strong> (<em>str</em>) – Target variable name.</p></li>
+<li><p><strong>data</strong> (<em>pd.DataFrame</em>) – Input dataset.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Updated (x_vars, y_var, new data).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Tuple[list[str], str, pd.DataFrame]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cleands.utils.test_train_split">
+<span class="sig-prename descclassname"><span class="pre">cleands.utils.</span></span><span class="sig-name descname"><span class="pre">test_train_split</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_ratio</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/utils.html#test_train_split"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.utils.test_train_split" title="Link to this definition"></a></dt>
+<dd><p>Split arrays into train/test sets.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>np.ndarray</em>) – Features.</p></li>
+<li><p><strong>y</strong> (<em>np.ndarray</em>) – Targets.</p></li>
+<li><p><strong>test_ratio</strong> (<em>float</em>) – Proportion for test set.</p></li>
+<li><p><strong>seed</strong> (<em>Optional</em><em>[</em><em>int</em><em>]</em>) – RNG seed.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>(x_train, x_test, y_train, y_test).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Tuple[np.ndarray]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cleands.utils.test_split_pandas">
+<span class="sig-prename descclassname"><span class="pre">cleands.utils.</span></span><span class="sig-name descname"><span class="pre">test_split_pandas</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_ratio</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/utils.html#test_split_pandas"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.utils.test_split_pandas" title="Link to this definition"></a></dt>
+<dd><p>Split a Pandas DataFrame into train/test subsets.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>pd.DataFrame</em>) – Dataset.</p></li>
+<li><p><strong>seed</strong> (<em>Optional</em><em>[</em><em>int</em><em>]</em>) – RNG seed.</p></li>
+<li><p><strong>test_ratio</strong> (<em>float</em>) – Proportion for test set.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>(x_train, x_test).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Tuple[pd.DataFrame]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cleands.utils.k_fold_cross_validation">
+<span class="sig-prename descclassname"><span class="pre">cleands.utils.</span></span><span class="sig-name descname"><span class="pre">k_fold_cross_validation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">folds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/utils.html#k_fold_cross_validation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.utils.k_fold_cross_validation" title="Link to this definition"></a></dt>
+<dd><p>Generate train/test splits for k-fold cross-validation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>np.ndarray</em>) – Features.</p></li>
+<li><p><strong>y</strong> (<em>np.ndarray</em>) – Targets.</p></li>
+<li><p><strong>folds</strong> (<em>int</em>) – Number of folds.</p></li>
+<li><p><strong>seed</strong> (<em>Optional</em><em>[</em><em>int</em><em>]</em>) – RNG seed.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of (x_train, x_test, y_train, y_test).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list[Tuple[np.ndarray]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cleands.utils.bootstrap">
+<span class="sig-prename descclassname"><span class="pre">cleands.utils.</span></span><span class="sig-name descname"><span class="pre">bootstrap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bootstraps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/utils.html#bootstrap"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.utils.bootstrap" title="Link to this definition"></a></dt>
+<dd><p>Generate bootstrap resamples and fit a model on each.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model</strong> (<em>Type</em><em>[</em><a class="reference internal" href="cleands.base.html#cleands.base.supervised_model" title="cleands.base.supervised_model"><em>supervised_model</em></a><em>]</em>) – Model class to fit.</p></li>
+<li><p><strong>x</strong> (<em>np.ndarray</em>) – Features.</p></li>
+<li><p><strong>y</strong> (<em>np.ndarray</em>) – Targets.</p></li>
+<li><p><strong>seed</strong> (<em>Optional</em><em>[</em><em>int</em><em>]</em>) – RNG seed.</p></li>
+<li><p><strong>bootstraps</strong> (<em>int</em>) – Number of bootstrap samples.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Fitted models from bootstrap samples.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list[<a class="reference internal" href="cleands.base.html#cleands.base.supervised_model" title="cleands.base.supervised_model">supervised_model</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cleands.utils.set_product">
+<span class="sig-prename descclassname"><span class="pre">cleands.utils.</span></span><span class="sig-name descname"><span class="pre">set_product</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/utils.html#set_product"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.utils.set_product" title="Link to this definition"></a></dt>
+<dd><p>Cartesian product of multiple iterables.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>*args</strong> (<em>Tuple</em><em>[</em><em>Iterable</em><em>]</em>) – Iterables to combine.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Cartesian product tuples.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list[Tuple]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cleands.utils.intercept">
+<span class="sig-prename descclassname"><span class="pre">cleands.utils.</span></span><span class="sig-name descname"><span class="pre">intercept</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/utils.html#intercept"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.utils.intercept" title="Link to this definition"></a></dt>
+<dd><p>Prepend an intercept column of ones to feature matrix.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>x</strong> (<em>np.ndarray</em>) – Feature matrix.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Feature matrix with intercept column added.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cleands.utils.C">
+<span class="sig-prename descclassname"><span class="pre">cleands.utils.</span></span><span class="sig-name descname"><span class="pre">C</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/utils.html#C"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.utils.C" title="Link to this definition"></a></dt>
+<dd><p>Construct combinatorial matrix for n choose r.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n</strong> (<em>int</em>) – Number of elements.</p></li>
+<li><p><strong>r</strong> (<em>int</em>) – Number chosen.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Binary matrix representing subsets.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>Exception</strong> – If n &lt; r.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="cleands.formula.html" class="btn btn-neutral float-left" title="cleands.formula module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="modules.html" class="btn btn-neutral float-right" title="cleands" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Jason Parker.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

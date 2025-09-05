@@ -1,0 +1,1658 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>cleands.base module &mdash; cleands  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=92fd9be5" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="cleands.formula module" href="cleands.formula.html" />
+    <link rel="prev" title="cleands.Prediction.tree module" href="cleands.Prediction.tree.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            cleands
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="cleands.html">cleands package</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="cleands.html#subpackages">Subpackages</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="cleands.html#submodules">Submodules</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">cleands.base module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#cleands.base.learning_model"><code class="docutils literal notranslate"><span class="pre">learning_model</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cleands.base.supervised_model"><code class="docutils literal notranslate"><span class="pre">supervised_model</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cleands.base.unsupervised_model"><code class="docutils literal notranslate"><span class="pre">unsupervised_model</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cleands.base.prediction_model"><code class="docutils literal notranslate"><span class="pre">prediction_model</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cleands.base.classification_model"><code class="docutils literal notranslate"><span class="pre">classification_model</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cleands.base.clustering_model"><code class="docutils literal notranslate"><span class="pre">clustering_model</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cleands.base.distribution_model"><code class="docutils literal notranslate"><span class="pre">distribution_model</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cleands.base.dimension_reduction_model"><code class="docutils literal notranslate"><span class="pre">dimension_reduction_model</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cleands.base.supervised_dimension_reduction_model"><code class="docutils literal notranslate"><span class="pre">supervised_dimension_reduction_model</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cleands.base.likelihood_type"><code class="docutils literal notranslate"><span class="pre">likelihood_type</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cleands.base.likelihood_model"><code class="docutils literal notranslate"><span class="pre">likelihood_model</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cleands.base.parametric_distribution_model"><code class="docutils literal notranslate"><span class="pre">parametric_distribution_model</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cleands.base.prediction_likelihood_model"><code class="docutils literal notranslate"><span class="pre">prediction_likelihood_model</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cleands.base.broom_model"><code class="docutils literal notranslate"><span class="pre">broom_model</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cleands.base.variance_model"><code class="docutils literal notranslate"><span class="pre">variance_model</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cleands.base.SupervisedModel"><code class="docutils literal notranslate"><span class="pre">SupervisedModel</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cleands.base.PredictionModel"><code class="docutils literal notranslate"><span class="pre">PredictionModel</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cleands.base.ClassificationModel"><code class="docutils literal notranslate"><span class="pre">ClassificationModel</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cleands.base.UnsupervisedModel"><code class="docutils literal notranslate"><span class="pre">UnsupervisedModel</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cleands.base.ClusteringModel"><code class="docutils literal notranslate"><span class="pre">ClusteringModel</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cleands.base.DimensionReductionModel"><code class="docutils literal notranslate"><span class="pre">DimensionReductionModel</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="cleands.formula.html">cleands.formula module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cleands.utils.html">cleands.utils module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">cleands</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="cleands.html">cleands package</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="cleands.html#subpackages">Subpackages</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="cleands.html#submodules">Submodules</a><ul class="current">
+<li class="toctree-l4 current"><a class="current reference internal" href="#">cleands.base module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="cleands.formula.html">cleands.formula module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="cleands.utils.html">cleands.utils module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">cleands</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="cleands.html">cleands package</a></li>
+      <li class="breadcrumb-item active">cleands.base module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/source/cleands.base.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-cleands.base">
+<span id="cleands-base-module"></span><h1>cleands.base module<a class="headerlink" href="#module-cleands.base" title="Link to this heading"></a></h1>
+<p>Core base classes and abstract interfaces for the CleanDS statistical modeling framework.</p>
+<p>This module defines the fundamental building blocks for supervised, unsupervised,
+prediction, classification, clustering, and distribution models. It establishes
+a consistent API across model families, providing shared properties such as
+<cite>fitted</cite>, <cite>residuals</cite>, <cite>mean_squared_error</cite>, <cite>aic</cite>, and <cite>bic</cite>.</p>
+<dl class="simple">
+<dt>Key features:</dt><dd><ul class="simple">
+<li><p>Abstract base classes for supervised and unsupervised models.</p></li>
+<li><p>Prediction and classification models with common evaluation metrics.</p></li>
+<li><p>Clustering model interface with mean/cluster management utilities.</p></li>
+<li><p>Distribution model protocols with PDF and CDF support.</p></li>
+<li><p>Likelihood-based model mixins for deviance, AIC, BIC, and log-likelihood.</p></li>
+<li><p>Variance models for parameter uncertainty (standard errors, confidence intervals).</p></li>
+<li><p>Supervised wrappers (<cite>SupervisedModel</cite>, <cite>PredictionModel</cite>, <cite>ClassificationModel</cite>)
+for integrating with formula notation and tidy outputs.</p></li>
+</ul>
+</dd>
+</dl>
+<p>These base definitions are designed for extensibility:
+custom regression, classification, clustering, or distribution models
+should inherit from the appropriate abstract class to ensure interoperability
+within the CleanDS ecosystem.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="cleands.base.learning_model">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cleands.base.</span></span><span class="sig-name descname"><span class="pre">learning_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/base.html#learning_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.base.learning_model" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+<p>Abstract base class for all learning models.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>x</strong> (<em>ndarray</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cleands.base.supervised_model">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cleands.base.</span></span><span class="sig-name descname"><span class="pre">supervised_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/base.html#supervised_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.base.supervised_model" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#cleands.base.learning_model" title="cleands.base.learning_model"><code class="xref py py-class docutils literal notranslate"><span class="pre">learning_model</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+<p>Base class for supervised learning models with features and labels.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>ndarray</em>)</p></li>
+<li><p><strong>y</strong> (<em>ndarray</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cleands.base.unsupervised_model">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cleands.base.</span></span><span class="sig-name descname"><span class="pre">unsupervised_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/base.html#unsupervised_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.base.unsupervised_model" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#cleands.base.learning_model" title="cleands.base.learning_model"><code class="xref py py-class docutils literal notranslate"><span class="pre">learning_model</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+<p>Base class for unsupervised learning models.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>x</strong> (<em>ndarray</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cleands.base.prediction_model">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cleands.base.</span></span><span class="sig-name descname"><span class="pre">prediction_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/base.html#prediction_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.base.prediction_model" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#cleands.base.supervised_model" title="cleands.base.supervised_model"><code class="xref py py-class docutils literal notranslate"><span class="pre">supervised_model</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+<p>Base class for supervised prediction models.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>ndarray</em>)</p></li>
+<li><p><strong>y</strong> (<em>ndarray</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="cleands.base.prediction_model.predict">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/base.html#prediction_model.predict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.base.prediction_model.predict" title="Link to this definition"></a></dt>
+<dd><p>Predict outcomes for new input data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>target</strong> (<em>np.ndarray</em>) – Feature matrix for prediction.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Predicted values.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="cleands.base.prediction_model.fitted">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fitted</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><a class="headerlink" href="#cleands.base.prediction_model.fitted" title="Link to this definition"></a></dt>
+<dd><p>Predictions for training data (<cite>self.x</cite>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="cleands.base.prediction_model.residuals">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">residuals</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><a class="headerlink" href="#cleands.base.prediction_model.residuals" title="Link to this definition"></a></dt>
+<dd><p>Difference between observed and fitted values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="cleands.base.prediction_model.residual_sum_of_squares">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">residual_sum_of_squares</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#cleands.base.prediction_model.residual_sum_of_squares" title="Link to this definition"></a></dt>
+<dd><p>Residual sum of squares (RSS).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="cleands.base.prediction_model.mean_squared_error">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">mean_squared_error</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#cleands.base.prediction_model.mean_squared_error" title="Link to this definition"></a></dt>
+<dd><p>Mean squared error (MSE).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cleands.base.prediction_model.out_of_sample_mean_squared_error">
+<span class="sig-name descname"><span class="pre">out_of_sample_mean_squared_error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/base.html#prediction_model.out_of_sample_mean_squared_error"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.base.prediction_model.out_of_sample_mean_squared_error" title="Link to this definition"></a></dt>
+<dd><p>Compute out-of-sample mean squared error.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>np.ndarray</em>) – Test feature matrix.</p></li>
+<li><p><strong>y</strong> (<em>np.ndarray</em>) – Test target vector.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Out-of-sample MSE.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="cleands.base.prediction_model.root_mean_squared_error">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">root_mean_squared_error</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#cleands.base.prediction_model.root_mean_squared_error" title="Link to this definition"></a></dt>
+<dd><p>Root mean squared error (RMSE).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cleands.base.prediction_model.out_of_sample_root_mean_squared_error">
+<span class="sig-name descname"><span class="pre">out_of_sample_root_mean_squared_error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/base.html#prediction_model.out_of_sample_root_mean_squared_error"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.base.prediction_model.out_of_sample_root_mean_squared_error" title="Link to this definition"></a></dt>
+<dd><p>Compute out-of-sample RMSE.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>np.ndarray</em>) – Test feature matrix.</p></li>
+<li><p><strong>y</strong> (<em>np.ndarray</em>) – Test target vector.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Out-of-sample RMSE.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="cleands.base.prediction_model.r_squared">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">r_squared</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#cleands.base.prediction_model.r_squared" title="Link to this definition"></a></dt>
+<dd><p>Coefficient of determination (R²).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="cleands.base.prediction_model.adjusted_r_squared">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">adjusted_r_squared</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#cleands.base.prediction_model.adjusted_r_squared" title="Link to this definition"></a></dt>
+<dd><p>Adjusted R² that accounts for model complexity.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="cleands.base.prediction_model.degrees_of_freedom">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">degrees_of_freedom</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#cleands.base.prediction_model.degrees_of_freedom" title="Link to this definition"></a></dt>
+<dd><p>Degrees of freedom = n_obs - n_feat.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="cleands.base.prediction_model.residual_variance">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">residual_variance</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#cleands.base.prediction_model.residual_variance" title="Link to this definition"></a></dt>
+<dd><p>Estimated residual variance.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cleands.base.classification_model">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cleands.base.</span></span><span class="sig-name descname"><span class="pre">classification_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/base.html#classification_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.base.classification_model" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#cleands.base.supervised_model" title="cleands.base.supervised_model"><code class="xref py py-class docutils literal notranslate"><span class="pre">supervised_model</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+<p>Base class for supervised classification models.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="cleands.base.classification_model.predict_proba">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">predict_proba</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/base.html#classification_model.predict_proba"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.base.classification_model.predict_proba" title="Link to this definition"></a></dt>
+<dd><p>Predict class probabilities.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>target</strong> (<em>np.ndarray</em>) – Feature matrix.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Class probability estimates.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="cleands.base.classification_model.n_classes">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_classes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#cleands.base.classification_model.n_classes" title="Link to this definition"></a></dt>
+<dd><p>Number of classes in the dataset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cleands.base.classification_model.classify">
+<span class="sig-name descname"><span class="pre">classify</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/base.html#classification_model.classify"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.base.classification_model.classify" title="Link to this definition"></a></dt>
+<dd><p>Predict class labels.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>target</strong> (<em>np.ndarray</em>) – Feature matrix.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Predicted class labels.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="cleands.base.classification_model.fitted">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fitted</span></span><a class="headerlink" href="#cleands.base.classification_model.fitted" title="Link to this definition"></a></dt>
+<dd><p>Predicted class labels for training data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="cleands.base.classification_model.accuracy">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">accuracy</span></span><a class="headerlink" href="#cleands.base.classification_model.accuracy" title="Link to this definition"></a></dt>
+<dd><p>Training accuracy.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cleands.base.classification_model.out_of_sample_accuracy">
+<span class="sig-name descname"><span class="pre">out_of_sample_accuracy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/base.html#classification_model.out_of_sample_accuracy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.base.classification_model.out_of_sample_accuracy" title="Link to this definition"></a></dt>
+<dd><p>Compute out-of-sample accuracy.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>np.ndarray</em>) – Test features.</p></li>
+<li><p><strong>y</strong> (<em>np.ndarray</em>) – Test labels.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Accuracy score.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="cleands.base.classification_model.misclassification_probability">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">misclassification_probability</span></span><a class="headerlink" href="#cleands.base.classification_model.misclassification_probability" title="Link to this definition"></a></dt>
+<dd><p>Misclassification probability = 1 - accuracy.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cleands.base.classification_model.out_of_sample_misclassification_probability">
+<span class="sig-name descname"><span class="pre">out_of_sample_misclassification_probability</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/base.html#classification_model.out_of_sample_misclassification_probability"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.base.classification_model.out_of_sample_misclassification_probability" title="Link to this definition"></a></dt>
+<dd><p>Compute out-of-sample misclassification probability.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>np.ndarray</em>) – Test features.</p></li>
+<li><p><strong>y</strong> (<em>np.ndarray</em>) – Test labels.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Misclassification probability.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="cleands.base.classification_model.confusion_matrix">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">confusion_matrix</span></span><a class="headerlink" href="#cleands.base.classification_model.confusion_matrix" title="Link to this definition"></a></dt>
+<dd><p>Confusion matrix for training data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cleands.base.classification_model.out_of_sample_confusion_matrix">
+<span class="sig-name descname"><span class="pre">out_of_sample_confusion_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/base.html#classification_model.out_of_sample_confusion_matrix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.base.classification_model.out_of_sample_confusion_matrix" title="Link to this definition"></a></dt>
+<dd><p>Compute confusion matrix for test data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>np.ndarray</em>) – Test features.</p></li>
+<li><p><strong>y</strong> (<em>np.ndarray</em>) – Test labels.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Confusion matrix.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cleands.base.clustering_model">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cleands.base.</span></span><span class="sig-name descname"><span class="pre">clustering_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/base.html#clustering_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.base.clustering_model" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#cleands.base.unsupervised_model" title="cleands.base.unsupervised_model"><code class="xref py py-class docutils literal notranslate"><span class="pre">unsupervised_model</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+<p>Base class for clustering models.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>x</strong> (<em>ndarray</em>)</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="cleands.base.clustering_model.cluster">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">cluster</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/base.html#clustering_model.cluster"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.base.clustering_model.cluster" title="Link to this definition"></a></dt>
+<dd><p>Assign cluster labels for given data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>target</strong> (<em>np.ndarray</em>) – Feature matrix.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Cluster assignments.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="cleands.base.clustering_model.n_clusters">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_clusters</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#cleands.base.clustering_model.n_clusters" title="Link to this definition"></a></dt>
+<dd><p>Number of clusters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="cleands.base.clustering_model.means">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">means</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><a class="headerlink" href="#cleands.base.clustering_model.means" title="Link to this definition"></a></dt>
+<dd><p>Cluster centroids.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="cleands.base.clustering_model.groups">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">groups</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><a class="headerlink" href="#cleands.base.clustering_model.groups" title="Link to this definition"></a></dt>
+<dd><p>Cluster assignments for training data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="cleands.base.clustering_model.within_group_sum_of_squares">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">within_group_sum_of_squares</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><a class="headerlink" href="#cleands.base.clustering_model.within_group_sum_of_squares" title="Link to this definition"></a></dt>
+<dd><p>Within-group sum of squares per cluster.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="cleands.base.clustering_model.total_within_group_sum_of_squares">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">total_within_group_sum_of_squares</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#cleands.base.clustering_model.total_within_group_sum_of_squares" title="Link to this definition"></a></dt>
+<dd><p>Total within-group sum of squares across clusters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cleands.base.distribution_model">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cleands.base.</span></span><span class="sig-name descname"><span class="pre">distribution_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/base.html#distribution_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.base.distribution_model" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#cleands.base.unsupervised_model" title="cleands.base.unsupervised_model"><code class="xref py py-class docutils literal notranslate"><span class="pre">unsupervised_model</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+<p>Base class for unsupervised parametric/nonparametric distributions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>x</strong> (<em>ndarray</em>)</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="cleands.base.distribution_model.pdf">
+<span class="sig-name descname"><span class="pre">pdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/base.html#distribution_model.pdf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.base.distribution_model.pdf" title="Link to this definition"></a></dt>
+<dd><p>Probability density (or mass) function evaluated at <cite>target</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>target</strong> (<em>np.ndarray</em>) – Points at which to evaluate the pdf/pmf.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Density (or probability) values with shape compatible with <cite>target</cite>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cleands.base.distribution_model.cdf">
+<span class="sig-name descname"><span class="pre">cdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/base.html#distribution_model.cdf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.base.distribution_model.cdf" title="Link to this definition"></a></dt>
+<dd><p>Cumulative distribution function evaluated at <cite>target</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>target</strong> (<em>np.ndarray</em>) – Points at which to evaluate the CDF.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Cumulative probabilities with shape compatible with <cite>target</cite>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cleands.base.dimension_reduction_model">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cleands.base.</span></span><span class="sig-name descname"><span class="pre">dimension_reduction_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/base.html#dimension_reduction_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.base.dimension_reduction_model" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#cleands.base.unsupervised_model" title="cleands.base.unsupervised_model"><code class="xref py py-class docutils literal notranslate"><span class="pre">unsupervised_model</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+<p>Base class for unsupervised dimension reduction algorithms (e.g., PCA).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>x</strong> (<em>ndarray</em>)</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="cleands.base.dimension_reduction_model.reduce">
+<span class="sig-name descname"><span class="pre">reduce</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/base.html#dimension_reduction_model.reduce"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.base.dimension_reduction_model.reduce" title="Link to this definition"></a></dt>
+<dd><p>Project <cite>target</cite> into a lower-dimensional space.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>target</strong> (<em>np.ndarray</em>) – Data matrix to reduce, shape (n_obs, n_feat).</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Reduced representation, shape (n_obs, k) where k &lt;= n_feat.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cleands.base.dimension_reduction_model.out_of_sample_mean_squared_error">
+<span class="sig-name descname"><span class="pre">out_of_sample_mean_squared_error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/base.html#dimension_reduction_model.out_of_sample_mean_squared_error"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.base.dimension_reduction_model.out_of_sample_mean_squared_error" title="Link to this definition"></a></dt>
+<dd><p>Reprojection MSE: squared reconstruction error per element.</p>
+<p>This computes the MSE of projecting <cite>target</cite> onto the learned subspace and
+measuring the residual in the orthogonal complement.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>target</strong> (<em>np.ndarray</em>) – Data matrix to evaluate, shape (n_obs, n_feat).</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Scalar MSE (float-like) computed as trace(T’ M T) / T.size.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="cleands.base.dimension_reduction_model.mean_squared_error">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">mean_squared_error</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><a class="headerlink" href="#cleands.base.dimension_reduction_model.mean_squared_error" title="Link to this definition"></a></dt>
+<dd><p>In-sample mean squared error for <cite>self.x</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cleands.base.dimension_reduction_model.out_of_sample_root_mean_squared_error">
+<span class="sig-name descname"><span class="pre">out_of_sample_root_mean_squared_error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/base.html#dimension_reduction_model.out_of_sample_root_mean_squared_error"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.base.dimension_reduction_model.out_of_sample_root_mean_squared_error" title="Link to this definition"></a></dt>
+<dd><p>Root mean squared reconstruction error for new data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>target</strong> (<em>np.ndarray</em>) – Data matrix to evaluate.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Scalar RMSE.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="cleands.base.dimension_reduction_model.root_mean_squared_error">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">root_mean_squared_error</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><a class="headerlink" href="#cleands.base.dimension_reduction_model.root_mean_squared_error" title="Link to this definition"></a></dt>
+<dd><p>In-sample root mean squared error for <cite>self.x</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cleands.base.supervised_dimension_reduction_model">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cleands.base.</span></span><span class="sig-name descname"><span class="pre">supervised_dimension_reduction_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/base.html#supervised_dimension_reduction_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.base.supervised_dimension_reduction_model" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#cleands.base.supervised_model" title="cleands.base.supervised_model"><code class="xref py py-class docutils literal notranslate"><span class="pre">supervised_model</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+<p>Base class for supervised dimension reduction (e.g., CCA).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>ndarray</em>)</p></li>
+<li><p><strong>y</strong> (<em>ndarray</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="cleands.base.supervised_dimension_reduction_model.reduce_X">
+<span class="sig-name descname"><span class="pre">reduce_X</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_new</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/base.html#supervised_dimension_reduction_model.reduce_X"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.base.supervised_dimension_reduction_model.reduce_X" title="Link to this definition"></a></dt>
+<dd><p>Project <cite>x_new</cite> into the supervised lower-dimensional X-space.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>x_new</strong> (<em>np.ndarray</em>) – Feature matrix, shape (n_obs, n_feat).</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Reduced X scores, shape (n_obs, kx).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cleands.base.supervised_dimension_reduction_model.reduce_Y">
+<span class="sig-name descname"><span class="pre">reduce_Y</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y_new</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/base.html#supervised_dimension_reduction_model.reduce_Y"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.base.supervised_dimension_reduction_model.reduce_Y" title="Link to this definition"></a></dt>
+<dd><p>Project <cite>y_new</cite> (targets) into the supervised lower-dimensional Y-space.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>y_new</strong> (<em>np.ndarray</em>) – Target vector or matrix, shape (n_obs, …) depending on model.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Reduced Y scores, shape (n_obs, ky).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cleands.base.supervised_dimension_reduction_model.reduce">
+<span class="sig-name descname"><span class="pre">reduce</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_new</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_new</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/base.html#supervised_dimension_reduction_model.reduce"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.base.supervised_dimension_reduction_model.reduce" title="Link to this definition"></a></dt>
+<dd><p>Reduce X, Y, or both, depending on provided inputs.</p>
+<p>Exactly one (or both) of <cite>x_new</cite> or <cite>y_new</cite> must be provided.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x_new</strong> (<em>Optional</em><em>[</em><em>np.ndarray</em><em>]</em>) – Feature matrix to reduce.</p></li>
+<li><p><strong>y_new</strong> (<em>Optional</em><em>[</em><em>np.ndarray</em><em>]</em>) – Target vector/matrix to reduce.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p>If both provided: (X_reduced, Y_reduced).</p></li>
+<li><p>If only <cite>x_new</cite> provided: X_reduced.</p></li>
+<li><p>If only <cite>y_new</cite> provided: Y_reduced.</p></li>
+</ul>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray | tuple[np.ndarray, np.ndarray]</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If neither <cite>x_new</cite> nor <cite>y_new</cite> is provided.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cleands.base.likelihood_type">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cleands.base.</span></span><span class="sig-name descname"><span class="pre">likelihood_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/base.html#likelihood_type"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.base.likelihood_type" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></p>
+<p>Structural protocol for objects exposing likelihood metrics.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="cleands.base.likelihood_type.log_likelihood">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">log_likelihood</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#cleands.base.likelihood_type.log_likelihood" title="Link to this definition"></a></dt>
+<dd><p>Model log-likelihood.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="cleands.base.likelihood_type.null_likelihood">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">null_likelihood</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#cleands.base.likelihood_type.null_likelihood" title="Link to this definition"></a></dt>
+<dd><p>Log-likelihood of the null/reference model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cleands.base.likelihood_model">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cleands.base.</span></span><span class="sig-name descname"><span class="pre">likelihood_model</span></span><a class="reference internal" href="../_modules/cleands/base.html#likelihood_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.base.likelihood_model" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+<p>Mixin-like base for models that report likelihood-based criteria.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cleands.base.likelihood_model.n_feat">
+<span class="sig-name descname"><span class="pre">n_feat</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#cleands.base.likelihood_model.n_feat" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cleands.base.likelihood_model.n_obs">
+<span class="sig-name descname"><span class="pre">n_obs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#cleands.base.likelihood_model.n_obs" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="cleands.base.likelihood_model.log_likelihood">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">log_likelihood</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#cleands.base.likelihood_model.log_likelihood" title="Link to this definition"></a></dt>
+<dd><p>Model log-likelihood under fitted parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="cleands.base.likelihood_model.null_likelihood">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">null_likelihood</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#cleands.base.likelihood_model.null_likelihood" title="Link to this definition"></a></dt>
+<dd><p>Log-likelihood of the null/reference model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="cleands.base.likelihood_model.aic">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">aic</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#cleands.base.likelihood_model.aic" title="Link to this definition"></a></dt>
+<dd><p>Akaike Information Criterion (smaller is better).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="cleands.base.likelihood_model.bic">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">bic</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#cleands.base.likelihood_model.bic" title="Link to this definition"></a></dt>
+<dd><p>Bayesian Information Criterion (smaller is better).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="cleands.base.likelihood_model.deviance">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">deviance</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#cleands.base.likelihood_model.deviance" title="Link to this definition"></a></dt>
+<dd><p>Model deviance = 2*LL(model) - 2*LL(null).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cleands.base.parametric_distribution_model">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cleands.base.</span></span><span class="sig-name descname"><span class="pre">parametric_distribution_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/base.html#parametric_distribution_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.base.parametric_distribution_model" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#cleands.base.distribution_model" title="cleands.base.distribution_model"><code class="xref py py-class docutils literal notranslate"><span class="pre">distribution_model</span></code></a>, <a class="reference internal" href="#cleands.base.likelihood_model" title="cleands.base.likelihood_model"><code class="xref py py-class docutils literal notranslate"><span class="pre">likelihood_model</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+<p>Base class for parametric distributions that expose likelihood metrics.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>x</strong> (<em>ndarray</em>)</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cleands.base.parametric_distribution_model.params">
+<span class="sig-name descname"><span class="pre">params</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><a class="headerlink" href="#cleands.base.parametric_distribution_model.params" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cleands.base.parametric_distribution_model.x">
+<span class="sig-name descname"><span class="pre">x</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><a class="headerlink" href="#cleands.base.parametric_distribution_model.x" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cleands.base.parametric_distribution_model.pdf">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">pdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/base.html#parametric_distribution_model.pdf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.base.parametric_distribution_model.pdf" title="Link to this definition"></a></dt>
+<dd><p>Probability density (or mass) evaluated at <cite>target</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>target</strong> (<em>np.ndarray</em>) – Points for evaluation.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Density/probability values.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cleands.base.parametric_distribution_model.cdf">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">cdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/base.html#parametric_distribution_model.cdf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.base.parametric_distribution_model.cdf" title="Link to this definition"></a></dt>
+<dd><p>Cumulative distribution evaluated at <cite>target</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>target</strong> (<em>np.ndarray</em>) – Points for evaluation.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Cumulative probabilities.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="cleands.base.parametric_distribution_model.log_likelihood">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">log_likelihood</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#cleands.base.parametric_distribution_model.log_likelihood" title="Link to this definition"></a></dt>
+<dd><p>In-sample log-likelihood for <cite>self.x</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cleands.base.parametric_distribution_model.out_of_sample_log_likelihood">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">out_of_sample_log_likelihood</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/base.html#parametric_distribution_model.out_of_sample_log_likelihood"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.base.parametric_distribution_model.out_of_sample_log_likelihood" title="Link to this definition"></a></dt>
+<dd><p>Log-likelihood evaluated on arbitrary data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>target</strong> (<em>np.ndarray</em>) – Data on which to evaluate LL.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Log-likelihood value.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="cleands.base.parametric_distribution_model.null_likelihood">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">null_likelihood</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#cleands.base.parametric_distribution_model.null_likelihood" title="Link to this definition"></a></dt>
+<dd><p>In-sample null log-likelihood for <cite>self.x</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cleands.base.parametric_distribution_model.out_of_sample_null_likelihood">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">out_of_sample_null_likelihood</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/base.html#parametric_distribution_model.out_of_sample_null_likelihood"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.base.parametric_distribution_model.out_of_sample_null_likelihood" title="Link to this definition"></a></dt>
+<dd><p>Null-model log-likelihood on arbitrary data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>target</strong> (<em>np.ndarray</em>) – Data on which to evaluate null LL.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Null log-likelihood value.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="cleands.base.parametric_distribution_model.deviance">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">deviance</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><a class="headerlink" href="#cleands.base.parametric_distribution_model.deviance" title="Link to this definition"></a></dt>
+<dd><p>Deviance for <cite>self.x</cite> = 2*(LL - LL_null).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cleands.base.parametric_distribution_model.out_of_sample_deviance">
+<span class="sig-name descname"><span class="pre">out_of_sample_deviance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/base.html#parametric_distribution_model.out_of_sample_deviance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.base.parametric_distribution_model.out_of_sample_deviance" title="Link to this definition"></a></dt>
+<dd><p>Deviance on arbitrary data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>target</strong> (<em>np.ndarray</em>) – Data on which to compute deviance.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Deviance value(s).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cleands.base.prediction_likelihood_model">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cleands.base.</span></span><span class="sig-name descname"><span class="pre">prediction_likelihood_model</span></span><a class="reference internal" href="../_modules/cleands/base.html#prediction_likelihood_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.base.prediction_likelihood_model" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+<p>Base for prediction models that define likelihood via <cite>evaluate_lnL</cite>.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cleands.base.prediction_likelihood_model.y">
+<span class="sig-name descname"><span class="pre">y</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><a class="headerlink" href="#cleands.base.prediction_likelihood_model.y" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cleands.base.prediction_likelihood_model.n_obs">
+<span class="sig-name descname"><span class="pre">n_obs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#cleands.base.prediction_likelihood_model.n_obs" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cleands.base.prediction_likelihood_model.n_feat">
+<span class="sig-name descname"><span class="pre">n_feat</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#cleands.base.prediction_likelihood_model.n_feat" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cleands.base.prediction_likelihood_model.evaluate_lnL">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">evaluate_lnL</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pred</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/base.html#prediction_likelihood_model.evaluate_lnL"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.base.prediction_likelihood_model.evaluate_lnL" title="Link to this definition"></a></dt>
+<dd><p>Evaluate log-likelihood given predictions <cite>pred</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>pred</strong> (<em>np.ndarray</em>) – Predicted values or probabilities aligned with <cite>y</cite>.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Log-likelihood value.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="cleands.base.prediction_likelihood_model.fitted">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fitted</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><a class="headerlink" href="#cleands.base.prediction_likelihood_model.fitted" title="Link to this definition"></a></dt>
+<dd><p>Model-fitted predictions on training data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Predictions aligned with <cite>y</cite>.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="cleands.base.prediction_likelihood_model.log_likelihood">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">log_likelihood</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#cleands.base.prediction_likelihood_model.log_likelihood" title="Link to this definition"></a></dt>
+<dd><p>Log-likelihood at fitted values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="cleands.base.prediction_likelihood_model.null_likelihood">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">null_likelihood</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#cleands.base.prediction_likelihood_model.null_likelihood" title="Link to this definition"></a></dt>
+<dd><p>Log-likelihood of a mean-only/constant (null) predictor.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="cleands.base.prediction_likelihood_model.aic">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">aic</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#cleands.base.prediction_likelihood_model.aic" title="Link to this definition"></a></dt>
+<dd><p>Akaike Information Criterion.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="cleands.base.prediction_likelihood_model.bic">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">bic</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#cleands.base.prediction_likelihood_model.bic" title="Link to this definition"></a></dt>
+<dd><p>Bayesian Information Criterion.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="cleands.base.prediction_likelihood_model.deviance">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">deviance</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#cleands.base.prediction_likelihood_model.deviance" title="Link to this definition"></a></dt>
+<dd><p>Deviance = 2*LL(model) - 2*LL(null).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cleands.base.broom_model">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cleands.base.</span></span><span class="sig-name descname"><span class="pre">broom_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/base.html#broom_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.base.broom_model" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></p>
+<p>Protocol for tidy/glance accessors (broom-like API).</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="cleands.base.broom_model.tidy">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">tidy</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">DataFrame</span></em><a class="headerlink" href="#cleands.base.broom_model.tidy" title="Link to this definition"></a></dt>
+<dd><p>Per-parameter summary (estimates, SEs, tests, etc.).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="cleands.base.broom_model.glance">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">glance</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">DataFrame</span></em><a class="headerlink" href="#cleands.base.broom_model.glance" title="Link to this definition"></a></dt>
+<dd><p>Model-level summary (fit statistics, diagnostics, etc.).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cleands.base.variance_model">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cleands.base.</span></span><span class="sig-name descname"><span class="pre">variance_model</span></span><a class="reference internal" href="../_modules/cleands/base.html#variance_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.base.variance_model" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+<p>Mixin for models that expose variance-covariance and inferential stats.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="cleands.base.variance_model.vcov_params">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">vcov_params</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/base.html#variance_model.vcov_params"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.base.variance_model.vcov_params" title="Link to this definition"></a></dt>
+<dd><p>Variance-covariance matrix of parameter estimates.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(p x p) covariance matrix for the first <cite>n_feat</cite> parameters.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="cleands.base.variance_model.std_error">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">std_error</span></span><a class="headerlink" href="#cleands.base.variance_model.std_error" title="Link to this definition"></a></dt>
+<dd><p>Standard errors for parameters (from <cite>vcov_params</cite>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="cleands.base.variance_model.t_statistic">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">t_statistic</span></span><a class="headerlink" href="#cleands.base.variance_model.t_statistic" title="Link to this definition"></a></dt>
+<dd><p>t-statistics = params / std_error.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="cleands.base.variance_model.p_value">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">p_value</span></span><a class="headerlink" href="#cleands.base.variance_model.p_value" title="Link to this definition"></a></dt>
+<dd><p>Two-sided p-values under Student-t with df = n_obs - n_feat.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cleands.base.variance_model.conf_int">
+<span class="sig-name descname"><span class="pre">conf_int</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.95</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/base.html#variance_model.conf_int"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.base.variance_model.conf_int" title="Link to this definition"></a></dt>
+<dd><p>Confidence intervals for parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>level</strong> (<em>float</em>) – Coverage probability (default 0.95).</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>2 x p array with lower/upper bounds by column.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="cleands.base.variance_model.tidy">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">tidy</span></span><a class="headerlink" href="#cleands.base.variance_model.tidy" title="Link to this definition"></a></dt>
+<dd><p>Tidy per-parameter table (no CIs).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cleands.base.variance_model.tidyci">
+<span class="sig-name descname"><span class="pre">tidyci</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.95</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ci</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/base.html#variance_model.tidyci"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.base.variance_model.tidyci" title="Link to this definition"></a></dt>
+<dd><p>Tidy per-parameter table with optional confidence intervals.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>level</strong> (<em>float</em>) – CI level (default 0.95).</p></li>
+<li><p><strong>ci</strong> (<em>bool</em>) – If True, include CI columns.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>Columns include variable, estimate, std.error, t.statistic, p.value,</dt><dd><p>and optionally ci.lower, ci.upper.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="cleands.base.variance_model.glance">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">glance</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">DataFrame</span></em><a class="headerlink" href="#cleands.base.variance_model.glance" title="Link to this definition"></a></dt>
+<dd><p>Model-level summary table.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cleands.base.SupervisedModel">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cleands.base.</span></span><span class="sig-name descname"><span class="pre">SupervisedModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">formula</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/base.html#SupervisedModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.base.SupervisedModel" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+<p>Abstract base class for supervised models constructed from a formula.</p>
+<p>Subclasses must set the class attribute <code class="xref py py-attr docutils literal notranslate"><span class="pre">MODEL_TYPE</span></code> to a concrete
+supervised model implementation. This wrapper handles parsing a formula,
+extracting predictor and response variables, and fitting the underlying
+algorithm.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>formula</strong> (<em>str</em>) – Formula string used to specify the model.</p></li>
+<li><p><strong>x_vars</strong> (<em>list</em><em>[</em><em>str</em><em>]</em>) – Names of predictor variables.</p></li>
+<li><p><strong>y_var</strong> (<em>str</em>) – Name of response variable.</p></li>
+<li><p><strong>data</strong> (<em>pd.DataFrame</em>) – Parsed DataFrame containing predictors and response.</p></li>
+<li><p><strong>model</strong> (<a class="reference internal" href="#cleands.base.supervised_model" title="cleands.base.supervised_model"><em>supervised_model</em></a>) – Fitted underlying model implementation.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>formula</strong> (<em>str</em>)</p></li>
+<li><p><strong>data</strong> (<em>DataFrame</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="cleands.base.SupervisedModel.tidyci">
+<span class="sig-name descname"><span class="pre">tidyci</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.95</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ci</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/base.html#SupervisedModel.tidyci"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.base.SupervisedModel.tidyci" title="Link to this definition"></a></dt>
+<dd><p>Return a tidy coefficient table with optional confidence intervals.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>level</strong> (<em>float</em><em>, </em><em>default=0.95</em>) – Confidence level for intervals.</p></li>
+<li><p><strong>ci</strong> (<em>bool</em><em>, </em><em>default=True</em>) – Whether to include confidence intervals.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Tidy table of parameter estimates. If the model
+outputs a <code class="docutils literal notranslate"><span class="pre">variable</span></code> column of matching length, it is replaced
+with the predictor names from <code class="xref py py-attr docutils literal notranslate"><span class="pre">x_vars</span></code>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="cleands.base.SupervisedModel.tidy">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">tidy</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">DataFrame</span></em><a class="headerlink" href="#cleands.base.SupervisedModel.tidy" title="Link to this definition"></a></dt>
+<dd><p>Return a tidy table of parameter estimates without confidence intervals.</p>
+<p>Equivalent to calling <a class="reference internal" href="#cleands.base.SupervisedModel.tidyci" title="cleands.base.SupervisedModel.tidyci"><code class="xref py py-meth docutils literal notranslate"><span class="pre">tidyci()</span></code></a> with <code class="docutils literal notranslate"><span class="pre">ci=False</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Table of parameter estimates.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="cleands.base.SupervisedModel.glance">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">glance</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">DataFrame</span></em><a class="headerlink" href="#cleands.base.SupervisedModel.glance" title="Link to this definition"></a></dt>
+<dd><p>Return model-level summary statistics.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>One-row DataFrame of model fit diagnostics
+(e.g., log-likelihood, R², AIC).</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cleands.base.PredictionModel">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cleands.base.</span></span><span class="sig-name descname"><span class="pre">PredictionModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">formula</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/base.html#PredictionModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.base.PredictionModel" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#cleands.base.SupervisedModel" title="cleands.base.SupervisedModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">SupervisedModel</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+<p>Concrete interface for supervised prediction models.</p>
+<p>Extends <a class="reference internal" href="#cleands.base.SupervisedModel" title="cleands.base.SupervisedModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">SupervisedModel</span></code></a> by adding a <a class="reference internal" href="#cleands.base.PredictionModel.predict" title="cleands.base.PredictionModel.predict"><code class="xref py py-meth docutils literal notranslate"><span class="pre">predict()</span></code></a> method
+for generating predictions on new data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>formula</strong> (<em>str</em>)</p></li>
+<li><p><strong>data</strong> (<em>DataFrame</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="cleands.base.PredictionModel.predict">
+<span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/base.html#PredictionModel.predict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.base.PredictionModel.predict" title="Link to this definition"></a></dt>
+<dd><p>Generate predictions on new data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>new_data</strong> (<em>pd.DataFrame</em>) – DataFrame containing the predictor
+variables referenced in the original formula.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Predictions indexed to <code class="docutils literal notranslate"><span class="pre">new_data.index</span></code> and
+named after the response variable (<code class="xref py py-attr docutils literal notranslate"><span class="pre">y_var</span></code>).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.Series</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cleands.base.ClassificationModel">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cleands.base.</span></span><span class="sig-name descname"><span class="pre">ClassificationModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">formula</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/base.html#ClassificationModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.base.ClassificationModel" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#cleands.base.SupervisedModel" title="cleands.base.SupervisedModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">SupervisedModel</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+<p>Concrete interface for supervised prediction models.</p>
+<p>Extends <a class="reference internal" href="#cleands.base.SupervisedModel" title="cleands.base.SupervisedModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">SupervisedModel</span></code></a> by adding a <a class="reference internal" href="#cleands.base.ClassificationModel.classify" title="cleands.base.ClassificationModel.classify"><code class="xref py py-meth docutils literal notranslate"><span class="pre">classify()</span></code></a> method
+for generating classifications on new data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>formula</strong> (<em>str</em>)</p></li>
+<li><p><strong>data</strong> (<em>DataFrame</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="cleands.base.ClassificationModel.classify">
+<span class="sig-name descname"><span class="pre">classify</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/base.html#ClassificationModel.classify"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.base.ClassificationModel.classify" title="Link to this definition"></a></dt>
+<dd><p>Generate classifications on new data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>new_data</strong> (<em>pd.DataFrame</em>) – DataFrame containing the predictor
+variables referenced in the original formula.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Classifications indexed to <code class="docutils literal notranslate"><span class="pre">new_data.index</span></code> and
+named after the response variable (<code class="xref py py-attr docutils literal notranslate"><span class="pre">y_var</span></code>).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.Series</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cleands.base.ClassificationModel.predict_proba">
+<span class="sig-name descname"><span class="pre">predict_proba</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/base.html#ClassificationModel.predict_proba"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.base.ClassificationModel.predict_proba" title="Link to this definition"></a></dt>
+<dd><p>Predict probabilities for classes on new data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>new_data</strong> (<em>pd.DataFrame</em>) – DataFrame containing the predicted
+points to be assigned to classes.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Predicted probabilities with shape (n_samples, n_classes).
+Columns are named <code class="docutils literal notranslate"><span class="pre">class=0,</span> <span class="pre">class=1,</span> <span class="pre">...,</span> <span class="pre">class=r</span></code> corresponding to the
+r classes returned by the underlying model.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cleands.base.UnsupervisedModel">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cleands.base.</span></span><span class="sig-name descname"><span class="pre">UnsupervisedModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">formula</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/base.html#UnsupervisedModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.base.UnsupervisedModel" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+<p>Abstract base class for unsupervised models constructed from a formula.</p>
+<p>Subclasses must set the class attribute <code class="xref py py-attr docutils literal notranslate"><span class="pre">MODEL_TYPE</span></code> to a concrete
+supervised model implementation. This wrapper handles parsing a formula,
+extracting predictor and response variables, and fitting the underlying
+algorithm.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>formula</strong> (<em>str</em>) – Formula string used to specify the model.</p></li>
+<li><p><strong>x_vars</strong> (<em>list</em><em>[</em><em>str</em><em>]</em>) – Names of predictor variables.</p></li>
+<li><p><strong>y_var</strong> (<em>str</em>) – Name of response variable.</p></li>
+<li><p><strong>data</strong> (<em>pd.DataFrame</em>) – Parsed DataFrame containing predictors and response.</p></li>
+<li><p><strong>model</strong> (<a class="reference internal" href="#cleands.base.supervised_model" title="cleands.base.supervised_model"><em>supervised_model</em></a>) – Fitted underlying model implementation.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>formula</strong> (<em>str</em>)</p></li>
+<li><p><strong>data</strong> (<em>DataFrame</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="cleands.base.UnsupervisedModel.tidyci">
+<span class="sig-name descname"><span class="pre">tidyci</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.95</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ci</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/base.html#UnsupervisedModel.tidyci"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.base.UnsupervisedModel.tidyci" title="Link to this definition"></a></dt>
+<dd><p>Return a tidy coefficient table with optional confidence intervals.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>level</strong> (<em>float</em><em>, </em><em>default=0.95</em>) – Confidence level for intervals.</p></li>
+<li><p><strong>ci</strong> (<em>bool</em><em>, </em><em>default=True</em>) – Whether to include confidence intervals.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Tidy table of parameter estimates. If the model
+outputs a <code class="docutils literal notranslate"><span class="pre">variable</span></code> column of matching length, it is replaced
+with the predictor names from <code class="xref py py-attr docutils literal notranslate"><span class="pre">x_vars</span></code>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="cleands.base.UnsupervisedModel.tidy">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">tidy</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">DataFrame</span></em><a class="headerlink" href="#cleands.base.UnsupervisedModel.tidy" title="Link to this definition"></a></dt>
+<dd><p>Return a tidy table of parameter estimates without confidence intervals.</p>
+<p>Equivalent to calling <a class="reference internal" href="#cleands.base.UnsupervisedModel.tidyci" title="cleands.base.UnsupervisedModel.tidyci"><code class="xref py py-meth docutils literal notranslate"><span class="pre">tidyci()</span></code></a> with <code class="docutils literal notranslate"><span class="pre">ci=False</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Table of parameter estimates.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="cleands.base.UnsupervisedModel.glance">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">glance</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">DataFrame</span></em><a class="headerlink" href="#cleands.base.UnsupervisedModel.glance" title="Link to this definition"></a></dt>
+<dd><p>Return model-level summary statistics.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>One-row DataFrame of model fit diagnostics
+(e.g., log-likelihood, R², AIC).</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cleands.base.ClusteringModel">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cleands.base.</span></span><span class="sig-name descname"><span class="pre">ClusteringModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">formula</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/base.html#ClusteringModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.base.ClusteringModel" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#cleands.base.SupervisedModel" title="cleands.base.SupervisedModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">SupervisedModel</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+<p>Concrete interface for supervised clustering models.</p>
+<p>Extends <a class="reference internal" href="#cleands.base.SupervisedModel" title="cleands.base.SupervisedModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">SupervisedModel</span></code></a> by adding a <a class="reference internal" href="#cleands.base.ClusteringModel.cluster" title="cleands.base.ClusteringModel.cluster"><code class="xref py py-meth docutils literal notranslate"><span class="pre">cluster()</span></code></a> method
+for generating predictions on new data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>formula</strong> (<em>str</em>)</p></li>
+<li><p><strong>data</strong> (<em>DataFrame</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="cleands.base.ClusteringModel.cluster">
+<span class="sig-name descname"><span class="pre">cluster</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/base.html#ClusteringModel.cluster"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.base.ClusteringModel.cluster" title="Link to this definition"></a></dt>
+<dd><p>Generate predictions on new data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>new_data</strong> (<em>pd.DataFrame</em>) – DataFrame containing the predictor
+variables referenced in the original formula.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Predictions indexed to <code class="docutils literal notranslate"><span class="pre">new_data.index</span></code> and
+named after the response variable (<code class="xref py py-attr docutils literal notranslate"><span class="pre">y_var</span></code>).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.Series</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cleands.base.DimensionReductionModel">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cleands.base.</span></span><span class="sig-name descname"><span class="pre">DimensionReductionModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">formula</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/base.html#DimensionReductionModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.base.DimensionReductionModel" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#cleands.base.SupervisedModel" title="cleands.base.SupervisedModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">SupervisedModel</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+<p>Concrete interface for supervised dimension-reduction models.</p>
+<p>Extends <a class="reference internal" href="#cleands.base.SupervisedModel" title="cleands.base.SupervisedModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">SupervisedModel</span></code></a> by adding a <a class="reference internal" href="#cleands.base.DimensionReductionModel.reduce" title="cleands.base.DimensionReductionModel.reduce"><code class="xref py py-meth docutils literal notranslate"><span class="pre">reduce()</span></code></a> method
+for projecting new data into a lower-dimensional space.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>formula</strong> (<em>str</em>)</p></li>
+<li><p><strong>data</strong> (<em>DataFrame</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="cleands.base.DimensionReductionModel.reduce">
+<span class="sig-name descname"><span class="pre">reduce</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/base.html#DimensionReductionModel.reduce"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.base.DimensionReductionModel.reduce" title="Link to this definition"></a></dt>
+<dd><p>Project new data into the reduced space.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>new_data</strong> (<em>pd.DataFrame</em>) – DataFrame containing the predictor
+variables referenced in the original formula.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Reduced representation with shape (n_samples, r).
+Columns are named <code class="docutils literal notranslate"><span class="pre">z1,</span> <span class="pre">z2,</span> <span class="pre">...,</span> <span class="pre">zr</span></code> corresponding to the
+r components returned by the underlying model.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="cleands.Prediction.tree.html" class="btn btn-neutral float-left" title="cleands.Prediction.tree module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="cleands.formula.html" class="btn btn-neutral float-right" title="cleands.formula module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Jason Parker.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

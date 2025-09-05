@@ -1,0 +1,510 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>cleands.Classification.nb &mdash; cleands  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=92fd9be5" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            cleands
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../source/cleands.html">cleands package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../source/modules.html">cleands</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">cleands</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">cleands.Classification.nb</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for cleands.Classification.nb</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Naive Bayes classifiers (Gaussian and Multinomial).</span>
+
+<span class="sd">This module provides a small hierarchy for Naive Bayes:</span>
+
+<span class="sd">- `naive_bayes`: abstract base implementing common plumbing:</span>
+<span class="sd">  priors (optionally weighted), log-prior caching, input checks,</span>
+<span class="sd">  and `predict_proba` via log-sum-exp stabilization.</span>
+<span class="sd">- `gaussian_naive_bayes`: continuous features modeled as independent</span>
+<span class="sd">  univariate Gaussians per class with optional ridge variance `reg`.</span>
+<span class="sd">- `multinomial_naive_bayes`: count/nonnegative features with Laplace</span>
+<span class="sd">  smoothing (`alpha`) for per-class feature probabilities.</span>
+
+<span class="sd">Factory Aliases:</span>
+<span class="sd">    GaussianNaiveBayes:</span>
+<span class="sd">        Wrapper for constructing `gaussian_naive_bayes` via `ClassificationModel`.</span>
+<span class="sd">    MultinomialNaiveBayes:</span>
+<span class="sd">        Wrapper for constructing `multinomial_naive_bayes` via `ClassificationModel`.</span>
+
+<span class="sd">Typical usage example:</span>
+<span class="sd">    &gt;&gt;&gt; from cleands.Classification.nb import GaussianNaiveBayes</span>
+<span class="sd">    &gt;&gt;&gt; model = GaussianNaiveBayes(X, y)</span>
+<span class="sd">    &gt;&gt;&gt; model.tidy; model.glance</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">..base</span> <span class="kn">import</span> <span class="n">classification_model</span><span class="p">,</span> <span class="n">ClassificationModel</span>
+<span class="kn">from</span> <span class="nn">..utils</span> <span class="kn">import</span> <span class="n">itemprob</span><span class="p">,</span> <span class="n">hstack</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
+
+
+<div class="viewcode-block" id="naive_bayes">
+<a class="viewcode-back" href="../../../source/cleands.Classification.nb.html#cleands.Classification.nb.naive_bayes">[docs]</a>
+<span class="k">class</span> <span class="nc">naive_bayes</span><span class="p">(</span><span class="n">classification_model</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Abstract Naive Bayes classifier.</span>
+
+<span class="sd">    Handles class priors (with optional sample weights), caches log-priors,</span>
+<span class="sd">    validates inputs, and provides stable `predict_proba`. Subclasses must</span>
+<span class="sd">    implement `log_likelihood(target)` returning class-wise log-likelihoods.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        priors (np.ndarray): Class priors of shape (K,), normalized to sum to 1.</span>
+<span class="sd">        _log_priors (np.ndarray): Log(priors + ε) cached for numerical stability.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">X</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">y</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">priors</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">sample_weight</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the Naive Bayes base model.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            X (np.ndarray): Feature matrix of shape (n_obs, n_feat).</span>
+<span class="sd">            y (np.ndarray): Integer class labels of shape (n_obs,).</span>
+<span class="sd">            priors (np.ndarray, optional): Class prior probabilities of shape (K,).</span>
+<span class="sd">                If None, estimated from `y` (optionally with `sample_weight`).</span>
+<span class="sd">            sample_weight (np.ndarray, optional): Nonnegative weights for samples,</span>
+<span class="sd">                shape (n_obs,). Used when estimating priors if provided.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: If `sample_weight` shape is invalid or has nonpositive sum;</span>
+<span class="sd">                if provided `priors` has invalid shape or nonpositive sum.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">naive_bayes</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+
+        <span class="c1"># --- fit priors (optionally weighted) ---</span>
+        <span class="k">if</span> <span class="n">priors</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">sample_weight</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">priors</span> <span class="o">=</span> <span class="n">itemprob</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>  <span class="c1"># (K,)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">w</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">sample_weight</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">w</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_obs</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;sample_weight must have shape (n_obs,).&quot;</span><span class="p">)</span>
+                <span class="n">pri</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">w</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">==</span> <span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_classes</span><span class="p">)],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+                <span class="n">s</span> <span class="o">=</span> <span class="n">pri</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">s</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;sum of sample weights must be &gt; 0 for prior estimation.&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">priors</span> <span class="o">=</span> <span class="n">pri</span> <span class="o">/</span> <span class="n">s</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">priors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">priors</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">priors</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_classes</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;priors must have length equal to number of classes.&quot;</span><span class="p">)</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">priors</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">s</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;priors must sum to a positive value.&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">priors</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">priors</span> <span class="o">/</span> <span class="n">s</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_log_priors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">priors</span> <span class="o">+</span> <span class="mf">1e-300</span><span class="p">)</span>  <span class="c1"># safety epsilon</span>
+
+    <span class="c1"># --- subclass contract ---</span>
+<div class="viewcode-block" id="naive_bayes.log_likelihood">
+<a class="viewcode-back" href="../../../source/cleands.Classification.nb.html#cleands.Classification.nb.naive_bayes.log_likelihood">[docs]</a>
+    <span class="k">def</span> <span class="nf">log_likelihood</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute per-class log-likelihoods log p(x | y=k) for each row.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            target (np.ndarray): Feature matrix of shape (n, p) or (p,).</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            np.ndarray: Log-likelihoods of shape (n, K).</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            NotImplementedError: Must be implemented by subclasses.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Subclasses must implement log_likelihood(target).&quot;</span><span class="p">)</span></div>
+
+
+    <span class="c1"># --- common helpers ---</span>
+    <span class="k">def</span> <span class="nf">_check_target</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Validate and coerce prediction input to 2D float array.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            target (np.ndarray): Input data of shape (n, p) or (p,).</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            np.ndarray: Array of shape (n, p), dtype float.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: If number of features does not match fitted model.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">target</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">target</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">target</span> <span class="o">=</span> <span class="n">target</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">target</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_feat</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;target must have shape (?, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n_feat</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">target</span>
+
+<div class="viewcode-block" id="naive_bayes.predict_proba">
+<a class="viewcode-back" href="../../../source/cleands.Classification.nb.html#cleands.Classification.nb.naive_bayes.predict_proba">[docs]</a>
+    <span class="k">def</span> <span class="nf">predict_proba</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Predict class posterior probabilities.</span>
+
+<span class="sd">        Implements stabilized softmax over log posterior:</span>
+<span class="sd">            log p(y=k | x) ∝ log p(x | y=k) + log π_k</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            target (np.ndarray): Feature matrix of shape (n, p) or (p,).</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            np.ndarray: Posterior probabilities of shape (n, K),</span>
+<span class="sd">                rows summing to 1.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">target</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_target</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
+        <span class="n">log_lik</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">log_likelihood</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>  <span class="c1"># (n, K)</span>
+        <span class="n">log_post</span> <span class="o">=</span> <span class="n">log_lik</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_log_priors</span>  <span class="c1"># add log-priors</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">log_post</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">stabilized</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">log_post</span> <span class="o">-</span> <span class="n">m</span><span class="p">)</span>
+        <span class="n">probs</span> <span class="o">=</span> <span class="n">stabilized</span> <span class="o">/</span> <span class="n">stabilized</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">probs</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="gaussian_naive_bayes">
+<a class="viewcode-back" href="../../../source/cleands.Classification.nb.html#cleands.Classification.nb.gaussian_naive_bayes">[docs]</a>
+<span class="k">class</span> <span class="nc">gaussian_naive_bayes</span><span class="p">(</span><span class="n">naive_bayes</span><span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Gaussian Naive Bayes classifier.</span>
+
+<span class="sd">    Assumes conditional independence across features with per-class Gaussian</span>
+<span class="sd">    likelihoods.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        X (np.ndarray): Feature matrix of shape ``(n_samples, n_features)``.</span>
+<span class="sd">        y (np.ndarray): Integer class labels of shape ``(n_samples,)``.</span>
+<span class="sd">        priors (np.ndarray | None, optional): Class prior probabilities. If</span>
+<span class="sd">            ``None``, uses empirical class frequencies. Defaults to ``None``.</span>
+<span class="sd">        var_smoothing (float, optional): Small additive term to variances for</span>
+<span class="sd">            numerical stability. Defaults to ``1e-9``.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        means (np.ndarray): Per-class feature means, shape ``(n_classes, n_features)``.</span>
+<span class="sd">        variances (np.ndarray): Per-class feature variances, same shape as ``means``.</span>
+<span class="sd">        priors (np.ndarray): Class prior probabilities, shape ``(n_classes,)``.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">X</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">y</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">priors</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">reg</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-9</span><span class="p">,</span>
+        <span class="n">sample_weight</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fit per-class univariate Gaussian parameters.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            X (np.ndarray): Feature matrix (n_obs, n_feat).</span>
+<span class="sd">            y (np.ndarray): Integer class labels (n_obs,).</span>
+<span class="sd">            priors (np.ndarray, optional): Class priors (K,), normalized if given.</span>
+<span class="sd">            reg (float, optional): Nonnegative ridge added to variances. Defaults to 1e-9.</span>
+<span class="sd">            sample_weight (np.ndarray, optional): Nonnegative weights (n_obs,).</span>
+
+<span class="sd">        Notes:</span>
+<span class="sd">            Variances are estimated as (weighted) MLE and clipped by adding `reg`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reg</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">reg</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">gaussian_naive_bayes</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">priors</span><span class="o">=</span><span class="n">priors</span><span class="p">,</span> <span class="n">sample_weight</span><span class="o">=</span><span class="n">sample_weight</span><span class="p">)</span>
+
+        <span class="c1"># --- fit per-class means/vars ---</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">means</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">n_classes</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_feat</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vars</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">n_classes</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_feat</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">sample_weight</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_classes</span><span class="p">):</span>
+                <span class="n">Xk</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">==</span> <span class="n">k</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">Xk</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">means</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">Xk</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">vars</span><span class="p">[</span><span class="n">k</span><span class="p">,</span>  <span class="p">:]</span> <span class="o">=</span> <span class="n">Xk</span><span class="o">.</span><span class="n">var</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">reg</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">w</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">sample_weight</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_classes</span><span class="p">):</span>
+                <span class="n">mask</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">==</span> <span class="n">k</span><span class="p">)</span>
+                <span class="n">Xk</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
+                <span class="n">wk</span> <span class="o">=</span> <span class="n">w</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">Xk</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">wk</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="n">mk</span> <span class="o">=</span> <span class="p">(</span><span class="n">wk</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">Xk</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">/</span> <span class="n">wk</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+                <span class="n">diff</span> <span class="o">=</span> <span class="n">Xk</span> <span class="o">-</span> <span class="n">mk</span>
+                <span class="n">vk</span> <span class="o">=</span> <span class="p">(</span><span class="n">wk</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">diff</span> <span class="o">**</span> <span class="mi">2</span><span class="p">))</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">/</span> <span class="n">wk</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">means</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">mk</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">vars</span><span class="p">[</span><span class="n">k</span><span class="p">,</span>  <span class="p">:]</span> <span class="o">=</span> <span class="n">vk</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">reg</span>
+
+        <span class="c1"># Precompute constants for log-density</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_log_const</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mf">2.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vars</span><span class="p">))</span>  <span class="c1"># (K, p)</span>
+
+<div class="viewcode-block" id="gaussian_naive_bayes.log_likelihood">
+<a class="viewcode-back" href="../../../source/cleands.Classification.nb.html#cleands.Classification.nb.gaussian_naive_bayes.log_likelihood">[docs]</a>
+    <span class="k">def</span> <span class="nf">log_likelihood</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute log p(x | y=k) under the Gaussian NB model.</span>
+
+<span class="sd">        Uses vectorized per-class, per-feature Gaussian log-densities with</span>
+<span class="sd">        precomputed constants for efficiency.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            target (np.ndarray): Feature matrix (n, p) or (p,).</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            np.ndarray: Log-likelihoods of shape (n, K).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">target</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_target</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="n">target</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">K</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_classes</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">n</span><span class="p">,</span> <span class="n">K</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">K</span><span class="p">):</span>
+            <span class="n">diff</span> <span class="o">=</span> <span class="n">target</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">means</span><span class="p">[</span><span class="n">c</span><span class="p">,</span> <span class="p">:]</span>
+            <span class="n">term</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_log_const</span><span class="p">[</span><span class="n">c</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">diff</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">vars</span><span class="p">[</span><span class="n">c</span><span class="p">,</span> <span class="p">:]</span>
+            <span class="n">out</span><span class="p">[:,</span> <span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="n">term</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">out</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="multinomial_naive_bayes">
+<a class="viewcode-back" href="../../../source/cleands.Classification.nb.html#cleands.Classification.nb.multinomial_naive_bayes">[docs]</a>
+<span class="k">class</span> <span class="nc">multinomial_naive_bayes</span><span class="p">(</span><span class="n">naive_bayes</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Multinomial Naive Bayes classifier.</span>
+
+<span class="sd">    Suitable for count-like, sparse, or term-frequency features (nonnegative).</span>
+<span class="sd">    Uses per-class multinomial parameters with Laplace smoothing.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        alpha (float): Laplace smoothing parameter (≥ 0).</span>
+<span class="sd">        feature_counts (np.ndarray): Per-class feature totals, shape (K, p).</span>
+<span class="sd">        feature_probs (np.ndarray): Per-class feature probabilities, shape (K, p).</span>
+<span class="sd">        _log_feature_probs (np.ndarray): Cached log probabilities, shape (K, p).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">X</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">y</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">priors</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">alpha</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">sample_weight</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fit per-class multinomial parameters with Laplace smoothing.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            X (np.ndarray): Nonnegative feature matrix (n_obs, n_feat).</span>
+<span class="sd">            y (np.ndarray): Integer class labels (n_obs,).</span>
+<span class="sd">            priors (np.ndarray, optional): Class priors (K,), normalized if given.</span>
+<span class="sd">            alpha (float, optional): Laplace smoothing parameter (≥0). Defaults to 1.0.</span>
+<span class="sd">            sample_weight (np.ndarray, optional): Nonnegative weights (n_obs,).</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: If `X` contains negative entries or `alpha` &lt; 0;</span>
+<span class="sd">                if `sample_weight` shape is invalid.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">X</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Multinomial NB requires nonnegative features.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">alpha</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;alpha must be nonnegative.&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">alpha</span><span class="p">)</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">multinomial_naive_bayes</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">priors</span><span class="o">=</span><span class="n">priors</span><span class="p">,</span> <span class="n">sample_weight</span><span class="o">=</span><span class="n">sample_weight</span><span class="p">)</span>
+
+        <span class="c1"># --- accumulate (possibly weighted) feature counts per class ---</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">feature_counts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">n_classes</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_feat</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">sample_weight</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_classes</span><span class="p">):</span>
+                <span class="n">Xk</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">==</span> <span class="n">k</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">Xk</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">feature_counts</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">Xk</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">w</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">sample_weight</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">w</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_obs</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;sample_weight must have shape (n_obs,).&quot;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_classes</span><span class="p">):</span>
+                <span class="n">mask</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">==</span> <span class="n">k</span><span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">mask</span><span class="p">):</span>
+                    <span class="k">continue</span>
+                <span class="n">Xk</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
+                <span class="n">wk</span> <span class="o">=</span> <span class="n">w</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">feature_counts</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="p">(</span><span class="n">wk</span> <span class="o">*</span> <span class="n">Xk</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="c1"># --- Laplace smoothing and normalization per class ---</span>
+        <span class="n">smoothed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_counts</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span>
+        <span class="n">class_totals</span> <span class="o">=</span> <span class="n">smoothed</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  <span class="c1"># (K, 1)</span>
+        <span class="n">class_totals</span><span class="p">[</span><span class="n">class_totals</span> <span class="o">==</span> <span class="mf">0.0</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>  <span class="c1"># guard (empty class, alpha==0)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">feature_probs</span> <span class="o">=</span> <span class="n">smoothed</span> <span class="o">/</span> <span class="n">class_totals</span>  <span class="c1"># (K, p)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_log_feature_probs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">feature_probs</span><span class="p">)</span>  <span class="c1"># cache</span>
+
+<div class="viewcode-block" id="multinomial_naive_bayes.log_likelihood">
+<a class="viewcode-back" href="../../../source/cleands.Classification.nb.html#cleands.Classification.nb.multinomial_naive_bayes.log_likelihood">[docs]</a>
+    <span class="k">def</span> <span class="nf">log_likelihood</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute log p(x | y=k) under the Multinomial NB model.</span>
+
+<span class="sd">        Treats each sample row as a bag of feature counts (or TF-like weights).</span>
+<span class="sd">        Log-likelihood is proportional to x · log θ_k (constant terms cancel).</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            target (np.ndarray): Nonnegative features, shape (n, p) or (p,).</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            np.ndarray: Log-likelihoods of shape (n, K).</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: If `target` has negative entries.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">target</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_target</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">target</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Multinomial NB requires nonnegative features.&quot;</span><span class="p">)</span>
+        <span class="c1"># (n, p) @ (p,) per class -&gt; (n, K)</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="n">target</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">K</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_classes</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">n</span><span class="p">,</span> <span class="n">K</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">K</span><span class="p">):</span>
+            <span class="n">out</span><span class="p">[:,</span> <span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="n">target</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">_log_feature_probs</span><span class="p">[</span><span class="n">c</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">T</span>
+        <span class="k">return</span> <span class="n">out</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="GaussianNaiveBayes">
+<a class="viewcode-back" href="../../../source/cleands.Classification.nb.html#cleands.Classification.nb.GaussianNaiveBayes">[docs]</a>
+<span class="k">class</span> <span class="nc">GaussianNaiveBayes</span><span class="p">(</span><span class="n">ClassificationModel</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convenience wrapper for Gaussian Naive Bayes classification.</span>
+
+<span class="sd">    Assumes features are conditionally independent given the class</span>
+<span class="sd">    label and normally distributed within each class. Provides a</span>
+<span class="sd">    formula/DataFrame interface for the</span>
+<span class="sd">    :class:`gaussian_naive_bayes`.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        MODEL_TYPE: Underlying model type, fixed to</span>
+<span class="sd">            :class:`gaussian_naive_bayes`.</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">        &gt;&gt;&gt; model = GaussianNaiveBayes.from_formula(&quot;y ~ x1 + x2&quot;, data=df)</span>
+<span class="sd">        &gt;&gt;&gt; model.classify(df[[&quot;x1&quot;, &quot;x2&quot;]])</span>
+<span class="sd">        &gt;&gt;&gt; model.predict_proba(df[[&quot;x1&quot;, &quot;x2&quot;]])</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">MODEL_TYPE</span> <span class="o">=</span> <span class="n">gaussian_naive_bayes</span></div>
+
+
+
+<div class="viewcode-block" id="MultinomialNaiveBayes">
+<a class="viewcode-back" href="../../../source/cleands.Classification.nb.html#cleands.Classification.nb.MultinomialNaiveBayes">[docs]</a>
+<span class="k">class</span> <span class="nc">MultinomialNaiveBayes</span><span class="p">(</span><span class="n">ClassificationModel</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convenience wrapper for Multinomial Naive Bayes classification.</span>
+
+<span class="sd">    Assumes features are conditionally independent given the class</span>
+<span class="sd">    label and follow a multinomial distribution. Often used for</span>
+<span class="sd">    discrete count data such as text classification. Provides a</span>
+<span class="sd">    formula/DataFrame interface for the</span>
+<span class="sd">    :class:`multinomial_naive_bayes`.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        MODEL_TYPE: Underlying model type, fixed to</span>
+<span class="sd">            :class:`multinomial_naive_bayes`.</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">        &gt;&gt;&gt; model = MultinomialNaiveBayes.from_formula(&quot;y ~ x1 + x2 + x3&quot;, data=df)</span>
+<span class="sd">        &gt;&gt;&gt; model.classify(df[[&quot;x1&quot;, &quot;x2&quot;, &quot;x3&quot;]])</span>
+<span class="sd">        &gt;&gt;&gt; model.predict_proba(df[[&quot;x1&quot;, &quot;x2&quot;, &quot;x3&quot;]])</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">MODEL_TYPE</span> <span class="o">=</span> <span class="n">multinomial_naive_bayes</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Jason Parker.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

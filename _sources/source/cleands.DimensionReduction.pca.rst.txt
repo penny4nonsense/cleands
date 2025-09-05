@@ -1,0 +1,7 @@
+cleands.DimensionReduction.pca module
+=====================================
+
+.. automodule:: cleands.DimensionReduction.pca
+   :members:
+   :undoc-members:
+   :show-inheritance:

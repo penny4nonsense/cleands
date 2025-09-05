@@ -1,0 +1,339 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>cleands.Prediction.tree &mdash; cleands  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=92fd9be5" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            cleands
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../source/cleands.html">cleands package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../source/modules.html">cleands</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">cleands</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">cleands.Prediction.tree</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for cleands.Prediction.tree</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">tree.py</span>
+<span class="sd">-------</span>
+
+<span class="sd">Implements recursive partitioning regression trees for prediction tasks.</span>
+
+<span class="sd">This module provides:</span>
+
+<span class="sd">- `recursive_partitioning_regressor`: A regression tree learner that recursively splits</span>
+<span class="sd">  predictors to minimize residual sum of squares, with optional statistical stopping rules.</span>
+<span class="sd">- Factory partials (`RecursivePartitioningRegressor`, `RandomForestRegressor`) to wrap models</span>
+<span class="sd">  into the `PredictionModel` interface for pandas/formula compatibility.</span>
+
+<span class="sd">Features:</span>
+<span class="sd">    * Greedy splitting based on residual sum of squares (RSS).</span>
+<span class="sd">    * Statistical significance pruning with p-value thresholds.</span>
+<span class="sd">    * Depth control via `max_level`.</span>
+<span class="sd">    * Support for random feature subsets at each split (for random forest–style trees).</span>
+<span class="sd">    * Integration with the broader framework (`PredictionModel`) for `.tidy` and `.glance`.</span>
+
+<span class="sd">Example:</span>
+<span class="sd">    &gt;&gt;&gt; model = RecursivePartitioningRegressor(</span>
+<span class="sd">    ...     x_vars=[&quot;x1&quot;, &quot;x2&quot;], y_var=&quot;y&quot;, data=df, sign_level=0.95, max_level=3</span>
+<span class="sd">    ... )</span>
+<span class="sd">    &gt;&gt;&gt; predictions = model.predict(df)</span>
+<span class="sd">    &gt;&gt;&gt; summary = model.glance</span>
+<span class="sd">    &gt;&gt;&gt; frame = model.tidy</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">scipy</span> <span class="k">as</span> <span class="nn">sp</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">List</span>
+<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
+
+<span class="kn">from</span> <span class="nn">..base</span> <span class="kn">import</span> <span class="n">prediction_model</span><span class="p">,</span> <span class="n">PredictionModel</span>
+<span class="kn">from</span> <span class="nn">..utils</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">.glm</span> <span class="kn">import</span> <span class="n">least_squares_regressor</span>
+<span class="kn">from</span> <span class="nn">..Distribution</span> <span class="kn">import</span> <span class="n">multinomial</span>
+
+
+<div class="viewcode-block" id="recursive_partitioning_regressor">
+<a class="viewcode-back" href="../../../source/cleands.Prediction.tree.html#cleands.Prediction.tree.recursive_partitioning_regressor">[docs]</a>
+<span class="k">class</span> <span class="nc">recursive_partitioning_regressor</span><span class="p">(</span><span class="n">prediction_model</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Recursive partitioning regression tree.</span>
+
+<span class="sd">    Splits data into subgroups to minimize residual sum of squares (RSS).</span>
+<span class="sd">    Supports significance-based stopping and random feature subsets.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        x (np.ndarray): Predictor matrix of shape (n_obs, n_features).</span>
+<span class="sd">        y (np.ndarray): Target vector of shape (n_obs,).</span>
+<span class="sd">        sign_level (float, optional): Significance threshold for stopping. Default 0.95.</span>
+<span class="sd">        max_level (int | None, optional): Maximum depth of the tree. Default None.</span>
+<span class="sd">        random_x (bool, optional): If True, use random feature subsets (RF-style). Default False.</span>
+<span class="sd">        level (str, optional): Internal recursion marker (L/R path string). Default &#39;&#39;.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">sign_level</span><span class="o">=</span><span class="mf">0.95</span><span class="p">,</span> <span class="n">max_level</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">random_x</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_col_indx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">permutation</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])[</span>
+                         <span class="p">:</span><span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])))]</span> <span class="k">if</span> <span class="n">random_x</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_col_indx</span><span class="p">]</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">recursive_partitioning_regressor</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_level</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_level</span> <span class="o">=</span> <span class="n">max_level</span><span class="p">,</span> <span class="n">level</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_split_variable</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_split_value</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_p_value</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_left</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_right</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_terminal_prediction</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">max_level</span> <span class="o">!=</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">level</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">==</span> <span class="n">max_level</span><span class="p">:</span> <span class="k">return</span>
+        <span class="n">outp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">__get_RSS</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">[:,</span> <span class="n">i</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_feat</span><span class="p">)])</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">outp</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">all</span><span class="p">():</span> <span class="k">return</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_split_variable</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nanargmin</span><span class="p">(</span><span class="n">outp</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_split_value</span> <span class="o">=</span> <span class="n">outp</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_split_variable</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="k">with</span> <span class="n">warnings</span><span class="o">.</span><span class="n">catch_warnings</span><span class="p">():</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">simplefilter</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_p_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_p_value</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">max_level</span> <span class="o">==</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_p_value</span> <span class="o">&gt;</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">sign_level</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">**</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_level</span><span class="p">)</span> <span class="o">+</span> <span class="mi">2</span><span class="p">):</span> <span class="k">return</span>
+        <span class="n">left_indx</span> <span class="o">=</span> <span class="n">x</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_split_variable</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_split_value</span><span class="p">)</span> <span class="k">else</span> <span class="n">x</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_split_variable</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_split_value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_left</span> <span class="o">=</span> <span class="n">recursive_partitioning_regressor</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">left_indx</span><span class="p">,</span> <span class="p">:],</span> <span class="n">y</span><span class="p">[</span><span class="n">left_indx</span><span class="p">],</span> <span class="n">sign_level</span><span class="o">=</span><span class="n">sign_level</span><span class="p">,</span> <span class="n">max_level</span><span class="o">=</span><span class="n">max_level</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="n">level</span> <span class="o">+</span> <span class="s1">&#39;L&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_right</span> <span class="o">=</span> <span class="n">recursive_partitioning_regressor</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="o">~</span><span class="n">left_indx</span><span class="p">,</span> <span class="p">:],</span> <span class="n">y</span><span class="p">[</span><span class="o">~</span><span class="n">left_indx</span><span class="p">],</span> <span class="n">sign_level</span><span class="o">=</span><span class="n">sign_level</span><span class="p">,</span> <span class="n">max_level</span><span class="o">=</span><span class="n">max_level</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="n">level</span> <span class="o">+</span> <span class="s1">&#39;R&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__get_RSS</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">var</span><span class="p">,</span> <span class="n">binary</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Compute residual sum of squares (RSS) for a candidate split.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            var (np.ndarray): Candidate variable values.</span>
+<span class="sd">            binary (bool): Whether variable is binary. Default False.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            tuple: (RSS, split_value) where split_value is NaN for binary splits.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">var</span><span class="o">.</span><span class="n">var</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span> <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+        <span class="k">if</span> <span class="n">binary</span> <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_or</span><span class="p">(</span><span class="n">var</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="n">var</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+            <span class="n">retp</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">[</span><span class="n">var</span> <span class="o">==</span> <span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">[</span><span class="n">var</span> <span class="o">==</span> <span class="mi">1</span><span class="p">]]</span>
+            <span class="k">if</span> <span class="nb">any</span><span class="p">([</span><span class="n">item</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">retp</span><span class="p">]):</span> <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+            <span class="n">outp</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">retp</span><span class="p">]</span>
+            <span class="n">retp</span> <span class="o">=</span> <span class="p">[((</span><span class="n">retp</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">outp</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">)]</span>
+            <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="n">retp</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+        <span class="n">splits</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">var</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">var</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span> <span class="mi">10</span><span class="p">)</span>
+        <span class="n">RSS</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">__get_RSS</span><span class="p">(</span><span class="n">var</span> <span class="o">&gt;</span> <span class="n">split</span><span class="p">,</span> <span class="kc">True</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">split</span> <span class="ow">in</span> <span class="n">splits</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">RSS</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">():</span> <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+        <span class="n">indx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nanargmin</span><span class="p">(</span><span class="n">RSS</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">RSS</span><span class="p">[</span><span class="n">indx</span><span class="p">],</span> <span class="n">splits</span><span class="p">[</span><span class="n">indx</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">_get_p_value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Compute split significance p-value using linear regression.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            float: p-value for the current split variable.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">xvar</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_split_variable</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_split_value</span><span class="p">)</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_split_variable</span><span class="p">]</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_split_value</span>
+        <span class="n">xvar</span> <span class="o">=</span> <span class="n">hstack</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_obs</span><span class="p">),</span> <span class="n">xvar</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">))</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="n">least_squares_regressor</span><span class="p">(</span><span class="n">xvar</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="n">model</span><span class="o">.</span><span class="n">p_value</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        String representation of the tree.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: Human-readable recursive description of splits and nodes.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_left</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;level:</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_level</span><span class="si">}</span><span class="s1">; n.obs:</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n_obs</span><span class="si">}</span><span class="s1">; residual.ss:</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">residual_sum_of_squares</span><span class="si">}</span><span class="s1">; variable:</span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="si">}</span><span class="s1">; split:</span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="si">}</span><span class="s1">; prediction:</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_terminal_prediction</span><span class="si">}</span><span class="s1">; mean.squared.error:</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">mean_squared_error</span><span class="si">}</span><span class="s1">; p.value:</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_p_value</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;level:</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_level</span><span class="si">}</span><span class="s1">; n.obs:</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n_obs</span><span class="si">}</span><span class="s1">; residual.ss:</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">residual_sum_of_squares</span><span class="si">}</span><span class="s1">; variable:</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_col_indx</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_split_variable</span><span class="p">]</span><span class="si">}</span><span class="s1">; split:</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_split_value</span><span class="si">}</span><span class="s1">; prediction:</span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="si">}</span><span class="s1">; mean.squared.error:</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">mean_squared_error</span><span class="si">}</span><span class="s1">; p.value:</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_p_value</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_left</span><span class="p">)</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_right</span><span class="p">)</span>
+
+<div class="viewcode-block" id="recursive_partitioning_regressor.predict">
+<a class="viewcode-back" href="../../../source/cleands.Prediction.tree.html#cleands.Prediction.tree.recursive_partitioning_regressor.predict">[docs]</a>
+    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">newx</span><span class="p">,</span> <span class="n">fitted</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Predict target values for new data.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            newx (np.ndarray): New predictor data.</span>
+<span class="sd">            fitted (bool): If True, assume newx already uses training column subset. Default False.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            np.ndarray: Predicted values.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">outp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="n">newx</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">fill_value</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_terminal_prediction</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_left</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span> <span class="k">return</span> <span class="n">outp</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">fitted</span><span class="p">:</span> <span class="n">newx</span> <span class="o">=</span> <span class="n">newx</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_col_indx</span><span class="p">]</span>
+        <span class="n">left_indx</span> <span class="o">=</span> <span class="n">newx</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_split_variable</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_split_value</span><span class="p">)</span> <span class="k">else</span> <span class="n">newx</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_split_variable</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_split_value</span>
+        <span class="n">outp</span><span class="p">[</span><span class="n">left_indx</span><span class="p">],</span> <span class="n">outp</span><span class="p">[</span><span class="o">~</span><span class="n">left_indx</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_left</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">newx</span><span class="p">[</span><span class="n">left_indx</span><span class="p">,</span> <span class="p">:]),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_right</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">newx</span><span class="p">[</span><span class="o">~</span><span class="n">left_indx</span><span class="p">,</span> <span class="p">:])</span>
+        <span class="k">return</span> <span class="n">outp</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">fitted</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return fitted values (in-sample predictions).</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            np.ndarray: Predictions for training data.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">fitted</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">tidy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Structured node summary of the tree.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pd.DataFrame: Node-wise information including levels, splits, and statistics.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">outp</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">outp</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]):</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;;&#39;</span><span class="p">)</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">line</span><span class="p">]</span>
+            <span class="n">mydict</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">value</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">line</span><span class="p">}</span>
+            <span class="n">level</span> <span class="o">=</span> <span class="n">mydict</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;level&#39;</span><span class="p">)</span>
+            <span class="n">newdf</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">mydict</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="p">[</span><span class="n">level</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">df</span> <span class="o">=</span> <span class="n">newdf</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">df</span><span class="p">,</span> <span class="n">newdf</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;level&#39;</span>
+        <span class="k">for</span> <span class="n">column</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">column</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;n.obs&#39;</span><span class="p">]:</span>
+                <span class="n">df</span><span class="p">[</span><span class="n">column</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">column</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">column</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;variable&#39;</span><span class="p">]:</span>
+                <span class="n">df</span><span class="p">[</span><span class="n">column</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">column</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">df</span><span class="p">[</span><span class="n">column</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">column</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">df</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">glance</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        One-row summary of overall tree performance.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pd.DataFrame: Contains RSS, MSE, RMSE, R², and degrees of freedom.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_glance_dict</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">])</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_glance_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Internal dict backing the `.glance` summary.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;resid.sum.squares&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">residual_sum_of_squares</span><span class="p">,</span>
+                <span class="s1">&#39;mean.squared.error&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">mean_squared_error</span><span class="p">,</span>
+                <span class="s1">&#39;root.mean.squared.error&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">root_mean_squared_error</span><span class="p">,</span>
+                <span class="s1">&#39;r.squared&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">r_squared</span><span class="p">,</span>
+                <span class="s1">&#39;adjusted.r.squared&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">adjusted_r_squared</span><span class="p">,</span>
+                <span class="s1">&#39;self.df&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_feat</span><span class="p">,</span>
+                <span class="s1">&#39;resid.df&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">degrees_of_freedom</span><span class="p">,</span>
+                <span class="s1">&#39;resid.var&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">residual_variance</span><span class="p">}</span></div>
+
+
+
+<div class="viewcode-block" id="RecursivePartitioningRegressor">
+<a class="viewcode-back" href="../../../source/cleands.Prediction.tree.html#cleands.Prediction.tree.RecursivePartitioningRegressor">[docs]</a>
+<span class="k">class</span> <span class="nc">RecursivePartitioningRegressor</span><span class="p">(</span><span class="n">PredictionModel</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convenience wrapper for recursive partitioning regression.</span>
+
+<span class="sd">    This model fits a regression tree by recursively splitting the</span>
+<span class="sd">    predictor space to minimize residual sum of squares. It provides a</span>
+<span class="sd">    formula/DataFrame interface for the</span>
+<span class="sd">    :class:`recursive_partitioning_regressor`.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        MODEL_TYPE: Underlying model type, fixed to</span>
+<span class="sd">            :class:`recursive_partitioning_regressor`.</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">        &gt;&gt;&gt; model = RecursivePartitioningRegressor.from_formula(&quot;y ~ x1 + x2&quot;, data=df, max_level=3)</span>
+<span class="sd">        &gt;&gt;&gt; model.predict(df[[&quot;x1&quot;, &quot;x2&quot;]])</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">MODEL_TYPE</span> <span class="o">=</span> <span class="n">recursive_partitioning_regressor</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Jason Parker.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

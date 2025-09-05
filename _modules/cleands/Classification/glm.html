@@ -1,0 +1,378 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>cleands.Classification.glm &mdash; cleands  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=92fd9be5" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            cleands
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../source/cleands.html">cleands package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../source/modules.html">cleands</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">cleands</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">cleands.Classification.glm</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for cleands.Classification.glm</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Classification models based on generalized linear models (GLMs).</span>
+
+<span class="sd">This module implements classifiers built on top of GLM regression models:</span>
+<span class="sd">logistic regression for binary classification and multinomial logistic</span>
+<span class="sd">regression for multi-class classification. Both models integrate with the</span>
+<span class="sd">broader `cleands` framework and expose `tidy` and `glance` methods for</span>
+<span class="sd">summarized model output.</span>
+
+<span class="sd">Classes:</span>
+<span class="sd">    logistic_classifier:</span>
+<span class="sd">        Binary classification model using logistic regression.</span>
+<span class="sd">    multinomial_classifier:</span>
+<span class="sd">        Multi-class classification model using a one-vs-rest approach</span>
+<span class="sd">        with multiple logistic regressions.</span>
+
+<span class="sd">Factory Aliases:</span>
+<span class="sd">    LogisticClassifier:</span>
+<span class="sd">        Wrapper for constructing a logistic_classifier via ClassificationModel.</span>
+<span class="sd">    MultinomialClassifier:</span>
+<span class="sd">        Wrapper for constructing a multinomial_classifier via ClassificationModel.</span>
+
+<span class="sd">Typical usage example:</span>
+
+<span class="sd">    &gt;&gt;&gt; from cleands.Classification.glm import LogisticClassifier</span>
+<span class="sd">    &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">    &gt;&gt;&gt; x = np.random.randn(100, 3)</span>
+<span class="sd">    &gt;&gt;&gt; y = (x[:, 0] + x[:, 1] &gt; 0).astype(int)</span>
+<span class="sd">    &gt;&gt;&gt; model = LogisticClassifier(x, y)</span>
+<span class="sd">    &gt;&gt;&gt; model.tidy</span>
+<span class="sd">    &gt;&gt;&gt; model.glance</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">..Prediction</span> <span class="kn">import</span> <span class="n">logistic_regressor</span>
+<span class="kn">from</span> <span class="nn">..base</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">..utils</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+
+<div class="viewcode-block" id="logistic_classifier">
+<a class="viewcode-back" href="../../../source/cleands.Classification.glm.html#cleands.Classification.glm.logistic_classifier">[docs]</a>
+<span class="k">class</span> <span class="nc">logistic_classifier</span><span class="p">(</span><span class="n">classification_model</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Logistic regression classifier.</span>
+
+<span class="sd">    Wraps a logistic regression model for binary classification tasks.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        model (logistic_regressor): Underlying logistic regression estimator.</span>
+<span class="sd">        params (np.ndarray): Estimated model parameters.</span>
+<span class="sd">        probability (float): Threshold probability for classification.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">probability</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize a logistic classifier.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            x (np.ndarray or pd.DataFrame): Feature matrix of shape (n_samples, n_features).</span>
+<span class="sd">            y (np.ndarray): Binary response vector of shape (n_samples,).</span>
+<span class="sd">            probability (float, optional): Classification threshold. Defaults to 0.5.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">logistic_regressor</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">params</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">probability</span> <span class="o">=</span> <span class="n">probability</span>
+
+<div class="viewcode-block" id="logistic_classifier.predict_proba">
+<a class="viewcode-back" href="../../../source/cleands.Classification.glm.html#cleands.Classification.glm.logistic_classifier.predict_proba">[docs]</a>
+    <span class="k">def</span> <span class="nf">predict_proba</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Predict class probabilities for new observations.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            target (np.ndarray or pd.DataFrame): Feature matrix for predictions.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            np.ndarray: Predicted probabilities with shape (n_samples, 2).</span>
+<span class="sd">                Column 0 = probability of class 0, Column 1 = probability of class 1.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">Fx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">Fx</span><span class="p">,</span> <span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)):</span>
+            <span class="n">Fx</span> <span class="o">=</span> <span class="n">Fx</span><span class="o">.</span><span class="n">values</span>
+        <span class="n">Fx</span> <span class="o">=</span> <span class="n">Fx</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="mi">1</span> <span class="o">-</span> <span class="n">Fx</span><span class="p">,</span> <span class="n">Fx</span><span class="p">))</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">tidy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return parameter estimates in tidy format without confidence intervals.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pd.DataFrame: Table of variables, estimates, standard errors, test statistics, and p-values.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">tidyci</span><span class="p">(</span><span class="n">ci</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+<div class="viewcode-block" id="logistic_classifier.tidyci">
+<a class="viewcode-back" href="../../../source/cleands.Classification.glm.html#cleands.Classification.glm.logistic_classifier.tidyci">[docs]</a>
+    <span class="k">def</span> <span class="nf">tidyci</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">level</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.95</span><span class="p">,</span> <span class="n">ci</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return parameter estimates with optional confidence intervals.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            level (float, optional): Confidence level. Defaults to 0.95.</span>
+<span class="sd">            ci (bool, optional): If True, include confidence intervals. Defaults to True.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pd.DataFrame: Table of coefficient estimates and statistics.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_feat</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;x_vars&#39;</span><span class="p">):</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">x_vars</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">params</span><span class="p">[:</span><span class="n">n</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">std_error</span><span class="p">[:</span><span class="n">n</span><span class="p">],</span>
+                  <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">t_statistic</span><span class="p">[:</span><span class="n">n</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">p_value</span><span class="p">[:</span><span class="n">n</span><span class="p">]]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">params</span><span class="p">[:</span><span class="n">n</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">std_error</span><span class="p">[:</span><span class="n">n</span><span class="p">],</span>
+                  <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">t_statistic</span><span class="p">[:</span><span class="n">n</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">p_value</span><span class="p">[:</span><span class="n">n</span><span class="p">]]</span>
+        <span class="n">cols</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;variable&#39;</span><span class="p">,</span> <span class="s1">&#39;estimate&#39;</span><span class="p">,</span> <span class="s1">&#39;std.error&#39;</span><span class="p">,</span> <span class="s1">&#39;t.statistic&#39;</span><span class="p">,</span> <span class="s1">&#39;p.value&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">ci</span><span class="p">:</span>
+            <span class="n">df</span> <span class="o">+=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">conf_int</span><span class="p">(</span><span class="n">level</span><span class="p">)[:,</span> <span class="p">:</span><span class="n">n</span><span class="p">]]</span>
+            <span class="n">cols</span> <span class="o">+=</span> <span class="p">[</span><span class="s1">&#39;ci.lower&#39;</span><span class="p">,</span> <span class="s1">&#39;ci.upper&#39;</span><span class="p">]</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span><span class="n">df</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">cols</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">df</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">vcov_params</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Variance–covariance matrix of parameters.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            np.ndarray: Estimated covariance matrix.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">vcov_params</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">glance</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return model-level summary statistics.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pd.DataFrame: Summary with fit metrics, information criteria, and classification accuracy.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+            <span class="s1">&#39;mcfaddens.r.squared&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">mcfaddens_r_squared</span><span class="p">,</span>
+            <span class="s1">&#39;ben.akiva.lerman.r.squared&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">ben_akiva_lerman_r_squared</span><span class="p">,</span>
+            <span class="s1">&#39;self.df&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">n_feat</span><span class="p">,</span>
+            <span class="s1">&#39;resid.df&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">degrees_of_freedom</span><span class="p">,</span>
+            <span class="s1">&#39;aic&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">aic</span><span class="p">,</span>
+            <span class="s1">&#39;bic&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">bic</span><span class="p">,</span>
+            <span class="s1">&#39;log.likelihood&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">log_likelihood</span><span class="p">,</span>
+            <span class="s1">&#39;deviance&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">deviance</span><span class="p">,</span>
+            <span class="s1">&#39;probability.threshold&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">probability</span><span class="p">,</span>
+            <span class="s1">&#39;accuracy&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">accuracy</span><span class="p">,</span>
+            <span class="s1">&#39;misclassification.probability&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">misclassification_probability</span>
+        <span class="p">},</span> <span class="n">index</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">])</span></div>
+
+
+
+<div class="viewcode-block" id="multinomial_classifier">
+<a class="viewcode-back" href="../../../source/cleands.Classification.glm.html#cleands.Classification.glm.multinomial_classifier">[docs]</a>
+<span class="k">class</span> <span class="nc">multinomial_classifier</span><span class="p">(</span><span class="n">classification_model</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Multinomial logistic regression classifier.</span>
+
+<span class="sd">    Fits a one-vs-rest set of logistic regressions for multi-class classification.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize a multinomial classifier.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            x (np.ndarray or pd.DataFrame): Feature matrix of shape (n_samples, n_features).</span>
+<span class="sd">            y (np.ndarray): Response vector with integer class labels of shape (n_samples,).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">multinomial_classifier</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ohe_y</span> <span class="o">=</span> <span class="n">one_hot_encode</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">models</span> <span class="o">=</span> <span class="p">[</span><span class="n">logistic_regressor</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ohe_y</span><span class="p">[:,</span> <span class="n">i</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_classes</span><span class="p">)]</span>
+
+<div class="viewcode-block" id="multinomial_classifier.predict_proba">
+<a class="viewcode-back" href="../../../source/cleands.Classification.glm.html#cleands.Classification.glm.multinomial_classifier.predict_proba">[docs]</a>
+    <span class="k">def</span> <span class="nf">predict_proba</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Predict class probabilities for new observations.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            target (np.ndarray or pd.DataFrame): Feature matrix for predictions.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            np.ndarray: Predicted probabilities of shape (n_samples, n_classes).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">outp</span> <span class="o">=</span> <span class="p">[</span><span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">target</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">]</span>
+        <span class="n">outp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">(</span><span class="n">outp</span><span class="p">)</span>
+        <span class="n">outp</span> <span class="o">/=</span> <span class="n">outp</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">outp</span></div>
+
+
+<div class="viewcode-block" id="multinomial_classifier.tidyci">
+<a class="viewcode-back" href="../../../source/cleands.Classification.glm.html#cleands.Classification.glm.multinomial_classifier.tidyci">[docs]</a>
+    <span class="k">def</span> <span class="nf">tidyci</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">level</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.95</span><span class="p">,</span> <span class="n">ci</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return parameter estimates for each logistic regression.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            level (float, optional): Confidence level. Defaults to 0.95.</span>
+<span class="sd">            ci (bool, optional): If True, include confidence intervals. Defaults to True.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pd.DataFrame: Stacked table of coefficient estimates for all models.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">outp</span> <span class="o">=</span> <span class="p">[</span><span class="n">model</span><span class="o">.</span><span class="n">tidyci</span><span class="p">(</span><span class="n">level</span><span class="p">,</span> <span class="n">ci</span><span class="p">)</span> <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">]</span>
+        <span class="n">outp</span> <span class="o">=</span> <span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">((</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;model&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">i</span><span class="p">)}),</span>
+                           <span class="n">model</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">model</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">outp</span><span class="p">)]</span>
+        <span class="n">outp</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">outp</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">outp</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">tidy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return parameter estimates without confidence intervals.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pd.DataFrame: Table of estimates for all models.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">tidyci</span><span class="p">(</span><span class="n">ci</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">glance</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return model-level summary statistics for each logistic regression.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pd.DataFrame: Concatenated DataFrame of summaries.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">outp</span> <span class="o">=</span> <span class="p">[</span><span class="n">model</span><span class="o">.</span><span class="n">glance</span> <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">]</span>
+        <span class="n">outp</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">outp</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">outp</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">outp</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">outp</span></div>
+
+
+
+<div class="viewcode-block" id="LogisticClassifier">
+<a class="viewcode-back" href="../../../source/cleands.Classification.glm.html#cleands.Classification.glm.LogisticClassifier">[docs]</a>
+<span class="k">class</span> <span class="nc">LogisticClassifier</span><span class="p">(</span><span class="n">ClassificationModel</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convenience wrapper for binary logistic regression classifier.</span>
+
+<span class="sd">    Provides a formula/DataFrame interface for the</span>
+<span class="sd">    :class:`logistic_classifier`, which fits a logistic regression</span>
+<span class="sd">    model for binary outcomes.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        MODEL_TYPE: Underlying model type, fixed to</span>
+<span class="sd">            :class:`logistic_classifier`.</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">        &gt;&gt;&gt; model = LogisticClassifier.from_formula(&quot;y ~ x1 + x2&quot;, data=df)</span>
+<span class="sd">        &gt;&gt;&gt; model.classify(df[[&quot;x1&quot;, &quot;x2&quot;]])</span>
+<span class="sd">        &gt;&gt;&gt; model.predict_proba(df[[&quot;x1&quot;, &quot;x2&quot;]])</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">MODEL_TYPE</span> <span class="o">=</span> <span class="n">logistic_classifier</span></div>
+
+
+
+<div class="viewcode-block" id="MultinomialClassifier">
+<a class="viewcode-back" href="../../../source/cleands.Classification.glm.html#cleands.Classification.glm.MultinomialClassifier">[docs]</a>
+<span class="k">class</span> <span class="nc">MultinomialClassifier</span><span class="p">(</span><span class="n">ClassificationModel</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convenience wrapper for multinomial logistic regression classifier.</span>
+
+<span class="sd">    Provides a formula/DataFrame interface for the</span>
+<span class="sd">    :class:`multinomial_classifier`, which fits a multinomial logistic</span>
+<span class="sd">    regression model for multi-class classification problems.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        MODEL_TYPE: Underlying model type, fixed to</span>
+<span class="sd">            :class:`multinomial_classifier`.</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">        &gt;&gt;&gt; model = MultinomialClassifier.from_formula(&quot;y ~ x1 + x2 + x3&quot;, data=df)</span>
+<span class="sd">        &gt;&gt;&gt; model.classify(df[[&quot;x1&quot;, &quot;x2&quot;, &quot;x3&quot;]])</span>
+<span class="sd">        &gt;&gt;&gt; model.predict_proba(df[[&quot;x1&quot;, &quot;x2&quot;, &quot;x3&quot;]])</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">MODEL_TYPE</span> <span class="o">=</span> <span class="n">multinomial_classifier</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Jason Parker.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

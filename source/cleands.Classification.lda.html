@@ -1,0 +1,367 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>cleands.Classification.lda module &mdash; cleands  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=92fd9be5" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="cleands.Classification.nb module" href="cleands.Classification.nb.html" />
+    <link rel="prev" title="cleands.Classification.knn module" href="cleands.Classification.knn.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            cleands
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="cleands.html">cleands package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="cleands.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="cleands.Classification.html">cleands.Classification package</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="cleands.Classification.html#submodules">Submodules</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="cleands.Clustering.html">cleands.Clustering package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cleands.DimensionReduction.html">cleands.DimensionReduction package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cleands.Distribution.html">cleands.Distribution package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cleands.Prediction.html">cleands.Prediction package</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cleands.html#submodules">Submodules</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">cleands</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="cleands.html">cleands package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="cleands.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="cleands.Classification.html">cleands.Classification package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="cleands.Clustering.html">cleands.Clustering package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="cleands.DimensionReduction.html">cleands.DimensionReduction package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="cleands.Distribution.html">cleands.Distribution package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="cleands.Prediction.html">cleands.Prediction package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="cleands.html#submodules">Submodules</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">cleands</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="cleands.html">cleands package</a></li>
+          <li class="breadcrumb-item"><a href="cleands.Classification.html">cleands.Classification package</a></li>
+      <li class="breadcrumb-item active">cleands.Classification.lda module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/source/cleands.Classification.lda.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-cleands.Classification.lda">
+<span id="cleands-classification-lda-module"></span><h1>cleands.Classification.lda module<a class="headerlink" href="#module-cleands.Classification.lda" title="Link to this heading"></a></h1>
+<p>Linear and Quadratic Discriminant Analysis (LDA/QDA) classifiers.</p>
+<p>This module implements classical discriminant analysis methods:</p>
+<ul class="simple">
+<li><p><cite>linear_discriminant_analysis</cite> (LDA): assumes shared covariance across classes.
+Provides a low-dimensional discriminant projection and class posterior
+probabilities under a Gaussian generative model with equal covariance.</p></li>
+<li><p><cite>quadratic_discriminant_analysis</cite> (QDA): allows class-specific covariance
+matrices with optional ridge-type regularization for numerical stability.</p></li>
+</ul>
+<dl class="simple">
+<dt>Utility:</dt><dd><p><cite>_quad_form_rows(X, A)</cite> efficiently computes row-wise quadratic forms
+xᵢᵀ A xᵢ using <cite>numpy.einsum</cite>, which is used by QDA.</p>
+</dd>
+<dt>Factory Aliases:</dt><dd><dl class="simple">
+<dt>LinearDiscriminantAnalysis:  Wrapper for <cite>linear_discriminant_analysis</cite></dt><dd><p>via <cite>ClassificationModel</cite>.</p>
+</dd>
+<dt>QuadraticDiscriminantAnalysis:  Wrapper for <cite>quadratic_discriminant_analysis</cite></dt><dd><p>via <cite>ClassificationModel</cite>.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p>Typical usage example:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">cleands.Classification.lda</span> <span class="kn">import</span> <span class="n">LinearDiscriminantAnalysis</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">LinearDiscriminantAnalysis</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">tidy</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">glance</span>
+</pre></div>
+</div>
+<dl class="py class">
+<dt class="sig sig-object py" id="cleands.Classification.lda.linear_discriminant_analysis">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cleands.Classification.lda.</span></span><span class="sig-name descname"><span class="pre">linear_discriminant_analysis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/Classification/lda.html#linear_discriminant_analysis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.Classification.lda.linear_discriminant_analysis" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="cleands.base.html#cleands.base.classification_model" title="cleands.base.classification_model"><code class="xref py py-class docutils literal notranslate"><span class="pre">classification_model</span></code></a></p>
+<p>Linear Discriminant Analysis (LDA) classifier.</p>
+<p>Fits class means and a pooled within-class covariance (shared across
+classes) to derive a linear discriminant subspace and compute class
+posterior probabilities under a Gaussian generative model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mean_vectors</strong> (<em>list</em><em>[</em><em>np.ndarray</em><em>]</em>) – Per-class mean vectors of shape
+(n_features, 1).</p></li>
+<li><p><strong>priors</strong> (<em>np.ndarray</em>) – Class prior probabilities of shape (n_classes,).</p></li>
+<li><p><strong>Sigma_within</strong> (<em>np.ndarray</em>) – Pooled within-class covariance matrix of
+shape (n_features, n_features).</p></li>
+<li><p><strong>overall_mean</strong> (<em>np.ndarray</em>) – Overall mean vector of shape (n_features, 1).</p></li>
+<li><p><strong>Sigma_between</strong> (<em>np.ndarray</em>) – Between-class scatter matrix of shape
+(n_features, n_features).</p></li>
+<li><p><strong>eigenvalues</strong> (<em>np.ndarray</em>) – Eigenvalues from generalized eigenproblem
+<cite>inv(S_w) S_b</cite>, sorted descending.</p></li>
+<li><p><strong>eigenvectors</strong> (<em>np.ndarray</em>) – Top <cite>n_classes - 1</cite> eigenvectors forming the
+discriminant projection matrix of shape (n_features, n_classes-1).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>x</strong> (<em>array</em>)</p></li>
+<li><p><strong>y</strong> (<em>array</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="cleands.Classification.lda.linear_discriminant_analysis.discriminant">
+<span class="sig-name descname"><span class="pre">discriminant</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/Classification/lda.html#linear_discriminant_analysis.discriminant"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.Classification.lda.linear_discriminant_analysis.discriminant" title="Link to this definition"></a></dt>
+<dd><p>Project data into the discriminant space.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>target</strong> (<em>np.ndarray</em><em> or </em><em>pd.DataFrame</em>) – Feature matrix (n_samples, n_features).</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Discriminant scores of shape (n_samples, n_classes-1).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cleands.Classification.lda.linear_discriminant_analysis.predict_proba">
+<span class="sig-name descname"><span class="pre">predict_proba</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/Classification/lda.html#linear_discriminant_analysis.predict_proba"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.Classification.lda.linear_discriminant_analysis.predict_proba" title="Link to this definition"></a></dt>
+<dd><p>Compute posterior probabilities for each class.</p>
+<p>Implements the LDA log-posterior up to a constant and returns
+softmax-normalized probabilities.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>target</strong> (<em>np.ndarray</em><em> or </em><em>pd.DataFrame</em>) – Feature matrix (n_samples, n_features).</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Class probabilities of shape (n_samples, n_classes).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cleands.Classification.lda.quadratic_discriminant_analysis">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cleands.Classification.lda.</span></span><span class="sig-name descname"><span class="pre">quadratic_discriminant_analysis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">priors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-6</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_weight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/Classification/lda.html#quadratic_discriminant_analysis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.Classification.lda.quadratic_discriminant_analysis" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="cleands.base.html#cleands.base.classification_model" title="cleands.base.classification_model"><code class="xref py py-class docutils literal notranslate"><span class="pre">classification_model</span></code></a></p>
+<p>Quadratic Discriminant Analysis (QDA) classifier.</p>
+<p>QDA models each class with its own Gaussian distribution:
+x | y = k ~ N(μ_k, Σ_k). Predictions use the quadratic log-density
+with class-specific covariance, allowing non-linear decision boundaries.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>classes</strong> (<em>np.ndarray</em>) – Sorted unique class labels of shape (n_classes,).</p></li>
+<li><p><strong>n_classes</strong> (<em>int</em>) – Number of classes.</p></li>
+<li><p><strong>priors</strong> (<em>np.ndarray</em>) – Class prior probabilities of shape (n_classes,).</p></li>
+<li><p><strong>means</strong> (<em>np.ndarray</em>) – Per-class mean vectors, shape (n_classes, n_features).</p></li>
+<li><p><strong>covs</strong> (<em>np.ndarray</em>) – Per-class covariance matrices,
+shape (n_classes, n_features, n_features).</p></li>
+<li><p><strong>inv_covs</strong> (<em>np.ndarray</em>) – Inverses of covariance matrices, same shape as <cite>covs</cite>.</p></li>
+<li><p><strong>log_dets</strong> (<em>np.ndarray</em>) – Log-determinants of covariance matrices, shape (n_classes,).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>x</strong> (<em>ndarray</em>)</p></li>
+<li><p><strong>y</strong> (<em>ndarray</em>)</p></li>
+<li><p><strong>priors</strong> (<em>ndarray</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>reg</strong> (<em>float</em>)</p></li>
+<li><p><strong>sample_weight</strong> (<em>ndarray</em><em> | </em><em>None</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="cleands.Classification.lda.quadratic_discriminant_analysis.decision_function">
+<span class="sig-name descname"><span class="pre">decision_function</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/Classification/lda.html#quadratic_discriminant_analysis.decision_function"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.Classification.lda.quadratic_discriminant_analysis.decision_function" title="Link to this definition"></a></dt>
+<dd><p>Compute unnormalized class scores (log-posterior up to a constant).</p>
+<dl class="simple">
+<dt>For each class k:</dt><dd><p>score_k(x) = log π_k - 0.5 * log|Σ_k| - 0.5 * (x - μ_k)ᵀ Σ_k⁻¹ (x - μ_k)</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>x</strong> (<em>np.ndarray</em><em> or </em><em>pd.DataFrame</em>) – Feature matrix (n_samples, n_features).</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Scores of shape (n_samples, n_classes).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cleands.Classification.lda.quadratic_discriminant_analysis.predict_proba">
+<span class="sig-name descname"><span class="pre">predict_proba</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/Classification/lda.html#quadratic_discriminant_analysis.predict_proba"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.Classification.lda.quadratic_discriminant_analysis.predict_proba" title="Link to this definition"></a></dt>
+<dd><p>Compute class posterior probabilities via softmax over scores.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>x</strong> (<em>np.ndarray</em><em> or </em><em>pd.DataFrame</em>) – Feature matrix (n_samples, n_features).</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Class probabilities of shape (n_samples, n_classes).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cleands.Classification.lda.LinearDiscriminantAnalysis">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cleands.Classification.lda.</span></span><span class="sig-name descname"><span class="pre">LinearDiscriminantAnalysis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">formula</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/Classification/lda.html#LinearDiscriminantAnalysis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.Classification.lda.LinearDiscriminantAnalysis" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="cleands.base.html#cleands.base.ClassificationModel" title="cleands.base.ClassificationModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">ClassificationModel</span></code></a></p>
+<p>Convenience wrapper for Linear Discriminant Analysis (LDA).</p>
+<p>LDA projects data into a lower-dimensional space that maximizes
+class separability, assuming normally distributed features with
+equal covariance matrices. Provides a formula/DataFrame interface
+for the <a class="reference internal" href="#cleands.Classification.lda.linear_discriminant_analysis" title="cleands.Classification.lda.linear_discriminant_analysis"><code class="xref py py-class docutils literal notranslate"><span class="pre">linear_discriminant_analysis</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>MODEL_TYPE</strong> (<em>ClassVar</em><em>[</em><em>Type</em><em>[</em><a class="reference internal" href="cleands.base.html#cleands.base.supervised_model" title="cleands.base.supervised_model"><em>cleands.base.supervised_model</em></a><em>]</em><em>]</em>) – Underlying model type, fixed to
+<a class="reference internal" href="#cleands.Classification.lda.linear_discriminant_analysis" title="cleands.Classification.lda.linear_discriminant_analysis"><code class="xref py py-class docutils literal notranslate"><span class="pre">linear_discriminant_analysis</span></code></a>.</p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>formula</strong> (<em>str</em>)</p></li>
+<li><p><strong>data</strong> (<em>DataFrame</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">LinearDiscriminantAnalysis</span><span class="o">.</span><span class="n">from_formula</span><span class="p">(</span><span class="s2">&quot;y ~ x1 + x2&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">classify</span><span class="p">(</span><span class="n">df</span><span class="p">[[</span><span class="s2">&quot;x1&quot;</span><span class="p">,</span> <span class="s2">&quot;x2&quot;</span><span class="p">]])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">df</span><span class="p">[[</span><span class="s2">&quot;x1&quot;</span><span class="p">,</span> <span class="s2">&quot;x2&quot;</span><span class="p">]])</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cleands.Classification.lda.QuadraticDiscriminantAnalysis">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cleands.Classification.lda.</span></span><span class="sig-name descname"><span class="pre">QuadraticDiscriminantAnalysis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">formula</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/Classification/lda.html#QuadraticDiscriminantAnalysis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.Classification.lda.QuadraticDiscriminantAnalysis" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="cleands.base.html#cleands.base.ClassificationModel" title="cleands.base.ClassificationModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">ClassificationModel</span></code></a></p>
+<p>Convenience wrapper for Quadratic Discriminant Analysis (QDA).</p>
+<p>QDA is similar to LDA but allows each class to have its own
+covariance matrix, resulting in quadratic rather than linear
+decision boundaries. Provides a formula/DataFrame interface
+for the <a class="reference internal" href="#cleands.Classification.lda.quadratic_discriminant_analysis" title="cleands.Classification.lda.quadratic_discriminant_analysis"><code class="xref py py-class docutils literal notranslate"><span class="pre">quadratic_discriminant_analysis</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>MODEL_TYPE</strong> (<em>ClassVar</em><em>[</em><em>Type</em><em>[</em><a class="reference internal" href="cleands.base.html#cleands.base.supervised_model" title="cleands.base.supervised_model"><em>cleands.base.supervised_model</em></a><em>]</em><em>]</em>) – Underlying model type, fixed to
+<a class="reference internal" href="#cleands.Classification.lda.quadratic_discriminant_analysis" title="cleands.Classification.lda.quadratic_discriminant_analysis"><code class="xref py py-class docutils literal notranslate"><span class="pre">quadratic_discriminant_analysis</span></code></a>.</p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>formula</strong> (<em>str</em>)</p></li>
+<li><p><strong>data</strong> (<em>DataFrame</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">QuadraticDiscriminantAnalysis</span><span class="o">.</span><span class="n">from_formula</span><span class="p">(</span><span class="s2">&quot;y ~ x1 + x2 + x3&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">classify</span><span class="p">(</span><span class="n">df</span><span class="p">[[</span><span class="s2">&quot;x1&quot;</span><span class="p">,</span> <span class="s2">&quot;x2&quot;</span><span class="p">,</span> <span class="s2">&quot;x3&quot;</span><span class="p">]])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">df</span><span class="p">[[</span><span class="s2">&quot;x1&quot;</span><span class="p">,</span> <span class="s2">&quot;x2&quot;</span><span class="p">,</span> <span class="s2">&quot;x3&quot;</span><span class="p">]])</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="cleands.Classification.knn.html" class="btn btn-neutral float-left" title="cleands.Classification.knn module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="cleands.Classification.nb.html" class="btn btn-neutral float-right" title="cleands.Classification.nb module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Jason Parker.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

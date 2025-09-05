@@ -1,0 +1,1308 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>cleands.base &mdash; cleands  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=92fd9be5" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            cleands
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../source/cleands.html">cleands package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../source/modules.html">cleands</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">cleands</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">cleands.base</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for cleands.base</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Core base classes and abstract interfaces for the CleanDS statistical modeling framework.</span>
+
+<span class="sd">This module defines the fundamental building blocks for supervised, unsupervised,</span>
+<span class="sd">prediction, classification, clustering, and distribution models. It establishes</span>
+<span class="sd">a consistent API across model families, providing shared properties such as</span>
+<span class="sd">`fitted`, `residuals`, `mean_squared_error`, `aic`, and `bic`.</span>
+
+<span class="sd">Key features:</span>
+<span class="sd">    • Abstract base classes for supervised and unsupervised models.</span>
+<span class="sd">    • Prediction and classification models with common evaluation metrics.</span>
+<span class="sd">    • Clustering model interface with mean/cluster management utilities.</span>
+<span class="sd">    • Distribution model protocols with PDF and CDF support.</span>
+<span class="sd">    • Likelihood-based model mixins for deviance, AIC, BIC, and log-likelihood.</span>
+<span class="sd">    • Variance models for parameter uncertainty (standard errors, confidence intervals).</span>
+<span class="sd">    • Supervised wrappers (`SupervisedModel`, `PredictionModel`, `ClassificationModel`)</span>
+<span class="sd">      for integrating with formula notation and tidy outputs.</span>
+
+<span class="sd">These base definitions are designed for extensibility:</span>
+<span class="sd">custom regression, classification, clustering, or distribution models</span>
+<span class="sd">should inherit from the appropriate abstract class to ensure interoperability</span>
+<span class="sd">within the CleanDS ecosystem.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">scipy</span> <span class="k">as</span> <span class="nn">sp</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Protocol</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">ClassVar</span>
+<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
+<span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span>
+<span class="kn">from</span> <span class="nn">.utils</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">.formula</span> <span class="kn">import</span> <span class="n">parse</span>
+
+
+<div class="viewcode-block" id="learning_model">
+<a class="viewcode-back" href="../../source/cleands.base.html#cleands.base.learning_model">[docs]</a>
+<span class="k">class</span> <span class="nc">learning_model</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Abstract base class for all learning models.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize a learning model.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            x (np.ndarray): Input feature matrix of shape (n_obs, n_feat).</span>
+
+<span class="sd">        Attributes:</span>
+<span class="sd">            x (np.ndarray): Stored feature matrix.</span>
+<span class="sd">            n_obs (int): Number of observations.</span>
+<span class="sd">            n_feat (int): Number of features.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">x</span>
+        <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_obs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_feat</span><span class="p">)</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span></div>
+
+
+
+<div class="viewcode-block" id="supervised_model">
+<a class="viewcode-back" href="../../source/cleands.base.html#cleands.base.supervised_model">[docs]</a>
+<span class="k">class</span> <span class="nc">supervised_model</span><span class="p">(</span><span class="n">learning_model</span><span class="p">,</span> <span class="n">ABC</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for supervised learning models with features and labels.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize a supervised learning model.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            x (np.ndarray): Feature matrix of shape (n_obs, n_feat).</span>
+<span class="sd">            y (np.ndarray): Target vector of shape (n_obs,).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">y</span></div>
+
+
+
+<div class="viewcode-block" id="unsupervised_model">
+<a class="viewcode-back" href="../../source/cleands.base.html#cleands.base.unsupervised_model">[docs]</a>
+<span class="k">class</span> <span class="nc">unsupervised_model</span><span class="p">(</span><span class="n">learning_model</span><span class="p">,</span> <span class="n">ABC</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for unsupervised learning models.&quot;&quot;&quot;</span>
+    <span class="o">...</span></div>
+
+
+
+<div class="viewcode-block" id="prediction_model">
+<a class="viewcode-back" href="../../source/cleands.base.html#cleands.base.prediction_model">[docs]</a>
+<span class="k">class</span> <span class="nc">prediction_model</span><span class="p">(</span><span class="n">supervised_model</span><span class="p">,</span> <span class="n">ABC</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for supervised prediction models.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="prediction_model.predict">
+<a class="viewcode-back" href="../../source/cleands.base.html#cleands.base.prediction_model.predict">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Predict outcomes for new input data.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            target (np.ndarray): Feature matrix for prediction.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            np.ndarray: Predicted values.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="o">...</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">fitted</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;np.ndarray: Predictions for training data (`self.x`).&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">residuals</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;np.ndarray: Difference between observed and fitted values.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitted</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">residual_sum_of_squares</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;float: Residual sum of squares (RSS).&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">residuals</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">mean_squared_error</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;float: Mean squared error (MSE).&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">residuals</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+
+<div class="viewcode-block" id="prediction_model.out_of_sample_mean_squared_error">
+<a class="viewcode-back" href="../../source/cleands.base.html#cleands.base.prediction_model.out_of_sample_mean_squared_error">[docs]</a>
+    <span class="k">def</span> <span class="nf">out_of_sample_mean_squared_error</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Compute out-of-sample mean squared error.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            x (np.ndarray): Test feature matrix.</span>
+<span class="sd">            y (np.ndarray): Test target vector.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            float: Out-of-sample MSE.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">((</span><span class="n">y</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">x</span><span class="p">))</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">root_mean_squared_error</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;float: Root mean squared error (RMSE).&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mean_squared_error</span><span class="p">)</span>
+
+<div class="viewcode-block" id="prediction_model.out_of_sample_root_mean_squared_error">
+<a class="viewcode-back" href="../../source/cleands.base.html#cleands.base.prediction_model.out_of_sample_root_mean_squared_error">[docs]</a>
+    <span class="k">def</span> <span class="nf">out_of_sample_root_mean_squared_error</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Compute out-of-sample RMSE.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            x (np.ndarray): Test feature matrix.</span>
+<span class="sd">            y (np.ndarray): Test target vector.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            float: Out-of-sample RMSE.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">out_of_sample_mean_squared_error</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">))</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">r_squared</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;float: Coefficient of determination (R²).&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="mi">1</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">residuals</span><span class="o">.</span><span class="n">var</span><span class="p">()</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">var</span><span class="p">()</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">adjusted_r_squared</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;float: Adjusted R² that accounts for model complexity.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="mi">1</span> <span class="o">-</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">r_squared</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_obs</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">degrees_of_freedom</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">degrees_of_freedom</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;int: Degrees of freedom = n_obs - n_feat.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_obs</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_feat</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">residual_variance</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;float: Estimated residual variance.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">residuals</span><span class="o">.</span><span class="n">var</span><span class="p">()</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_obs</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">degrees_of_freedom</span></div>
+
+
+
+<div class="viewcode-block" id="classification_model">
+<a class="viewcode-back" href="../../source/cleands.base.html#cleands.base.classification_model">[docs]</a>
+<span class="k">class</span> <span class="nc">classification_model</span><span class="p">(</span><span class="n">supervised_model</span><span class="p">,</span> <span class="n">ABC</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for supervised classification models.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="classification_model.predict_proba">
+<a class="viewcode-back" href="../../source/cleands.base.html#cleands.base.classification_model.predict_proba">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">predict_proba</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Predict class probabilities.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            target (np.ndarray): Feature matrix.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            np.ndarray: Class probability estimates.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="o">...</span></div>
+
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize a classification model.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            x (np.ndarray): Feature matrix.</span>
+<span class="sd">            y (np.ndarray): Target labels.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">classification_model</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_n_classes</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">n_classes</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;int: Number of classes in the dataset.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_classes</span>
+
+    <span class="nd">@n_classes</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">n_classes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the number of classes.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_n_classes</span> <span class="o">=</span> <span class="n">value</span>
+
+<div class="viewcode-block" id="classification_model.classify">
+<a class="viewcode-back" href="../../source/cleands.base.html#cleands.base.classification_model.classify">[docs]</a>
+    <span class="k">def</span> <span class="nf">classify</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Predict class labels.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            target (np.ndarray): Feature matrix.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            np.ndarray: Predicted class labels.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">target</span><span class="p">)</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">fitted</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;np.ndarray: Predicted class labels for training data.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">classify</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">accuracy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;float: Training accuracy.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitted</span><span class="p">)</span>
+
+<div class="viewcode-block" id="classification_model.out_of_sample_accuracy">
+<a class="viewcode-back" href="../../source/cleands.base.html#cleands.base.classification_model.out_of_sample_accuracy">[docs]</a>
+    <span class="k">def</span> <span class="nf">out_of_sample_accuracy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Compute out-of-sample accuracy.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            x (np.ndarray): Test features.</span>
+<span class="sd">            y (np.ndarray): Test labels.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            float: Accuracy score.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">y</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">classify</span><span class="p">(</span><span class="n">x</span><span class="p">))</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">misclassification_probability</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;float: Misclassification probability = 1 - accuracy.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="mi">1</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">accuracy</span>
+
+<div class="viewcode-block" id="classification_model.out_of_sample_misclassification_probability">
+<a class="viewcode-back" href="../../source/cleands.base.html#cleands.base.classification_model.out_of_sample_misclassification_probability">[docs]</a>
+    <span class="k">def</span> <span class="nf">out_of_sample_misclassification_probability</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Compute out-of-sample misclassification probability.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            x (np.ndarray): Test features.</span>
+<span class="sd">            y (np.ndarray): Test labels.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            float: Misclassification probability.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="mi">1</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_of_sample_accuracy</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">confusion_matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;np.ndarray: Confusion matrix for training data.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">one_hot_encode</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">)</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">one_hot_encode</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fitted</span><span class="p">)</span>
+
+<div class="viewcode-block" id="classification_model.out_of_sample_confusion_matrix">
+<a class="viewcode-back" href="../../source/cleands.base.html#cleands.base.classification_model.out_of_sample_confusion_matrix">[docs]</a>
+    <span class="k">def</span> <span class="nf">out_of_sample_confusion_matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Compute confusion matrix for test data.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            x (np.ndarray): Test features.</span>
+<span class="sd">            y (np.ndarray): Test labels.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            np.ndarray: Confusion matrix.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">one_hot_encode</span><span class="p">(</span><span class="n">y</span><span class="p">)</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">one_hot_encode</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">classify</span><span class="p">(</span><span class="n">x</span><span class="p">))</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="clustering_model">
+<a class="viewcode-back" href="../../source/cleands.base.html#cleands.base.clustering_model">[docs]</a>
+<span class="k">class</span> <span class="nc">clustering_model</span><span class="p">(</span><span class="n">unsupervised_model</span><span class="p">,</span> <span class="n">ABC</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for clustering models.&quot;&quot;&quot;</span>
+
+    <span class="n">_n_clusters</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">_means</span><span class="p">:</span> <span class="nb">int</span>
+
+<div class="viewcode-block" id="clustering_model.cluster">
+<a class="viewcode-back" href="../../source/cleands.base.html#cleands.base.clustering_model.cluster">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">cluster</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Assign cluster labels for given data.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            target (np.ndarray): Feature matrix.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            np.ndarray: Cluster assignments.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="o">...</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">n_clusters</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;int: Number of clusters.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_clusters</span>
+
+    <span class="nd">@n_clusters</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">n_clusters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_n_clusters</span> <span class="o">=</span> <span class="n">x</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">means</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;np.ndarray: Cluster centroids.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_means</span>
+
+    <span class="nd">@means</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">means</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_means</span> <span class="o">=</span> <span class="n">x</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">groups</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;np.ndarray: Cluster assignments for training data.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">cluster</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_calc_means</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">groups</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Compute cluster means from group assignments.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            groups (np.ndarray): Cluster assignment array.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            np.ndarray: Cluster centroids.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="n">warnings</span><span class="o">.</span><span class="n">catch_warnings</span><span class="p">():</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">simplefilter</span><span class="p">(</span><span class="s1">&#39;ignore&#39;</span><span class="p">)</span>
+            <span class="n">outp</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="n">groups</span> <span class="o">==</span> <span class="n">i</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_clusters</span><span class="p">)]</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">outp</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">within_group_sum_of_squares</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;np.ndarray: Within-group sum of squares per cluster.&quot;&quot;&quot;</span>
+        <span class="n">outp</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">groups</span> <span class="o">==</span> <span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">means</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_clusters</span><span class="p">)]</span>
+        <span class="n">outp</span> <span class="o">=</span> <span class="p">[(</span><span class="n">item</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">outp</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">outp</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">total_within_group_sum_of_squares</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;float: Total within-group sum of squares across clusters.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">within_group_sum_of_squares</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span></div>
+
+
+
+<div class="viewcode-block" id="distribution_model">
+<a class="viewcode-back" href="../../source/cleands.base.html#cleands.base.distribution_model">[docs]</a>
+<span class="k">class</span> <span class="nc">distribution_model</span><span class="p">(</span><span class="n">unsupervised_model</span><span class="p">,</span> <span class="n">ABC</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for unsupervised parametric/nonparametric distributions.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="distribution_model.pdf">
+<a class="viewcode-back" href="../../source/cleands.base.html#cleands.base.distribution_model.pdf">[docs]</a>
+    <span class="k">def</span> <span class="nf">pdf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Probability density (or mass) function evaluated at `target`.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            target (np.ndarray): Points at which to evaluate the pdf/pmf.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            np.ndarray: Density (or probability) values with shape compatible with `target`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="o">...</span></div>
+
+
+<div class="viewcode-block" id="distribution_model.cdf">
+<a class="viewcode-back" href="../../source/cleands.base.html#cleands.base.distribution_model.cdf">[docs]</a>
+    <span class="k">def</span> <span class="nf">cdf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Cumulative distribution function evaluated at `target`.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            target (np.ndarray): Points at which to evaluate the CDF.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            np.ndarray: Cumulative probabilities with shape compatible with `target`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="o">...</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="dimension_reduction_model">
+<a class="viewcode-back" href="../../source/cleands.base.html#cleands.base.dimension_reduction_model">[docs]</a>
+<span class="k">class</span> <span class="nc">dimension_reduction_model</span><span class="p">(</span><span class="n">unsupervised_model</span><span class="p">,</span> <span class="n">ABC</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for unsupervised dimension reduction algorithms (e.g., PCA).&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="dimension_reduction_model.reduce">
+<a class="viewcode-back" href="../../source/cleands.base.html#cleands.base.dimension_reduction_model.reduce">[docs]</a>
+    <span class="k">def</span> <span class="nf">reduce</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Project `target` into a lower-dimensional space.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            target (np.ndarray): Data matrix to reduce, shape (n_obs, n_feat).</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            np.ndarray: Reduced representation, shape (n_obs, k) where k &lt;= n_feat.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="o">...</span></div>
+
+
+<div class="viewcode-block" id="dimension_reduction_model.out_of_sample_mean_squared_error">
+<a class="viewcode-back" href="../../source/cleands.base.html#cleands.base.dimension_reduction_model.out_of_sample_mean_squared_error">[docs]</a>
+    <span class="k">def</span> <span class="nf">out_of_sample_mean_squared_error</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Reprojection MSE: squared reconstruction error per element.</span>
+
+<span class="sd">        This computes the MSE of projecting `target` onto the learned subspace and</span>
+<span class="sd">        measuring the residual in the orthogonal complement.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            target (np.ndarray): Data matrix to evaluate, shape (n_obs, n_feat).</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            np.ndarray: Scalar MSE (float-like) computed as trace(T&#39; M T) / T.size.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">Z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">reduce</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
+        <span class="n">M</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">target</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">-</span><span class="n">Z</span><span class="nd">@np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">Z</span><span class="o">.</span><span class="n">T</span><span class="nd">@Z</span><span class="p">)</span><span class="nd">@Z</span><span class="o">.</span><span class="n">T</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">trace</span><span class="p">(</span><span class="n">target</span><span class="o">.</span><span class="n">T</span><span class="nd">@M@target</span><span class="p">)</span><span class="o">/</span><span class="n">target</span><span class="o">.</span><span class="n">size</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">mean_squared_error</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;np.ndarray: In-sample mean squared error for `self.x`.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_of_sample_mean_squared_error</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
+
+<div class="viewcode-block" id="dimension_reduction_model.out_of_sample_root_mean_squared_error">
+<a class="viewcode-back" href="../../source/cleands.base.html#cleands.base.dimension_reduction_model.out_of_sample_root_mean_squared_error">[docs]</a>
+    <span class="k">def</span> <span class="nf">out_of_sample_root_mean_squared_error</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Root mean squared reconstruction error for new data.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            target (np.ndarray): Data matrix to evaluate.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            np.ndarray: Scalar RMSE.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">out_of_sample_mean_squared_error</span><span class="p">(</span><span class="n">target</span><span class="p">))</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">root_mean_squared_error</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;np.ndarray: In-sample root mean squared error for `self.x`.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_of_sample_root_mean_squared_error</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="supervised_dimension_reduction_model">
+<a class="viewcode-back" href="../../source/cleands.base.html#cleands.base.supervised_dimension_reduction_model">[docs]</a>
+<span class="k">class</span> <span class="nc">supervised_dimension_reduction_model</span><span class="p">(</span><span class="n">supervised_model</span><span class="p">,</span> <span class="n">ABC</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for supervised dimension reduction (e.g., CCA).&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="supervised_dimension_reduction_model.reduce_X">
+<a class="viewcode-back" href="../../source/cleands.base.html#cleands.base.supervised_dimension_reduction_model.reduce_X">[docs]</a>
+    <span class="k">def</span> <span class="nf">reduce_X</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x_new</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Project `x_new` into the supervised lower-dimensional X-space.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            x_new (np.ndarray): Feature matrix, shape (n_obs, n_feat).</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            np.ndarray: Reduced X scores, shape (n_obs, kx).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="o">...</span></div>
+
+
+<div class="viewcode-block" id="supervised_dimension_reduction_model.reduce_Y">
+<a class="viewcode-back" href="../../source/cleands.base.html#cleands.base.supervised_dimension_reduction_model.reduce_Y">[docs]</a>
+    <span class="k">def</span> <span class="nf">reduce_Y</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y_new</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Project `y_new` (targets) into the supervised lower-dimensional Y-space.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            y_new (np.ndarray): Target vector or matrix, shape (n_obs, ...) depending on model.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            np.ndarray: Reduced Y scores, shape (n_obs, ky).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="o">...</span></div>
+
+
+<div class="viewcode-block" id="supervised_dimension_reduction_model.reduce">
+<a class="viewcode-back" href="../../source/cleands.base.html#cleands.base.supervised_dimension_reduction_model.reduce">[docs]</a>
+    <span class="k">def</span> <span class="nf">reduce</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x_new</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">y_new</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Reduce X, Y, or both, depending on provided inputs.</span>
+
+<span class="sd">        Exactly one (or both) of `x_new` or `y_new` must be provided.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            x_new (Optional[np.ndarray]): Feature matrix to reduce.</span>
+<span class="sd">            y_new (Optional[np.ndarray]): Target vector/matrix to reduce.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            np.ndarray | tuple[np.ndarray, np.ndarray]:</span>
+<span class="sd">                - If both provided: (X_reduced, Y_reduced).</span>
+<span class="sd">                - If only `x_new` provided: X_reduced.</span>
+<span class="sd">                - If only `y_new` provided: Y_reduced.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: If neither `x_new` nor `y_new` is provided.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">x_new</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">y_new</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Provide at least one of x_new or y_new.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">x_new</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">y_new</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">reduce_X</span><span class="p">(</span><span class="n">x_new</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">reduce_Y</span><span class="p">(</span><span class="n">y_new</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">reduce_X</span><span class="p">(</span><span class="n">x_new</span><span class="p">)</span> <span class="k">if</span> <span class="n">x_new</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">reduce_Y</span><span class="p">(</span><span class="n">y_new</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="likelihood_type">
+<a class="viewcode-back" href="../../source/cleands.base.html#cleands.base.likelihood_type">[docs]</a>
+<span class="k">class</span> <span class="nc">likelihood_type</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Structural protocol for objects exposing likelihood metrics.&quot;&quot;&quot;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">log_likelihood</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;float: Model log-likelihood.&quot;&quot;&quot;</span>
+        <span class="o">...</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">null_likelihood</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;float: Log-likelihood of the null/reference model.&quot;&quot;&quot;</span>
+        <span class="o">...</span></div>
+
+
+
+<div class="viewcode-block" id="likelihood_model">
+<a class="viewcode-back" href="../../source/cleands.base.html#cleands.base.likelihood_model">[docs]</a>
+<span class="k">class</span> <span class="nc">likelihood_model</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Mixin-like base for models that report likelihood-based criteria.&quot;&quot;&quot;</span>
+
+    <span class="n">n_feat</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">n_obs</span><span class="p">:</span> <span class="nb">int</span>
+
+    <span class="nd">@property</span>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">log_likelihood</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;float: Model log-likelihood under fitted parameters.&quot;&quot;&quot;</span>
+        <span class="o">...</span>
+
+    <span class="nd">@property</span>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">null_likelihood</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;float: Log-likelihood of the null/reference model.&quot;&quot;&quot;</span>
+        <span class="o">...</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">aic</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;float: Akaike Information Criterion (smaller is better).&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_feat</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">log_likelihood</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">bic</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;float: Bayesian Information Criterion (smaller is better).&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_obs</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_feat</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">log_likelihood</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">deviance</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;float: Model deviance = 2*LL(model) - 2*LL(null).&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">log_likelihood</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">null_likelihood</span></div>
+
+
+
+<div class="viewcode-block" id="parametric_distribution_model">
+<a class="viewcode-back" href="../../source/cleands.base.html#cleands.base.parametric_distribution_model">[docs]</a>
+<span class="k">class</span> <span class="nc">parametric_distribution_model</span><span class="p">(</span><span class="n">distribution_model</span><span class="p">,</span> <span class="n">likelihood_model</span><span class="p">,</span> <span class="n">ABC</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for parametric distributions that expose likelihood metrics.&quot;&quot;&quot;</span>
+
+    <span class="n">params</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
+    <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
+
+<div class="viewcode-block" id="parametric_distribution_model.pdf">
+<a class="viewcode-back" href="../../source/cleands.base.html#cleands.base.parametric_distribution_model.pdf">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">pdf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Probability density (or mass) evaluated at `target`.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            target (np.ndarray): Points for evaluation.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            np.ndarray: Density/probability values.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="o">...</span></div>
+
+
+<div class="viewcode-block" id="parametric_distribution_model.cdf">
+<a class="viewcode-back" href="../../source/cleands.base.html#cleands.base.parametric_distribution_model.cdf">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">cdf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Cumulative distribution evaluated at `target`.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            target (np.ndarray): Points for evaluation.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            np.ndarray: Cumulative probabilities.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="o">...</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">log_likelihood</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;float: In-sample log-likelihood for `self.x`.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_of_sample_log_likelihood</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
+
+<div class="viewcode-block" id="parametric_distribution_model.out_of_sample_log_likelihood">
+<a class="viewcode-back" href="../../source/cleands.base.html#cleands.base.parametric_distribution_model.out_of_sample_log_likelihood">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">out_of_sample_log_likelihood</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Log-likelihood evaluated on arbitrary data.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            target (np.ndarray): Data on which to evaluate LL.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            float: Log-likelihood value.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="o">...</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">null_likelihood</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;float: In-sample null log-likelihood for `self.x`.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_of_sample_null_likelihood</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
+
+<div class="viewcode-block" id="parametric_distribution_model.out_of_sample_null_likelihood">
+<a class="viewcode-back" href="../../source/cleands.base.html#cleands.base.parametric_distribution_model.out_of_sample_null_likelihood">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">out_of_sample_null_likelihood</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Null-model log-likelihood on arbitrary data.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            target (np.ndarray): Data on which to evaluate null LL.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            float: Null log-likelihood value.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="o">...</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">deviance</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;np.ndarray: Deviance for `self.x` = 2*(LL - LL_null).&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="mi">2</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">log_likelihood</span><span class="o">-</span><span class="mi">2</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">null_likelihood</span>
+
+<div class="viewcode-block" id="parametric_distribution_model.out_of_sample_deviance">
+<a class="viewcode-back" href="../../source/cleands.base.html#cleands.base.parametric_distribution_model.out_of_sample_deviance">[docs]</a>
+    <span class="k">def</span> <span class="nf">out_of_sample_deviance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Deviance on arbitrary data.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            target (np.ndarray): Data on which to compute deviance.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            np.ndarray: Deviance value(s).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="mi">2</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">out_of_sample_log_likelihood</span><span class="p">(</span><span class="n">target</span><span class="p">)</span><span class="o">-</span><span class="mi">2</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">out_of_sample_null_likelihood</span><span class="p">(</span><span class="n">target</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="prediction_likelihood_model">
+<a class="viewcode-back" href="../../source/cleands.base.html#cleands.base.prediction_likelihood_model">[docs]</a>
+<span class="k">class</span> <span class="nc">prediction_likelihood_model</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Base for prediction models that define likelihood via `evaluate_lnL`.&quot;&quot;&quot;</span>
+
+    <span class="n">y</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
+    <span class="n">n_obs</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">n_feat</span><span class="p">:</span> <span class="nb">int</span>
+
+<div class="viewcode-block" id="prediction_likelihood_model.evaluate_lnL">
+<a class="viewcode-back" href="../../source/cleands.base.html#cleands.base.prediction_likelihood_model.evaluate_lnL">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">evaluate_lnL</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pred</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Evaluate log-likelihood given predictions `pred`.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            pred (np.ndarray): Predicted values or probabilities aligned with `y`.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            float: Log-likelihood value.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="o">...</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">fitted</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Model-fitted predictions on training data.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            np.ndarray: Predictions aligned with `y`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="o">...</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">log_likelihood</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;float: Log-likelihood at fitted values.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">evaluate_lnL</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fitted</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">null_likelihood</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;float: Log-likelihood of a mean-only/constant (null) predictor.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">evaluate_lnL</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">mean</span><span class="p">()))</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">aic</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;float: Akaike Information Criterion.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_feat</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">log_likelihood</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">bic</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;float: Bayesian Information Criterion.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_obs</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_feat</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">log_likelihood</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">deviance</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;float: Deviance = 2*LL(model) - 2*LL(null).&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">log_likelihood</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">null_likelihood</span></div>
+
+
+
+<div class="viewcode-block" id="broom_model">
+<a class="viewcode-back" href="../../source/cleands.base.html#cleands.base.broom_model">[docs]</a>
+<span class="k">class</span> <span class="nc">broom_model</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Protocol for tidy/glance accessors (broom-like API).&quot;&quot;&quot;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">tidy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;pd.DataFrame: Per-parameter summary (estimates, SEs, tests, etc.).&quot;&quot;&quot;</span>
+        <span class="o">...</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">glance</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;pd.DataFrame: Model-level summary (fit statistics, diagnostics, etc.).&quot;&quot;&quot;</span>
+        <span class="o">...</span></div>
+
+
+
+<div class="viewcode-block" id="variance_model">
+<a class="viewcode-back" href="../../source/cleands.base.html#cleands.base.variance_model">[docs]</a>
+<span class="k">class</span> <span class="nc">variance_model</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Mixin for models that expose variance-covariance and inferential stats.&quot;&quot;&quot;</span>
+
+    <span class="n">_glance</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span>
+
+<div class="viewcode-block" id="variance_model.vcov_params">
+<a class="viewcode-back" href="../../source/cleands.base.html#cleands.base.variance_model.vcov_params">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">vcov_params</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Variance-covariance matrix of parameter estimates.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            np.ndarray: (p x p) covariance matrix for the first `n_feat` parameters.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="o">...</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">std_error</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;np.ndarray: Standard errors for parameters (from `vcov_params`).&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diagonal</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vcov_params</span><span class="p">))</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">t_statistic</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;np.ndarray: t-statistics = params / std_error.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">std_error</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">p_value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;np.ndarray: Two-sided p-values under Student-t with df = n_obs - n_feat.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">sp</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">cdf</span><span class="p">(</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">t_statistic</span><span class="p">),</span> <span class="n">df</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">n_obs</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_feat</span><span class="p">)</span>
+
+<div class="viewcode-block" id="variance_model.conf_int">
+<a class="viewcode-back" href="../../source/cleands.base.html#cleands.base.variance_model.conf_int">[docs]</a>
+    <span class="k">def</span> <span class="nf">conf_int</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="mf">0.95</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Confidence intervals for parameters.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            level (float): Coverage probability (default 0.95).</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            np.ndarray: 2 x p array with lower/upper bounds by column.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">spread</span> <span class="o">=</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">std_error</span> <span class="o">*</span> <span class="n">sp</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">t</span><span class="o">.</span><span class="n">ppf</span><span class="p">((</span><span class="mi">1</span> <span class="o">-</span> <span class="n">level</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">df</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">degrees_of_freedom</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">vstack</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span> <span class="o">-</span> <span class="n">spread</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span> <span class="o">+</span> <span class="n">spread</span><span class="p">)</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">tidy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;pd.DataFrame: Tidy per-parameter table (no CIs).&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">tidyci</span><span class="p">(</span><span class="n">ci</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+<div class="viewcode-block" id="variance_model.tidyci">
+<a class="viewcode-back" href="../../source/cleands.base.html#cleands.base.variance_model.tidyci">[docs]</a>
+    <span class="k">def</span> <span class="nf">tidyci</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="mf">0.95</span><span class="p">,</span> <span class="n">ci</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Tidy per-parameter table with optional confidence intervals.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            level (float): CI level (default 0.95).</span>
+<span class="sd">            ci (bool): If True, include CI columns.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pd.DataFrame: Columns include variable, estimate, std.error, t.statistic, p.value,</span>
+<span class="sd">                and optionally ci.lower, ci.upper.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_feat</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[:</span><span class="n">n</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">std_error</span><span class="p">[:</span><span class="n">n</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">t_statistic</span><span class="p">[:</span><span class="n">n</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">p_value</span><span class="p">[:</span><span class="n">n</span><span class="p">]]</span>
+        <span class="n">cols</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;variable&#39;</span><span class="p">,</span> <span class="s1">&#39;estimate&#39;</span><span class="p">,</span> <span class="s1">&#39;std.error&#39;</span><span class="p">,</span> <span class="s1">&#39;t.statistic&#39;</span><span class="p">,</span> <span class="s1">&#39;p.value&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">ci</span><span class="p">:</span>
+            <span class="n">df</span> <span class="o">+=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">conf_int</span><span class="p">(</span><span class="n">level</span><span class="p">)[:,</span> <span class="p">:</span><span class="n">n</span><span class="p">]]</span>
+            <span class="n">cols</span> <span class="o">+=</span> <span class="p">[</span><span class="s1">&#39;ci.lower&#39;</span><span class="p">,</span> <span class="s1">&#39;ci.upper&#39;</span><span class="p">]</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span><span class="n">df</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">cols</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">df</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">glance</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;pd.DataFrame: Model-level summary table.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_glance</span>
+
+    <span class="nd">@glance</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">glance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the glance DataFrame.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_glance</span> <span class="o">=</span> <span class="n">x</span></div>
+
+
+
+<div class="viewcode-block" id="SupervisedModel">
+<a class="viewcode-back" href="../../source/cleands.base.html#cleands.base.SupervisedModel">[docs]</a>
+<span class="k">class</span> <span class="nc">SupervisedModel</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Abstract base class for supervised models constructed from a formula.</span>
+
+<span class="sd">    Subclasses must set the class attribute :attr:`MODEL_TYPE` to a concrete</span>
+<span class="sd">    supervised model implementation. This wrapper handles parsing a formula,</span>
+<span class="sd">    extracting predictor and response variables, and fitting the underlying</span>
+<span class="sd">    algorithm.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        formula (str): Formula string used to specify the model.</span>
+<span class="sd">        x_vars (list[str]): Names of predictor variables.</span>
+<span class="sd">        y_var (str): Name of response variable.</span>
+<span class="sd">        data (pd.DataFrame): Parsed DataFrame containing predictors and response.</span>
+<span class="sd">        model (supervised_model): Fitted underlying model implementation.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">MODEL_TYPE</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="n">Type</span><span class="p">[</span><span class="s2">&quot;supervised_model&quot;</span><span class="p">]]</span>  <span class="c1"># must be provided by subclasses</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">formula</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize and fit a supervised model.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            formula (str): Patsy-like formula string (e.g., ``&quot;y ~ x1 + x2&quot;``).</span>
+<span class="sd">            data (pd.DataFrame): Input DataFrame containing all variables.</span>
+<span class="sd">            *args: Positional arguments passed to the underlying model type.</span>
+<span class="sd">            **kwargs: Keyword arguments passed to the underlying model type.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            TypeError: If the subclass does not define :attr:`MODEL_TYPE`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">formula</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">formula</span>
+        <span class="n">x_vars</span><span class="p">,</span> <span class="n">y_var</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">data_out</span> <span class="o">=</span> <span class="n">parse</span><span class="p">(</span><span class="n">formula</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">,</span> <span class="s2">&quot;MODEL_TYPE&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> must define MODEL_TYPE&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">x_vars</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">x_vars</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">y_var</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">y_var</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">=</span> <span class="n">data_out</span>
+
+        <span class="n">X</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">x_vars</span><span class="p">]</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">y_var</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">:</span> <span class="n">supervised_model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">MODEL_TYPE</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+<div class="viewcode-block" id="SupervisedModel.tidyci">
+<a class="viewcode-back" href="../../source/cleands.base.html#cleands.base.SupervisedModel.tidyci">[docs]</a>
+    <span class="k">def</span> <span class="nf">tidyci</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">level</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.95</span><span class="p">,</span> <span class="n">ci</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a tidy coefficient table with optional confidence intervals.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            level (float, default=0.95): Confidence level for intervals.</span>
+<span class="sd">            ci (bool, default=True): Whether to include confidence intervals.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pd.DataFrame: Tidy table of parameter estimates. If the model</span>
+<span class="sd">            outputs a ``variable`` column of matching length, it is replaced</span>
+<span class="sd">            with the predictor names from :attr:`x_vars`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">outp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">tidyci</span><span class="p">(</span><span class="n">level</span><span class="p">,</span> <span class="n">ci</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s2">&quot;variable&quot;</span> <span class="ow">in</span> <span class="n">outp</span><span class="o">.</span><span class="n">columns</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">outp</span><span class="p">[</span><span class="s2">&quot;variable&quot;</span><span class="p">])</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x_vars</span><span class="p">):</span>
+            <span class="n">outp</span> <span class="o">=</span> <span class="n">outp</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="n">outp</span><span class="p">[</span><span class="s2">&quot;variable&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x_vars</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">outp</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">tidy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a tidy table of parameter estimates without confidence intervals.</span>
+
+<span class="sd">        Equivalent to calling :meth:`tidyci` with ``ci=False``.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pd.DataFrame: Table of parameter estimates.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">tidyci</span><span class="p">(</span><span class="n">ci</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">glance</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return model-level summary statistics.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pd.DataFrame: One-row DataFrame of model fit diagnostics</span>
+<span class="sd">            (e.g., log-likelihood, R², AIC).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">glance</span></div>
+
+
+
+<div class="viewcode-block" id="PredictionModel">
+<a class="viewcode-back" href="../../source/cleands.base.html#cleands.base.PredictionModel">[docs]</a>
+<span class="k">class</span> <span class="nc">PredictionModel</span><span class="p">(</span><span class="n">SupervisedModel</span><span class="p">,</span> <span class="n">ABC</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Concrete interface for supervised prediction models.</span>
+
+<span class="sd">    Extends :class:`SupervisedModel` by adding a :meth:`predict` method</span>
+<span class="sd">    for generating predictions on new data.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="PredictionModel.predict">
+<a class="viewcode-back" href="../../source/cleands.base.html#cleands.base.PredictionModel.predict">[docs]</a>
+    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate predictions on new data.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            new_data (pd.DataFrame): DataFrame containing the predictor</span>
+<span class="sd">                variables referenced in the original formula.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pd.Series: Predictions indexed to ``new_data.index`` and</span>
+<span class="sd">            named after the response variable (:attr:`y_var`).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">new_data_out</span> <span class="o">=</span> <span class="n">parse</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">formula</span><span class="p">,</span> <span class="n">new_data</span><span class="p">)</span>
+        <span class="n">yhat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">new_data_out</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">x_vars</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">yhat</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">new_data_out</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">y_var</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="ClassificationModel">
+<a class="viewcode-back" href="../../source/cleands.base.html#cleands.base.ClassificationModel">[docs]</a>
+<span class="k">class</span> <span class="nc">ClassificationModel</span><span class="p">(</span><span class="n">SupervisedModel</span><span class="p">,</span> <span class="n">ABC</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Concrete interface for supervised prediction models.</span>
+
+<span class="sd">    Extends :class:`SupervisedModel` by adding a :meth:`classify` method</span>
+<span class="sd">    for generating classifications on new data.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="ClassificationModel.classify">
+<a class="viewcode-back" href="../../source/cleands.base.html#cleands.base.ClassificationModel.classify">[docs]</a>
+    <span class="k">def</span> <span class="nf">classify</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate classifications on new data.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            new_data (pd.DataFrame): DataFrame containing the predictor</span>
+<span class="sd">                variables referenced in the original formula.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pd.Series: Classifications indexed to ``new_data.index`` and</span>
+<span class="sd">            named after the response variable (:attr:`y_var`).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">new_data_out</span> <span class="o">=</span> <span class="n">parse</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">formula</span><span class="p">,</span> <span class="n">new_data</span><span class="p">)</span>
+        <span class="n">yhat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">classify</span><span class="p">(</span><span class="n">new_data_out</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">x_vars</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">yhat</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">new_data_out</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">y_var</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ClassificationModel.predict_proba">
+<a class="viewcode-back" href="../../source/cleands.base.html#cleands.base.ClassificationModel.predict_proba">[docs]</a>
+    <span class="k">def</span> <span class="nf">predict_proba</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Predict probabilities for classes on new data.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            new_data (pd.DataFrame): DataFrame containing the predicted</span>
+<span class="sd">                points to be assigned to classes.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pd.DataFrame: Predicted probabilities with shape (n_samples, n_classes).</span>
+<span class="sd">            Columns are named ``class=0, class=1, ..., class=r`` corresponding to the</span>
+<span class="sd">            r classes returned by the underlying model.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">new_data_out</span> <span class="o">=</span> <span class="n">parse</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">formula</span><span class="p">,</span> <span class="n">new_data</span><span class="p">)</span>
+        <span class="n">Z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">new_data_out</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">x_vars</span><span class="p">])</span>  <span class="c1"># shape (n, r)</span>
+
+        <span class="c1"># build column names: class=0, class=1, ..., class=r</span>
+        <span class="n">n_classes</span> <span class="o">=</span> <span class="n">Z</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">col_names</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;class=</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_classes</span><span class="p">)]</span>
+
+        <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">Z</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">new_data_out</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">col_names</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="UnsupervisedModel">
+<a class="viewcode-back" href="../../source/cleands.base.html#cleands.base.UnsupervisedModel">[docs]</a>
+<span class="k">class</span> <span class="nc">UnsupervisedModel</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Abstract base class for unsupervised models constructed from a formula.</span>
+
+<span class="sd">    Subclasses must set the class attribute :attr:`MODEL_TYPE` to a concrete</span>
+<span class="sd">    supervised model implementation. This wrapper handles parsing a formula,</span>
+<span class="sd">    extracting predictor and response variables, and fitting the underlying</span>
+<span class="sd">    algorithm.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        formula (str): Formula string used to specify the model.</span>
+<span class="sd">        x_vars (list[str]): Names of predictor variables.</span>
+<span class="sd">        y_var (str): Name of response variable.</span>
+<span class="sd">        data (pd.DataFrame): Parsed DataFrame containing predictors and response.</span>
+<span class="sd">        model (supervised_model): Fitted underlying model implementation.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">MODEL_TYPE</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="n">Type</span><span class="p">[</span><span class="s2">&quot;unsupervised_model&quot;</span><span class="p">]]</span>  <span class="c1"># must be provided by subclasses</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">formula</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize and fit a supervised model.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            formula (str): Patsy-like formula string (e.g., ``&quot;y ~ x1 + x2&quot;``).</span>
+<span class="sd">            data (pd.DataFrame): Input DataFrame containing all variables.</span>
+<span class="sd">            *args: Positional arguments passed to the underlying model type.</span>
+<span class="sd">            **kwargs: Keyword arguments passed to the underlying model type.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            TypeError: If the subclass does not define :attr:`MODEL_TYPE`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">formula</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">formula</span>
+        <span class="n">x_vars</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">data_out</span> <span class="o">=</span> <span class="n">parse</span><span class="p">(</span><span class="n">formula</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">,</span> <span class="s2">&quot;MODEL_TYPE&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> must define MODEL_TYPE&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">x_vars</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">x_vars</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">=</span> <span class="n">data_out</span>
+
+        <span class="n">X</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">x_vars</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">:</span> <span class="n">unsupervised_model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">MODEL_TYPE</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+<div class="viewcode-block" id="UnsupervisedModel.tidyci">
+<a class="viewcode-back" href="../../source/cleands.base.html#cleands.base.UnsupervisedModel.tidyci">[docs]</a>
+    <span class="k">def</span> <span class="nf">tidyci</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">level</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.95</span><span class="p">,</span> <span class="n">ci</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a tidy coefficient table with optional confidence intervals.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            level (float, default=0.95): Confidence level for intervals.</span>
+<span class="sd">            ci (bool, default=True): Whether to include confidence intervals.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pd.DataFrame: Tidy table of parameter estimates. If the model</span>
+<span class="sd">            outputs a ``variable`` column of matching length, it is replaced</span>
+<span class="sd">            with the predictor names from :attr:`x_vars`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">outp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">tidyci</span><span class="p">(</span><span class="n">level</span><span class="p">,</span> <span class="n">ci</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s2">&quot;variable&quot;</span> <span class="ow">in</span> <span class="n">outp</span><span class="o">.</span><span class="n">columns</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">outp</span><span class="p">[</span><span class="s2">&quot;variable&quot;</span><span class="p">])</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x_vars</span><span class="p">):</span>
+            <span class="n">outp</span> <span class="o">=</span> <span class="n">outp</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="n">outp</span><span class="p">[</span><span class="s2">&quot;variable&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x_vars</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">outp</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">tidy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a tidy table of parameter estimates without confidence intervals.</span>
+
+<span class="sd">        Equivalent to calling :meth:`tidyci` with ``ci=False``.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pd.DataFrame: Table of parameter estimates.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">tidyci</span><span class="p">(</span><span class="n">ci</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">glance</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return model-level summary statistics.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pd.DataFrame: One-row DataFrame of model fit diagnostics</span>
+<span class="sd">            (e.g., log-likelihood, R², AIC).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">glance</span></div>
+
+
+<div class="viewcode-block" id="ClusteringModel">
+<a class="viewcode-back" href="../../source/cleands.base.html#cleands.base.ClusteringModel">[docs]</a>
+<span class="k">class</span> <span class="nc">ClusteringModel</span><span class="p">(</span><span class="n">SupervisedModel</span><span class="p">,</span> <span class="n">ABC</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Concrete interface for supervised clustering models.</span>
+
+<span class="sd">    Extends :class:`SupervisedModel` by adding a :meth:`cluster` method</span>
+<span class="sd">    for generating predictions on new data.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="ClusteringModel.cluster">
+<a class="viewcode-back" href="../../source/cleands.base.html#cleands.base.ClusteringModel.cluster">[docs]</a>
+    <span class="k">def</span> <span class="nf">cluster</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate predictions on new data.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            new_data (pd.DataFrame): DataFrame containing the predictor</span>
+<span class="sd">                variables referenced in the original formula.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pd.Series: Predictions indexed to ``new_data.index`` and</span>
+<span class="sd">            named after the response variable (:attr:`y_var`).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">new_data_out</span> <span class="o">=</span> <span class="n">parse</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">formula</span><span class="p">,</span> <span class="n">new_data</span><span class="p">)</span>
+        <span class="n">yhat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">cluster</span><span class="p">(</span><span class="n">new_data_out</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">x_vars</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">yhat</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">new_data_out</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;clusters&#39;</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="DimensionReductionModel">
+<a class="viewcode-back" href="../../source/cleands.base.html#cleands.base.DimensionReductionModel">[docs]</a>
+<span class="k">class</span> <span class="nc">DimensionReductionModel</span><span class="p">(</span><span class="n">SupervisedModel</span><span class="p">,</span> <span class="n">ABC</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Concrete interface for supervised dimension-reduction models.</span>
+
+<span class="sd">    Extends :class:`SupervisedModel` by adding a :meth:`reduce` method</span>
+<span class="sd">    for projecting new data into a lower-dimensional space.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="DimensionReductionModel.reduce">
+<a class="viewcode-back" href="../../source/cleands.base.html#cleands.base.DimensionReductionModel.reduce">[docs]</a>
+    <span class="k">def</span> <span class="nf">reduce</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Project new data into the reduced space.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            new_data (pd.DataFrame): DataFrame containing the predictor</span>
+<span class="sd">                variables referenced in the original formula.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pd.DataFrame: Reduced representation with shape (n_samples, r).</span>
+<span class="sd">            Columns are named ``z1, z2, ..., zr`` corresponding to the</span>
+<span class="sd">            r components returned by the underlying model.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">new_data_out</span> <span class="o">=</span> <span class="n">parse</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">formula</span><span class="p">,</span> <span class="n">new_data</span><span class="p">)</span>
+        <span class="n">Z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">reduce</span><span class="p">(</span><span class="n">new_data_out</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">x_vars</span><span class="p">])</span>  <span class="c1"># shape (n, r)</span>
+
+        <span class="c1"># build column names: z1, z2, ..., zr</span>
+        <span class="n">n_components</span> <span class="o">=</span> <span class="n">Z</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">col_names</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;z</span><span class="si">{</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_components</span><span class="p">)]</span>
+
+        <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">Z</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">new_data_out</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">col_names</span><span class="p">)</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Jason Parker.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

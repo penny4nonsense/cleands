@@ -1,0 +1,7 @@
+cleands.Clustering.kmeans module
+================================
+
+.. automodule:: cleands.Clustering.kmeans
+   :members:
+   :undoc-members:
+   :show-inheritance:

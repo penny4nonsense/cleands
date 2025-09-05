@@ -1,0 +1,395 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>cleands.Classification.nb module &mdash; cleands  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=92fd9be5" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="cleands.Classification.tree module" href="cleands.Classification.tree.html" />
+    <link rel="prev" title="cleands.Classification.lda module" href="cleands.Classification.lda.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            cleands
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="cleands.html">cleands package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="cleands.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="cleands.Classification.html">cleands.Classification package</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="cleands.Classification.html#submodules">Submodules</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="cleands.Clustering.html">cleands.Clustering package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cleands.DimensionReduction.html">cleands.DimensionReduction package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cleands.Distribution.html">cleands.Distribution package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cleands.Prediction.html">cleands.Prediction package</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cleands.html#submodules">Submodules</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">cleands</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="cleands.html">cleands package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="cleands.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="cleands.Classification.html">cleands.Classification package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="cleands.Clustering.html">cleands.Clustering package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="cleands.DimensionReduction.html">cleands.DimensionReduction package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="cleands.Distribution.html">cleands.Distribution package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="cleands.Prediction.html">cleands.Prediction package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="cleands.html#submodules">Submodules</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">cleands</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="cleands.html">cleands package</a></li>
+          <li class="breadcrumb-item"><a href="cleands.Classification.html">cleands.Classification package</a></li>
+      <li class="breadcrumb-item active">cleands.Classification.nb module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/source/cleands.Classification.nb.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-cleands.Classification.nb">
+<span id="cleands-classification-nb-module"></span><h1>cleands.Classification.nb module<a class="headerlink" href="#module-cleands.Classification.nb" title="Link to this heading"></a></h1>
+<p>Naive Bayes classifiers (Gaussian and Multinomial).</p>
+<p>This module provides a small hierarchy for Naive Bayes:</p>
+<ul class="simple">
+<li><p><cite>naive_bayes</cite>: abstract base implementing common plumbing:
+priors (optionally weighted), log-prior caching, input checks,
+and <cite>predict_proba</cite> via log-sum-exp stabilization.</p></li>
+<li><p><cite>gaussian_naive_bayes</cite>: continuous features modeled as independent
+univariate Gaussians per class with optional ridge variance <cite>reg</cite>.</p></li>
+<li><p><cite>multinomial_naive_bayes</cite>: count/nonnegative features with Laplace
+smoothing (<cite>alpha</cite>) for per-class feature probabilities.</p></li>
+</ul>
+<dl>
+<dt>Factory Aliases:</dt><dd><dl class="simple">
+<dt>GaussianNaiveBayes:</dt><dd><p>Wrapper for constructing <cite>gaussian_naive_bayes</cite> via <cite>ClassificationModel</cite>.</p>
+</dd>
+<dt>MultinomialNaiveBayes:</dt><dd><p>Wrapper for constructing <cite>multinomial_naive_bayes</cite> via <cite>ClassificationModel</cite>.</p>
+</dd>
+</dl>
+</dd>
+<dt>Typical usage example:</dt><dd><div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">cleands.Classification.nb</span> <span class="kn">import</span> <span class="n">GaussianNaiveBayes</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">GaussianNaiveBayes</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">tidy</span><span class="p">;</span> <span class="n">model</span><span class="o">.</span><span class="n">glance</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="cleands.Classification.nb.naive_bayes">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cleands.Classification.nb.</span></span><span class="sig-name descname"><span class="pre">naive_bayes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">priors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_weight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/Classification/nb.html#naive_bayes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.Classification.nb.naive_bayes" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="cleands.base.html#cleands.base.classification_model" title="cleands.base.classification_model"><code class="xref py py-class docutils literal notranslate"><span class="pre">classification_model</span></code></a></p>
+<p>Abstract Naive Bayes classifier.</p>
+<p>Handles class priors (with optional sample weights), caches log-priors,
+validates inputs, and provides stable <cite>predict_proba</cite>. Subclasses must
+implement <cite>log_likelihood(target)</cite> returning class-wise log-likelihoods.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>priors</strong> (<em>np.ndarray</em>) – Class priors of shape (K,), normalized to sum to 1.</p></li>
+<li><p><strong>_log_priors</strong> (<em>np.ndarray</em>) – Log(priors + ε) cached for numerical stability.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>X</strong> (<em>ndarray</em>)</p></li>
+<li><p><strong>y</strong> (<em>ndarray</em>)</p></li>
+<li><p><strong>priors</strong> (<em>ndarray</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>sample_weight</strong> (<em>ndarray</em><em> | </em><em>None</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="cleands.Classification.nb.naive_bayes.log_likelihood">
+<span class="sig-name descname"><span class="pre">log_likelihood</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/Classification/nb.html#naive_bayes.log_likelihood"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.Classification.nb.naive_bayes.log_likelihood" title="Link to this definition"></a></dt>
+<dd><p>Compute per-class log-likelihoods log p(x | y=k) for each row.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>target</strong> (<em>np.ndarray</em>) – Feature matrix of shape (n, p) or (p,).</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Log-likelihoods of shape (n, K).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>NotImplementedError</strong> – Must be implemented by subclasses.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cleands.Classification.nb.naive_bayes.predict_proba">
+<span class="sig-name descname"><span class="pre">predict_proba</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/Classification/nb.html#naive_bayes.predict_proba"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.Classification.nb.naive_bayes.predict_proba" title="Link to this definition"></a></dt>
+<dd><p>Predict class posterior probabilities.</p>
+<dl class="simple">
+<dt>Implements stabilized softmax over log posterior:</dt><dd><p>log p(y=k | x) ∝ log p(x | y=k) + log π_k</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>target</strong> (<em>np.ndarray</em>) – Feature matrix of shape (n, p) or (p,).</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>Posterior probabilities of shape (n, K),</dt><dd><p>rows summing to 1.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cleands.Classification.nb.gaussian_naive_bayes">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cleands.Classification.nb.</span></span><span class="sig-name descname"><span class="pre">gaussian_naive_bayes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">priors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-9</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_weight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/Classification/nb.html#gaussian_naive_bayes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.Classification.nb.gaussian_naive_bayes" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#cleands.Classification.nb.naive_bayes" title="cleands.Classification.nb.naive_bayes"><code class="xref py py-class docutils literal notranslate"><span class="pre">naive_bayes</span></code></a></p>
+<p>Gaussian Naive Bayes classifier.</p>
+<p>Assumes conditional independence across features with per-class Gaussian
+likelihoods.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> (<em>np.ndarray</em>) – Feature matrix of shape <code class="docutils literal notranslate"><span class="pre">(n_samples,</span> <span class="pre">n_features)</span></code>.</p></li>
+<li><p><strong>y</strong> (<em>np.ndarray</em>) – Integer class labels of shape <code class="docutils literal notranslate"><span class="pre">(n_samples,)</span></code>.</p></li>
+<li><p><strong>priors</strong> (<em>np.ndarray</em><em> | </em><em>None</em><em>, </em><em>optional</em>) – Class prior probabilities. If
+<code class="docutils literal notranslate"><span class="pre">None</span></code>, uses empirical class frequencies. Defaults to <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p></li>
+<li><p><strong>var_smoothing</strong> (<em>float</em><em>, </em><em>optional</em>) – Small additive term to variances for
+numerical stability. Defaults to <code class="docutils literal notranslate"><span class="pre">1e-9</span></code>.</p></li>
+<li><p><strong>reg</strong> (<em>float</em>)</p></li>
+<li><p><strong>sample_weight</strong> (<em>ndarray</em><em> | </em><em>None</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Variables<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>means</strong> (<em>np.ndarray</em>) – Per-class feature means, shape <code class="docutils literal notranslate"><span class="pre">(n_classes,</span> <span class="pre">n_features)</span></code>.</p></li>
+<li><p><strong>variances</strong> (<em>np.ndarray</em>) – Per-class feature variances, same shape as <code class="docutils literal notranslate"><span class="pre">means</span></code>.</p></li>
+<li><p><strong>priors</strong> (<em>np.ndarray</em>) – Class prior probabilities, shape <code class="docutils literal notranslate"><span class="pre">(n_classes,)</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="cleands.Classification.nb.gaussian_naive_bayes.log_likelihood">
+<span class="sig-name descname"><span class="pre">log_likelihood</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/Classification/nb.html#gaussian_naive_bayes.log_likelihood"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.Classification.nb.gaussian_naive_bayes.log_likelihood" title="Link to this definition"></a></dt>
+<dd><p>Compute log p(x | y=k) under the Gaussian NB model.</p>
+<p>Uses vectorized per-class, per-feature Gaussian log-densities with
+precomputed constants for efficiency.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>target</strong> (<em>np.ndarray</em>) – Feature matrix (n, p) or (p,).</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Log-likelihoods of shape (n, K).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cleands.Classification.nb.multinomial_naive_bayes">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cleands.Classification.nb.</span></span><span class="sig-name descname"><span class="pre">multinomial_naive_bayes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">priors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_weight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/Classification/nb.html#multinomial_naive_bayes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.Classification.nb.multinomial_naive_bayes" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#cleands.Classification.nb.naive_bayes" title="cleands.Classification.nb.naive_bayes"><code class="xref py py-class docutils literal notranslate"><span class="pre">naive_bayes</span></code></a></p>
+<p>Multinomial Naive Bayes classifier.</p>
+<p>Suitable for count-like, sparse, or term-frequency features (nonnegative).
+Uses per-class multinomial parameters with Laplace smoothing.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>alpha</strong> (<em>float</em>) – Laplace smoothing parameter (≥ 0).</p></li>
+<li><p><strong>feature_counts</strong> (<em>np.ndarray</em>) – Per-class feature totals, shape (K, p).</p></li>
+<li><p><strong>feature_probs</strong> (<em>np.ndarray</em>) – Per-class feature probabilities, shape (K, p).</p></li>
+<li><p><strong>_log_feature_probs</strong> (<em>np.ndarray</em>) – Cached log probabilities, shape (K, p).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>X</strong> (<em>ndarray</em>)</p></li>
+<li><p><strong>y</strong> (<em>ndarray</em>)</p></li>
+<li><p><strong>priors</strong> (<em>ndarray</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>alpha</strong> (<em>float</em>)</p></li>
+<li><p><strong>sample_weight</strong> (<em>ndarray</em><em> | </em><em>None</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="cleands.Classification.nb.multinomial_naive_bayes.log_likelihood">
+<span class="sig-name descname"><span class="pre">log_likelihood</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/Classification/nb.html#multinomial_naive_bayes.log_likelihood"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.Classification.nb.multinomial_naive_bayes.log_likelihood" title="Link to this definition"></a></dt>
+<dd><p>Compute log p(x | y=k) under the Multinomial NB model.</p>
+<p>Treats each sample row as a bag of feature counts (or TF-like weights).
+Log-likelihood is proportional to x · log θ_k (constant terms cancel).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>target</strong> (<em>np.ndarray</em>) – Nonnegative features, shape (n, p) or (p,).</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Log-likelihoods of shape (n, K).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If <cite>target</cite> has negative entries.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cleands.Classification.nb.GaussianNaiveBayes">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cleands.Classification.nb.</span></span><span class="sig-name descname"><span class="pre">GaussianNaiveBayes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">formula</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/Classification/nb.html#GaussianNaiveBayes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.Classification.nb.GaussianNaiveBayes" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="cleands.base.html#cleands.base.ClassificationModel" title="cleands.base.ClassificationModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">ClassificationModel</span></code></a></p>
+<p>Convenience wrapper for Gaussian Naive Bayes classification.</p>
+<p>Assumes features are conditionally independent given the class
+label and normally distributed within each class. Provides a
+formula/DataFrame interface for the
+<a class="reference internal" href="#cleands.Classification.nb.gaussian_naive_bayes" title="cleands.Classification.nb.gaussian_naive_bayes"><code class="xref py py-class docutils literal notranslate"><span class="pre">gaussian_naive_bayes</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>MODEL_TYPE</strong> (<em>ClassVar</em><em>[</em><em>Type</em><em>[</em><a class="reference internal" href="cleands.base.html#cleands.base.supervised_model" title="cleands.base.supervised_model"><em>cleands.base.supervised_model</em></a><em>]</em><em>]</em>) – Underlying model type, fixed to
+<a class="reference internal" href="#cleands.Classification.nb.gaussian_naive_bayes" title="cleands.Classification.nb.gaussian_naive_bayes"><code class="xref py py-class docutils literal notranslate"><span class="pre">gaussian_naive_bayes</span></code></a>.</p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>formula</strong> (<em>str</em>)</p></li>
+<li><p><strong>data</strong> (<em>DataFrame</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">GaussianNaiveBayes</span><span class="o">.</span><span class="n">from_formula</span><span class="p">(</span><span class="s2">&quot;y ~ x1 + x2&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">classify</span><span class="p">(</span><span class="n">df</span><span class="p">[[</span><span class="s2">&quot;x1&quot;</span><span class="p">,</span> <span class="s2">&quot;x2&quot;</span><span class="p">]])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">df</span><span class="p">[[</span><span class="s2">&quot;x1&quot;</span><span class="p">,</span> <span class="s2">&quot;x2&quot;</span><span class="p">]])</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cleands.Classification.nb.MultinomialNaiveBayes">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cleands.Classification.nb.</span></span><span class="sig-name descname"><span class="pre">MultinomialNaiveBayes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">formula</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/Classification/nb.html#MultinomialNaiveBayes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.Classification.nb.MultinomialNaiveBayes" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="cleands.base.html#cleands.base.ClassificationModel" title="cleands.base.ClassificationModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">ClassificationModel</span></code></a></p>
+<p>Convenience wrapper for Multinomial Naive Bayes classification.</p>
+<p>Assumes features are conditionally independent given the class
+label and follow a multinomial distribution. Often used for
+discrete count data such as text classification. Provides a
+formula/DataFrame interface for the
+<a class="reference internal" href="#cleands.Classification.nb.multinomial_naive_bayes" title="cleands.Classification.nb.multinomial_naive_bayes"><code class="xref py py-class docutils literal notranslate"><span class="pre">multinomial_naive_bayes</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>MODEL_TYPE</strong> (<em>ClassVar</em><em>[</em><em>Type</em><em>[</em><a class="reference internal" href="cleands.base.html#cleands.base.supervised_model" title="cleands.base.supervised_model"><em>cleands.base.supervised_model</em></a><em>]</em><em>]</em>) – Underlying model type, fixed to
+<a class="reference internal" href="#cleands.Classification.nb.multinomial_naive_bayes" title="cleands.Classification.nb.multinomial_naive_bayes"><code class="xref py py-class docutils literal notranslate"><span class="pre">multinomial_naive_bayes</span></code></a>.</p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>formula</strong> (<em>str</em>)</p></li>
+<li><p><strong>data</strong> (<em>DataFrame</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">MultinomialNaiveBayes</span><span class="o">.</span><span class="n">from_formula</span><span class="p">(</span><span class="s2">&quot;y ~ x1 + x2 + x3&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">classify</span><span class="p">(</span><span class="n">df</span><span class="p">[[</span><span class="s2">&quot;x1&quot;</span><span class="p">,</span> <span class="s2">&quot;x2&quot;</span><span class="p">,</span> <span class="s2">&quot;x3&quot;</span><span class="p">]])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">df</span><span class="p">[[</span><span class="s2">&quot;x1&quot;</span><span class="p">,</span> <span class="s2">&quot;x2&quot;</span><span class="p">,</span> <span class="s2">&quot;x3&quot;</span><span class="p">]])</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="cleands.Classification.lda.html" class="btn btn-neutral float-left" title="cleands.Classification.lda module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="cleands.Classification.tree.html" class="btn btn-neutral float-right" title="cleands.Classification.tree module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Jason Parker.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

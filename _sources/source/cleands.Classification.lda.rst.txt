@@ -1,0 +1,7 @@
+cleands.Classification.lda module
+=================================
+
+.. automodule:: cleands.Classification.lda
+   :members:
+   :undoc-members:
+   :show-inheritance:

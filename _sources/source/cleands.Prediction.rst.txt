@@ -1,0 +1,20 @@
+cleands.Prediction package
+==========================
+
+.. automodule:: cleands.Prediction
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 2
+
+   cleands.Prediction.ensemble
+   cleands.Prediction.glm
+   cleands.Prediction.knn
+   cleands.Prediction.ldv
+   cleands.Prediction.shrinkage
+   cleands.Prediction.tree

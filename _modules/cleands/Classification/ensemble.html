@@ -1,0 +1,340 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>cleands.Classification.ensemble &mdash; cleands  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=92fd9be5" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            cleands
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../source/cleands.html">cleands package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../source/modules.html">cleands</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">cleands</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">cleands.Classification.ensemble</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for cleands.Classification.ensemble</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Ensemble classification models.</span>
+
+<span class="sd">This module provides ensemble classifiers for improved predictive accuracy</span>
+<span class="sd">and stability, using bootstrap aggregation (bagging) and randomization</span>
+<span class="sd">strategies.</span>
+
+<span class="sd">Classes:</span>
+<span class="sd">    bagging_logistic_classifier:</span>
+<span class="sd">        Ensemble of logistic classifiers fit on bootstrap samples.</span>
+<span class="sd">    bagging_recursive_partitioning_classifier:</span>
+<span class="sd">        Ensemble of recursive partitioning classifiers (decision trees).</span>
+
+<span class="sd">Factory Aliases:</span>
+<span class="sd">    random_forest_classifier:</span>
+<span class="sd">        Partially-applied constructor for randomized recursive partitioning</span>
+<span class="sd">        (random forest-style) classifier.</span>
+<span class="sd">    BaggingLogisticClassifier:</span>
+<span class="sd">        Wrapper for constructing a bagged logistic classifier via ClassificationModel.</span>
+<span class="sd">    RandomForestClassifier:</span>
+<span class="sd">        Wrapper for constructing a random forest classifier via ClassificationModel.</span>
+<span class="sd">    BaggingRecursivePartitioningClassifier:</span>
+<span class="sd">        Wrapper for constructing a bagged tree classifier via ClassificationModel.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">..base</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">..utils</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">.glm</span> <span class="kn">import</span> <span class="n">logistic_classifier</span>
+<span class="kn">from</span> <span class="nn">.tree</span> <span class="kn">import</span> <span class="n">recursive_partitioning_classifier</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
+
+
+<div class="viewcode-block" id="bagging_logistic_classifier">
+<a class="viewcode-back" href="../../../source/cleands.Classification.ensemble.html#cleands.Classification.ensemble.bagging_logistic_classifier">[docs]</a>
+<span class="k">class</span> <span class="nc">bagging_logistic_classifier</span><span class="p">(</span><span class="n">logistic_classifier</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Bagged ensemble of logistic classifiers.</span>
+
+<span class="sd">    Trains multiple logistic classifiers on bootstrap resamples of the data,</span>
+<span class="sd">    then aggregates their predictions for improved robustness and variance</span>
+<span class="sd">    reduction.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        seed (int, optional): Random seed for reproducibility.</span>
+<span class="sd">        n_boot (int): Number of bootstrap samples.</span>
+<span class="sd">        bootstraps (list[logistic_classifier]): List of fitted base classifiers.</span>
+<span class="sd">        bootstrap_params (np.ndarray): Matrix of parameter estimates across bootstraps.</span>
+<span class="sd">        params (np.ndarray): Averaged parameter estimates across bootstraps.</span>
+<span class="sd">        model (abstract_logistic_regressor): Aggregated logistic regression model.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">probability</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">,</span> <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">bootstraps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize a bagged logistic classifier.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            x (np.ndarray or pd.DataFrame): Feature matrix of shape (n_samples, n_features).</span>
+<span class="sd">            y (np.ndarray): Binary response vector of shape (n_samples,).</span>
+<span class="sd">            probability (float, optional): Classification threshold. Defaults to 0.5.</span>
+<span class="sd">            seed (int, optional): Random seed for reproducibility. Defaults to None.</span>
+<span class="sd">            bootstraps (int, optional): Number of bootstrap resamples. Defaults to 1000.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">bagging_logistic_classifier</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">probability</span><span class="o">=</span><span class="n">probability</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">seed</span> <span class="o">=</span> <span class="n">seed</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_boot</span> <span class="o">=</span> <span class="n">bootstraps</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">logistic_classifier</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">probability</span><span class="o">=</span><span class="n">probability</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bootstraps</span> <span class="o">=</span> <span class="n">bootstrap</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">,</span> <span class="n">bootstraps</span><span class="o">=</span><span class="n">bootstraps</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bootstrap_params</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">item</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">params</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bootstraps</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bootstrap_params</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">vcov_params</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bootstrap_params</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">)</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bootstrap_params</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_boot</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">abstract_logistic_regressor</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">,</span> <span class="n">vcov_params</span><span class="p">)</span>
+
+<div class="viewcode-block" id="bagging_logistic_classifier.predict_proba">
+<a class="viewcode-back" href="../../../source/cleands.Classification.ensemble.html#cleands.Classification.ensemble.bagging_logistic_classifier.predict_proba">[docs]</a>
+    <span class="k">def</span> <span class="nf">predict_proba</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">newx</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Predict class probabilities by majority vote from bootstrapped models.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            newx (np.ndarray or pd.DataFrame): Feature matrix of shape (n_samples, n_features).</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            np.ndarray: Predicted probabilities of shape (n_samples, 2).</span>
+<span class="sd">                Column 0 = probability of class 0, Column 1 = probability of class 1.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">outp</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">item</span><span class="o">.</span><span class="n">classify</span><span class="p">(</span><span class="n">newx</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bootstraps</span><span class="p">])</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">0.5</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">hstack</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">outp</span><span class="p">,</span> <span class="n">outp</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="bagging_recursive_partitioning_classifier">
+<a class="viewcode-back" href="../../../source/cleands.Classification.ensemble.html#cleands.Classification.ensemble.bagging_recursive_partitioning_classifier">[docs]</a>
+<span class="k">class</span> <span class="nc">bagging_recursive_partitioning_classifier</span><span class="p">(</span><span class="n">recursive_partitioning_classifier</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Bagged ensemble of recursive partitioning classifiers (decision trees).</span>
+
+<span class="sd">    Builds multiple trees on bootstrap resamples and selects the best-performing</span>
+<span class="sd">    model (closest to ensemble fit) for stability. Can also be randomized to</span>
+<span class="sd">    emulate random forest behavior.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        seed (int, optional): Random seed for reproducibility.</span>
+<span class="sd">        n_boot (int): Number of bootstrap samples.</span>
+<span class="sd">        bootstraps (list[recursive_partitioning_classifier]): List of fitted base trees.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">bootstraps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">,</span>
+                 <span class="n">sign_level</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.95</span><span class="p">,</span> <span class="n">max_level</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+                 <span class="n">random_x</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">weights</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize a bagged recursive partitioning classifier.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            x (np.ndarray or pd.DataFrame): Feature matrix of shape (n_samples, n_features).</span>
+<span class="sd">            y (np.ndarray): Class label vector of shape (n_samples,).</span>
+<span class="sd">            seed (int, optional): Random seed for reproducibility. Defaults to None.</span>
+<span class="sd">            bootstraps (int, optional): Number of bootstrap resamples. Defaults to 1000.</span>
+<span class="sd">            sign_level (float, optional): Significance level for splitting. Defaults to 0.95.</span>
+<span class="sd">            max_level (int, optional): Maximum tree depth. Defaults to 2.</span>
+<span class="sd">            random_x (bool, optional): If True, randomly subset features at each split</span>
+<span class="sd">                (random forest-style). Defaults to False.</span>
+<span class="sd">            weights (np.ndarray, optional): Sample weights. Defaults to None.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">bagging_recursive_partitioning_classifier</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">max_level</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">seed</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_boot</span> <span class="o">=</span> <span class="n">seed</span><span class="p">,</span> <span class="n">bootstraps</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">recursive_partitioning_classifier</span><span class="p">(</span>
+            <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">sign_level</span><span class="o">=</span><span class="n">sign_level</span><span class="p">,</span> <span class="n">max_level</span><span class="o">=</span><span class="n">max_level</span><span class="p">,</span>
+            <span class="n">random_x</span><span class="o">=</span><span class="n">random_x</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">weights</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bootstraps</span> <span class="o">=</span> <span class="n">bootstrap</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">,</span> <span class="n">bootstraps</span><span class="o">=</span><span class="n">bootstraps</span><span class="p">)</span>
+        <span class="n">fit</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitted</span>
+        <span class="n">indx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">fitted</span> <span class="o">==</span> <span class="n">fit</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bootstraps</span><span class="p">])</span><span class="o">.</span><span class="n">argmax</span><span class="p">()</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bootstraps</span><span class="p">[</span><span class="n">indx</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">vars</span><span class="p">(</span><span class="n">model</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+<div class="viewcode-block" id="bagging_recursive_partitioning_classifier.predict_proba">
+<a class="viewcode-back" href="../../../source/cleands.Classification.ensemble.html#cleands.Classification.ensemble.bagging_recursive_partitioning_classifier.predict_proba">[docs]</a>
+    <span class="k">def</span> <span class="nf">predict_proba</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">fitted</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Predict class probabilities by aggregating bootstrap trees.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            target (np.ndarray or pd.DataFrame): Feature matrix of shape (n_samples, n_features).</span>
+<span class="sd">            fitted (bool, optional): If True, use fitted model attributes. Defaults to False.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            np.ndarray: Predicted class probabilities of shape (n_samples, n_classes).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">itemprob</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">item</span><span class="o">.</span><span class="n">classify</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">fitted</span><span class="o">=</span><span class="n">fitted</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bootstraps</span><span class="p">]),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="random_forest_classifier">
+<a class="viewcode-back" href="../../../source/cleands.Classification.ensemble.html#cleands.Classification.ensemble.random_forest_classifier">[docs]</a>
+<span class="k">class</span> <span class="nc">random_forest_classifier</span><span class="p">(</span><span class="n">bagging_recursive_partitioning_classifier</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Random Forest classifier using recursive partitioning trees.</span>
+
+<span class="sd">    This class implements a random forest by combining multiple</span>
+<span class="sd">    recursive partitioning classifiers with bootstrapping and random</span>
+<span class="sd">    feature sub-sampling. At each split, only a random subset of</span>
+<span class="sd">    predictors is considered, reducing correlation between trees.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        x (np.ndarray): Training feature matrix of shape (n_obs, n_feat).</span>
+<span class="sd">        y (np.ndarray): Training class labels of shape (n_obs,).</span>
+<span class="sd">        seed (int, optional): Random seed for reproducibility.</span>
+<span class="sd">        bootstraps (int, optional): Number of bootstrap resamples. Defaults to 1000.</span>
+<span class="sd">        sign_level (float, optional): Significance level for splitting. Defaults to 0.95.</span>
+<span class="sd">        max_level (int, optional): Maximum tree depth. Defaults to 2.</span>
+<span class="sd">        weights (np.ndarray, optional): Optional observation weights.</span>
+
+<span class="sd">    Inherits:</span>
+<span class="sd">        bagging_recursive_partitioning_classifier: Provides the ensemble</span>
+<span class="sd">        logic and base classification tree structure.</span>
+<span class="sd">    &quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="BaggingLogisticClassifier">
+<a class="viewcode-back" href="../../../source/cleands.Classification.ensemble.html#cleands.Classification.ensemble.BaggingLogisticClassifier">[docs]</a>
+<span class="k">class</span> <span class="nc">BaggingLogisticClassifier</span><span class="p">(</span><span class="n">ClassificationModel</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convenience wrapper for bagging logistic classification.</span>
+
+<span class="sd">    Applies the unified :class:`ClassificationModel` interface to the</span>
+<span class="sd">    :class:`bagging_logistic_classifier`, enabling construction from</span>
+<span class="sd">    formulas and DataFrames.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        MODEL_TYPE: Underlying model type, fixed to</span>
+<span class="sd">            :class:`bagging_logistic_classifier`.</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">        &gt;&gt;&gt; model = BaggingLogisticClassifier.from_formula(&quot;y ~ x1 + x2&quot;, data=df)</span>
+<span class="sd">        &gt;&gt;&gt; model.classify(df[[&quot;x1&quot;, &quot;x2&quot;]])</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">MODEL_TYPE</span> <span class="o">=</span> <span class="n">bagging_logistic_classifier</span></div>
+
+
+
+<div class="viewcode-block" id="BaggingRecursivePartitioningClassifier">
+<a class="viewcode-back" href="../../../source/cleands.Classification.ensemble.html#cleands.Classification.ensemble.BaggingRecursivePartitioningClassifier">[docs]</a>
+<span class="k">class</span> <span class="nc">BaggingRecursivePartitioningClassifier</span><span class="p">(</span><span class="n">ClassificationModel</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convenience wrapper for bagging recursive partitioning classification.</span>
+
+<span class="sd">    Provides a formula/DataFrame interface for the</span>
+<span class="sd">    :class:`bagging_recursive_partitioning_classifier`.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        MODEL_TYPE: Underlying model type, fixed to</span>
+<span class="sd">            :class:`bagging_recursive_partitioning_classifier`.</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">        &gt;&gt;&gt; model = BaggingRecursivePartitioningClassifier.from_formula(&quot;y ~ x1 + x2&quot;, data=df, max_level=3)</span>
+<span class="sd">        &gt;&gt;&gt; model.classify(df[[&quot;x1&quot;, &quot;x2&quot;]])</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">MODEL_TYPE</span> <span class="o">=</span> <span class="n">bagging_recursive_partitioning_classifier</span></div>
+
+
+
+<div class="viewcode-block" id="RandomForestClassifier">
+<a class="viewcode-back" href="../../../source/cleands.Classification.ensemble.html#cleands.Classification.ensemble.RandomForestClassifier">[docs]</a>
+<span class="k">class</span> <span class="nc">RandomForestClassifier</span><span class="p">(</span><span class="n">ClassificationModel</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convenience wrapper for random forest classification.</span>
+
+<span class="sd">    Provides a formula/DataFrame interface for the</span>
+<span class="sd">    :class:`random_forest_classifier`, which implements an ensemble of</span>
+<span class="sd">    recursive partitioning classifiers with random feature sub-sampling.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        MODEL_TYPE: Underlying model type, fixed to</span>
+<span class="sd">            :class:`random_forest_classifier`.</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">        &gt;&gt;&gt; model = RandomForestClassifier.from_formula(&quot;y ~ x1 + x2 + x3&quot;, data=df)</span>
+<span class="sd">        &gt;&gt;&gt; model.classify(df[[&quot;x1&quot;, &quot;x2&quot;, &quot;x3&quot;]])</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">MODEL_TYPE</span> <span class="o">=</span> <span class="n">random_forest_classifier</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Jason Parker.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

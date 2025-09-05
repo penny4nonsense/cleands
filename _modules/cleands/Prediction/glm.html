@@ -1,0 +1,1105 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>cleands.Prediction.glm &mdash; cleands  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=92fd9be5" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            cleands
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../source/cleands.html">cleands package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../source/modules.html">cleands</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">cleands</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">cleands.Prediction.glm</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for cleands.Prediction.glm</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">scipy</span> <span class="k">as</span> <span class="nn">sp</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Protocol</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Any</span>
+<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
+
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
+
+<span class="kn">from</span> <span class="nn">..base</span> <span class="kn">import</span> <span class="n">prediction_model</span><span class="p">,</span> <span class="n">PredictionModel</span><span class="p">,</span> <span class="n">prediction_likelihood_model</span><span class="p">,</span> <span class="n">variance_model</span>
+<span class="kn">from</span> <span class="nn">..utils</span> <span class="kn">import</span> <span class="o">*</span>
+
+
+<div class="viewcode-block" id="linear_model">
+<a class="viewcode-back" href="../../../source/cleands.Prediction.glm.html#cleands.Prediction.glm.linear_model">[docs]</a>
+<span class="k">class</span> <span class="nc">linear_model</span><span class="p">(</span><span class="n">prediction_model</span><span class="p">,</span> <span class="n">prediction_likelihood_model</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Ordinary least squares linear regression.</span>
+
+<span class="sd">    Inherits from:</span>
+<span class="sd">        - prediction_model: supervised regression base.</span>
+<span class="sd">        - prediction_likelihood_model: provides log-likelihood evaluation.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        params (np.ndarray): Estimated regression coefficients.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fit a linear regression model.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            x (np.ndarray): Design matrix of shape (n_obs, n_features).</span>
+<span class="sd">            y (np.ndarray): Response vector.</span>
+<span class="sd">            *args: Additional arguments.</span>
+<span class="sd">            **kwargs: Additional keyword arguments.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">linear_model</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fit</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Estimate regression coefficients via normal equations.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">x</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">y</span><span class="p">)</span>
+
+<div class="viewcode-block" id="linear_model.predict">
+<a class="viewcode-back" href="../../../source/cleands.Prediction.glm.html#cleands.Prediction.glm.linear_model.predict">[docs]</a>
+    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">newdata</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Predict responses for new data.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            newdata (np.ndarray): Design matrix for prediction.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            np.ndarray: Predicted values.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">newdata</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span></div>
+
+
+<div class="viewcode-block" id="linear_model.evaluate_lnL">
+<a class="viewcode-back" href="../../../source/cleands.Prediction.glm.html#cleands.Prediction.glm.linear_model.evaluate_lnL">[docs]</a>
+    <span class="k">def</span> <span class="nf">evaluate_lnL</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pred</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Evaluate log-likelihood of predictions under Gaussian errors.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            pred (np.ndarray): Predicted values.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            float: Log-likelihood value.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">n_obs</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">-</span> <span class="n">pred</span><span class="p">)</span><span class="o">.</span><span class="n">var</span><span class="p">())</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="logistic_regressor">
+<a class="viewcode-back" href="../../../source/cleands.Prediction.glm.html#cleands.Prediction.glm.logistic_regressor">[docs]</a>
+<span class="k">class</span> <span class="nc">logistic_regressor</span><span class="p">(</span><span class="n">linear_model</span><span class="p">,</span> <span class="n">variance_model</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Logistic regression with Newton–Raphson estimation.</span>
+
+<span class="sd">    Provides likelihood-based fit, variance-covariance matrix,</span>
+<span class="sd">    and pseudo-R² measures (McFadden, Ben-Akiva–Lerman).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fit a logistic regression model using Newton–Raphson.&quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">glance</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+            <span class="p">{</span>
+                <span class="s1">&#39;mcfaddens.r.squared&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">mcfaddens_r_squared</span><span class="p">,</span>
+                <span class="s1">&#39;ben.akiva.lerman.r.squared&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">ben_akiva_lerman_r_squared</span><span class="p">,</span>
+                <span class="s1">&#39;self.df&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_feat</span><span class="p">,</span>
+                <span class="s1">&#39;resid.df&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">degrees_of_freedom</span><span class="p">,</span>
+                <span class="s1">&#39;aic&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">aic</span><span class="p">,</span>
+                <span class="s1">&#39;bic&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">bic</span><span class="p">,</span>
+                <span class="s1">&#39;log.likelihood&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">log_likelihood</span><span class="p">,</span>
+                <span class="s1">&#39;deviance&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">deviance</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="n">index</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">]</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fit coefficients by Newton–Raphson optimization.&quot;&quot;&quot;</span>
+        <span class="n">params</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">iters</span> <span class="o">=</span> <span class="n">newton</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gradient</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">hessian</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_feat</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">params</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">vcov_params</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Variance-covariance matrix of parameters.&quot;&quot;&quot;</span>
+        <span class="n">H</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hessian</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">H</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">LinAlgError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">pinv</span><span class="p">(</span><span class="n">H</span><span class="p">)</span>
+
+<div class="viewcode-block" id="logistic_regressor.evaluate_lnL">
+<a class="viewcode-back" href="../../../source/cleands.Prediction.glm.html#cleands.Prediction.glm.logistic_regressor.evaluate_lnL">[docs]</a>
+    <span class="k">def</span> <span class="nf">evaluate_lnL</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pred</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Log-likelihood for Bernoulli outcomes.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            pred (np.ndarray): Predicted probabilities.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            float: Log-likelihood value.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">eps</span> <span class="o">=</span> <span class="mf">1e-15</span>
+        <span class="n">pred</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">pred</span><span class="p">,</span> <span class="n">eps</span><span class="p">,</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">eps</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">pred</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">)</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">pred</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="logistic_regressor.gradient">
+<a class="viewcode-back" href="../../../source/cleands.Prediction.glm.html#cleands.Prediction.glm.logistic_regressor.gradient">[docs]</a>
+    <span class="k">def</span> <span class="nf">gradient</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coefs</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Gradient of the log-likelihood.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">-</span> <span class="n">expit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">@</span> <span class="n">coefs</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="logistic_regressor.hessian">
+<a class="viewcode-back" href="../../../source/cleands.Prediction.glm.html#cleands.Prediction.glm.logistic_regressor.hessian">[docs]</a>
+    <span class="k">def</span> <span class="nf">hessian</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coefs</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Hessian matrix of the log-likelihood.&quot;&quot;&quot;</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">values</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">))</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span>
+        <span class="n">Fx</span> <span class="o">=</span> <span class="n">expit</span><span class="p">(</span><span class="n">x</span> <span class="o">@</span> <span class="n">coefs</span><span class="p">)</span>
+        <span class="n">inside</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diagflat</span><span class="p">(</span><span class="n">Fx</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">Fx</span><span class="p">))</span>
+        <span class="k">return</span> <span class="o">-</span><span class="n">x</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">inside</span> <span class="o">@</span> <span class="n">x</span></div>
+
+
+<div class="viewcode-block" id="logistic_regressor.predict">
+<a class="viewcode-back" href="../../../source/cleands.Prediction.glm.html#cleands.Prediction.glm.logistic_regressor.predict">[docs]</a>
+    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Predict probabilities for new data.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">expit</span><span class="p">(</span><span class="n">target</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">)</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">mcfaddens_r_squared</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;McFadden&#39;s pseudo-R².&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="mi">1</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">log_likelihood</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">null_likelihood</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">ben_akiva_lerman_r_squared</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Ben-Akiva–Lerman pseudo-R².&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitted</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">)</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitted</span><span class="p">))</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_obs</span>
+
+<div class="viewcode-block" id="logistic_regressor.marginal_effects">
+<a class="viewcode-back" href="../../../source/cleands.Prediction.glm.html#cleands.Prediction.glm.logistic_regressor.marginal_effects">[docs]</a>
+    <span class="k">def</span> <span class="nf">marginal_effects</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">newx</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">average</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute marginal effects of predictors.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            newx (np.ndarray | pd.DataFrame, optional): New design matrix.</span>
+<span class="sd">                If None, use training data.</span>
+<span class="sd">            average (bool): If True, return average marginal effects.</span>
+<span class="sd">                If False, return case-specific effects.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            np.ndarray: Marginal effects.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="k">if</span> <span class="n">newx</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">newx</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">)):</span>
+            <span class="n">X</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">values</span>
+        <span class="k">if</span> <span class="n">X</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_feat</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">)</span> <span class="ow">and</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_feat</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">)),</span> <span class="n">X</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;newx has shape </span><span class="si">{</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">, but model expects </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n_feat</span><span class="si">}</span><span class="s2"> features.&quot;</span><span class="p">)</span>
+        <span class="n">xb</span> <span class="o">=</span> <span class="n">X</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span>
+        <span class="n">Fx</span> <span class="o">=</span> <span class="n">expit</span><span class="p">(</span><span class="n">xb</span><span class="p">)</span>
+        <span class="n">slope</span> <span class="o">=</span> <span class="n">Fx</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">Fx</span><span class="p">)</span>
+        <span class="n">effects</span> <span class="o">=</span> <span class="n">slope</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">effects</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="k">if</span> <span class="n">average</span> <span class="k">else</span> <span class="n">effects</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="least_squares_regressor">
+<a class="viewcode-back" href="../../../source/cleands.Prediction.glm.html#cleands.Prediction.glm.least_squares_regressor">[docs]</a>
+<span class="k">class</span> <span class="nc">least_squares_regressor</span><span class="p">(</span><span class="n">linear_model</span><span class="p">,</span> <span class="n">variance_model</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Ordinary least squares regression with optional robust SEs.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">white</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">hc</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize least squares regressor.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            x (np.ndarray): Design matrix.</span>
+<span class="sd">            y (np.ndarray): Response vector.</span>
+<span class="sd">            white (bool): If True, use heteroskedasticity-consistent SEs.</span>
+<span class="sd">            hc (int): HC variant (1–5).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">least_squares_regressor</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">white</span> <span class="o">=</span> <span class="n">white</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hc</span> <span class="o">=</span> <span class="n">hc</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">glance</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+            <span class="p">{</span>
+                <span class="s1">&#39;r.squared&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">r_squared</span><span class="p">,</span>
+                <span class="s1">&#39;adjusted.r.squared&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">adjusted_r_squared</span><span class="p">,</span>
+                <span class="s1">&#39;self.df&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_feat</span><span class="p">,</span>
+                <span class="s1">&#39;resid.df&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">degrees_of_freedom</span><span class="p">,</span>
+                <span class="s1">&#39;aic&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">aic</span><span class="p">,</span>
+                <span class="s1">&#39;bic&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">bic</span><span class="p">,</span>
+                <span class="s1">&#39;log.likelihood&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">log_likelihood</span><span class="p">,</span>
+                <span class="s1">&#39;deviance&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">deviance</span><span class="p">,</span>
+                <span class="s1">&#39;resid.var&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">residual_variance</span><span class="p">,</span>
+            <span class="p">},</span> <span class="n">index</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">]</span>
+        <span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">vcov_params</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Variance-covariance matrix of parameters.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">white</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__white</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hc</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">residual_variance</span>
+
+    <span class="k">def</span> <span class="nf">__white</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hc</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;White’s heteroskedasticity-consistent covariance estimator.&quot;&quot;&quot;</span>
+        <span class="n">e</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">residuals</span><span class="o">.</span><span class="n">values</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">residuals</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">)</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">residuals</span>
+        <span class="n">esq</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__hc_correction</span><span class="p">(</span><span class="n">e</span> <span class="o">**</span> <span class="mi">2</span><span class="p">,</span> <span class="n">hc</span><span class="p">)</span>
+        <span class="n">meat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diagflat</span><span class="p">(</span><span class="n">esq</span><span class="p">)</span>
+        <span class="n">bread</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">)</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">T</span>
+        <span class="k">return</span> <span class="n">bread</span> <span class="o">@</span> <span class="n">meat</span> <span class="o">@</span> <span class="n">bread</span><span class="o">.</span><span class="n">T</span>
+
+    <span class="k">def</span> <span class="nf">__hc_correction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">esq</span><span class="p">,</span> <span class="n">hc</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Apply HC1–HC5 finite-sample corrections.&quot;&quot;&quot;</span>
+        <span class="n">mx</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">diagonal</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">@</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">T</span><span class="p">))</span>
+        <span class="k">match</span> <span class="n">hc</span><span class="p">:</span>
+            <span class="k">case</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">esq</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_obs</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_obs</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_feat</span><span class="p">)</span>
+            <span class="k">case</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="n">esq</span> <span class="o">/=</span> <span class="n">mx</span>
+            <span class="k">case</span> <span class="mi">3</span><span class="p">:</span>
+                <span class="n">esq</span> <span class="o">/=</span> <span class="n">mx</span> <span class="o">**</span> <span class="mi">2</span>
+            <span class="k">case</span> <span class="mi">4</span><span class="p">:</span>
+                <span class="n">p</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">((</span><span class="mi">1</span> <span class="o">-</span> <span class="n">mx</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()))</span>
+                <span class="n">delta</span> <span class="o">=</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">n_obs</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+                <span class="n">delta</span> <span class="o">=</span> <span class="n">hstack</span><span class="p">(</span><span class="n">delta</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_obs</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">mx</span><span class="p">)</span> <span class="o">/</span> <span class="n">p</span><span class="p">)</span>
+                <span class="n">delta</span> <span class="o">=</span> <span class="n">delta</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+                <span class="n">esq</span> <span class="o">/=</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">mx</span><span class="p">,</span> <span class="n">delta</span><span class="p">)</span>
+            <span class="k">case</span> <span class="mi">5</span><span class="p">:</span>
+                <span class="n">p</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">((</span><span class="mi">1</span> <span class="o">-</span> <span class="n">mx</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()))</span>
+                <span class="n">delta</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_obs</span> <span class="o">*</span> <span class="mf">0.7</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">mx</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">/</span> <span class="n">p</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">n_obs</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+                <span class="n">delta</span> <span class="o">=</span> <span class="n">hstack</span><span class="p">(</span><span class="n">delta</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_obs</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">mx</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span> <span class="o">/</span> <span class="n">p</span><span class="p">)</span>
+                <span class="n">delta</span> <span class="o">=</span> <span class="n">delta</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
+                <span class="n">esq</span> <span class="o">/=</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">mx</span><span class="p">,</span> <span class="n">delta</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">esq</span></div>
+
+
+
+<div class="viewcode-block" id="poisson_regressor">
+<a class="viewcode-back" href="../../../source/cleands.Prediction.glm.html#cleands.Prediction.glm.poisson_regressor">[docs]</a>
+<span class="k">class</span> <span class="nc">poisson_regressor</span><span class="p">(</span><span class="n">linear_model</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Poisson regression for count data.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fit a Poisson regression model.&quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">glance</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_glance_dict</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">])</span>
+
+    <span class="k">def</span> <span class="nf">_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fit coefficients by Newton–Raphson optimization.&quot;&quot;&quot;</span>
+        <span class="n">params</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">iters</span> <span class="o">=</span> <span class="n">newton</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gradient</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">hessian</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_feat</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">params</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">vcov_params</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Variance-covariance matrix of parameters.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hessian</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">))</span>
+
+<div class="viewcode-block" id="poisson_regressor.evaluate_lnL">
+<a class="viewcode-back" href="../../../source/cleands.Prediction.glm.html#cleands.Prediction.glm.poisson_regressor.evaluate_lnL">[docs]</a>
+    <span class="k">def</span> <span class="nf">evaluate_lnL</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pred</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Log-likelihood for Poisson-distributed outcomes.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">pred</span><span class="p">)</span>
+            <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_obs</span><span class="p">))</span> <span class="o">@</span> <span class="n">pred</span>
+            <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_obs</span><span class="p">))</span> <span class="o">@</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">sp</span><span class="o">.</span><span class="n">special</span><span class="o">.</span><span class="n">factorial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">))</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="poisson_regressor.gradient">
+<a class="viewcode-back" href="../../../source/cleands.Prediction.glm.html#cleands.Prediction.glm.poisson_regressor.gradient">[docs]</a>
+    <span class="k">def</span> <span class="nf">gradient</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coefs</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Gradient of the log-likelihood.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">@</span> <span class="n">coefs</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="poisson_regressor.hessian">
+<a class="viewcode-back" href="../../../source/cleands.Prediction.glm.html#cleands.Prediction.glm.poisson_regressor.hessian">[docs]</a>
+    <span class="k">def</span> <span class="nf">hessian</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coefs</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Hessian matrix of the log-likelihood.&quot;&quot;&quot;</span>
+        <span class="n">Fx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">@</span> <span class="n">coefs</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">Fx</span><span class="p">,</span> <span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">)):</span>
+            <span class="n">Fx</span> <span class="o">=</span> <span class="n">Fx</span><span class="o">.</span><span class="n">values</span>
+        <span class="k">return</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">np</span><span class="o">.</span><span class="n">diagflat</span><span class="p">(</span><span class="n">Fx</span><span class="p">)</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span></div>
+
+
+<div class="viewcode-block" id="poisson_regressor.predict">
+<a class="viewcode-back" href="../../../source/cleands.Prediction.glm.html#cleands.Prediction.glm.poisson_regressor.predict">[docs]</a>
+    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Predict expected counts for new data.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">target</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">)</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_glance_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Model summary statistics for glance output.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s1">&#39;self.df&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_feat</span><span class="p">,</span>
+            <span class="s1">&#39;resid.df&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">degrees_of_freedom</span><span class="p">,</span>
+            <span class="s1">&#39;aic&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">aic</span><span class="p">,</span>
+            <span class="s1">&#39;bic&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">bic</span><span class="p">,</span>
+            <span class="s1">&#39;log.likelihood&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">log_likelihood</span><span class="p">,</span>
+            <span class="s1">&#39;deviance&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">deviance</span>
+        <span class="p">}</span></div>
+
+
+
+<div class="viewcode-block" id="backward_stepwise">
+<a class="viewcode-back" href="../../../source/cleands.Prediction.glm.html#cleands.Prediction.glm.backward_stepwise">[docs]</a>
+<span class="k">def</span> <span class="nf">backward_stepwise</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+                      <span class="n">criterion</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;aic&quot;</span><span class="p">,</span>
+                      <span class="n">keep_vars</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                      <span class="n">min_features</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+                      <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Perform backward stepwise feature selection.</span>
+
+<span class="sd">    Iteratively removes features to optimize a model fit according to an</span>
+<span class="sd">    information criterion (e.g., AIC, BIC, MSE).</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        model: Model object. Either:</span>
+<span class="sd">            - Raw supervised_model with `.x` and `.y`.</span>
+<span class="sd">            - SupervisedModel wrapper with `.x_vars`, `.y_var`, `.data`, `.model_type`.</span>
+<span class="sd">        criterion: Model selection criterion (&quot;aic&quot;, &quot;bic&quot;, &quot;mse&quot;, etc.).</span>
+<span class="sd">        keep_vars: Variable names that must not be dropped.</span>
+<span class="sd">        min_features: Minimum number of features to retain.</span>
+<span class="sd">        verbose: If True, print progress messages.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Dict[str, Any]: A dictionary with:</span>
+<span class="sd">            - &quot;model&quot;: The best fitted model.</span>
+<span class="sd">            - &quot;selected_features&quot;: List of selected feature names.</span>
+<span class="sd">            - &quot;history&quot;: pd.DataFrame with stepwise history.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">keep_vars</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">keep_vars</span> <span class="ow">or</span> <span class="p">[])</span>
+
+    <span class="c1"># unwrap</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s2">&quot;x_vars&quot;</span><span class="p">):</span>   <span class="c1"># SupervisedModel</span>
+        <span class="n">x_vars</span><span class="p">,</span> <span class="n">y_var</span><span class="p">,</span> <span class="n">data</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">x_vars</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span> <span class="n">model</span><span class="o">.</span><span class="n">y_var</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">data</span>
+        <span class="n">model_type</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">model_type</span>
+        <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="n">subset</span><span class="p">):</span>
+            <span class="n">X</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">subset</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">y_var</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+            <span class="k">return</span> <span class="n">model_type</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+        <span class="n">feature_names</span> <span class="o">=</span> <span class="n">x_vars</span>
+    <span class="k">else</span><span class="p">:</span>  <span class="c1"># supervised_model</span>
+        <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">y</span>
+        <span class="n">feature_names</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;x</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])]</span>
+        <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="n">subset_idx</span><span class="p">):</span>
+            <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="n">model</span><span class="p">)(</span><span class="n">x</span><span class="p">[:,</span> <span class="n">subset_idx</span><span class="p">],</span> <span class="n">y</span><span class="p">)</span>
+
+    <span class="c1"># scoring</span>
+    <span class="k">def</span> <span class="nf">score</span><span class="p">(</span><span class="n">m</span><span class="p">):</span>
+        <span class="n">val</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">criterion</span><span class="p">)</span>
+        <span class="n">lower_is_better</span> <span class="o">=</span> <span class="n">criterion</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;aic&quot;</span><span class="p">,</span><span class="s2">&quot;bic&quot;</span><span class="p">,</span><span class="s2">&quot;mse&quot;</span><span class="p">,</span><span class="s2">&quot;misclassification_probability&quot;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">val</span><span class="p">,</span> <span class="n">lower_is_better</span>
+
+    <span class="c1"># initialize</span>
+    <span class="n">current</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">feature_names</span><span class="p">)))</span>
+    <span class="n">fitted</span> <span class="o">=</span> <span class="n">model</span>
+    <span class="n">best_score</span><span class="p">,</span> <span class="n">lower</span> <span class="o">=</span> <span class="n">score</span><span class="p">(</span><span class="n">fitted</span><span class="p">)</span>
+    <span class="n">history</span> <span class="o">=</span> <span class="p">[{</span><span class="s2">&quot;step&quot;</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span><span class="s2">&quot;removed&quot;</span><span class="p">:</span><span class="kc">None</span><span class="p">,</span><span class="s2">&quot;score&quot;</span><span class="p">:</span><span class="n">best_score</span><span class="p">,</span><span class="s2">&quot;features&quot;</span><span class="p">:</span><span class="n">feature_names</span><span class="o">.</span><span class="n">copy</span><span class="p">()}]</span>
+    <span class="n">step</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">current</span><span class="p">)</span> <span class="o">&gt;</span> <span class="nb">max</span><span class="p">(</span><span class="n">min_features</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">keep_vars</span><span class="p">)):</span>
+        <span class="n">trial</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">current</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">feature_names</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="ow">in</span> <span class="n">keep_vars</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="n">cand</span> <span class="o">=</span> <span class="p">[</span><span class="n">idx</span> <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">current</span> <span class="k">if</span> <span class="n">idx</span> <span class="o">!=</span> <span class="n">j</span><span class="p">]</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">cand_model</span> <span class="o">=</span> <span class="n">fit</span><span class="p">([</span><span class="n">feature_names</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">cand</span><span class="p">]</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">model</span><span class="p">,</span><span class="s2">&quot;x_vars&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="n">cand</span><span class="p">)</span>
+                <span class="n">sc</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">score</span><span class="p">(</span><span class="n">cand_model</span><span class="p">)</span>
+                <span class="n">trial</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">j</span><span class="p">,</span> <span class="n">sc</span><span class="p">,</span> <span class="n">cand_model</span><span class="p">))</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;skip&quot;</span><span class="p">,</span> <span class="n">feature_names</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">e</span><span class="p">)</span>
+                <span class="k">continue</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">trial</span><span class="p">:</span> <span class="k">break</span>
+
+        <span class="n">j_best</span><span class="p">,</span> <span class="n">sc_best</span><span class="p">,</span> <span class="n">best_model</span> <span class="o">=</span> <span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">trial</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">t</span><span class="p">:</span> <span class="n">t</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="k">if</span> <span class="n">lower</span> <span class="k">else</span> <span class="nb">max</span><span class="p">(</span><span class="n">trial</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">t</span><span class="p">:</span> <span class="n">t</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+        <span class="n">improved</span> <span class="o">=</span> <span class="p">(</span><span class="n">sc_best</span> <span class="o">&lt;</span> <span class="n">best_score</span> <span class="k">if</span> <span class="n">lower</span> <span class="k">else</span> <span class="n">sc_best</span> <span class="o">&gt;</span> <span class="n">best_score</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">improved</span><span class="p">:</span> <span class="k">break</span>
+
+        <span class="n">step</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;removed </span><span class="si">{</span><span class="n">feature_names</span><span class="p">[</span><span class="n">j_best</span><span class="p">]</span><span class="si">}</span><span class="s2"> -&gt; </span><span class="si">{</span><span class="n">criterion</span><span class="si">}</span><span class="s2">=</span><span class="si">{</span><span class="n">sc_best</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">current</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">j_best</span><span class="p">)</span>
+        <span class="n">best_score</span><span class="p">,</span> <span class="n">fitted</span> <span class="o">=</span> <span class="n">sc_best</span><span class="p">,</span> <span class="n">best_model</span>
+        <span class="n">history</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;step&quot;</span><span class="p">:</span><span class="n">step</span><span class="p">,</span><span class="s2">&quot;removed&quot;</span><span class="p">:</span><span class="n">feature_names</span><span class="p">[</span><span class="n">j_best</span><span class="p">],</span><span class="s2">&quot;score&quot;</span><span class="p">:</span><span class="n">best_score</span><span class="p">,</span>
+                        <span class="s2">&quot;features&quot;</span><span class="p">:[</span><span class="n">feature_names</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">current</span><span class="p">]})</span>
+
+    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;model&quot;</span><span class="p">:</span><span class="n">fitted</span><span class="p">,</span>
+            <span class="s2">&quot;selected_features&quot;</span><span class="p">:[</span><span class="n">feature_names</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">current</span><span class="p">],</span>
+            <span class="s2">&quot;history&quot;</span><span class="p">:</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">history</span><span class="p">)}</span></div>
+
+
+
+<div class="viewcode-block" id="forward_stepwise">
+<a class="viewcode-back" href="../../../source/cleands.Prediction.glm.html#cleands.Prediction.glm.forward_stepwise">[docs]</a>
+<span class="k">def</span> <span class="nf">forward_stepwise</span><span class="p">(</span>
+    <span class="n">model</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+    <span class="n">criterion</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;aic&quot;</span><span class="p">,</span>
+    <span class="n">keep_vars</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">max_features</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">prefer_intercept</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Perform forward stepwise feature selection.</span>
+
+<span class="sd">    Iteratively adds features to optimize a model according to a selection</span>
+<span class="sd">    criterion (e.g., AIC, BIC, MSE). Supports both raw models and SupervisedModel</span>
+<span class="sd">    wrappers, with optional intercept preference.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        model: Model object. Either:</span>
+<span class="sd">            - Raw supervised_model with `.x` and `.y`.</span>
+<span class="sd">            - SupervisedModel wrapper with `.x_vars`, `.y_var`, `.data`, `.model_type`.</span>
+<span class="sd">        criterion: Model selection criterion (&quot;aic&quot;, &quot;bic&quot;, &quot;mse&quot;, etc.).</span>
+<span class="sd">        keep_vars: Variables that must always be included.</span>
+<span class="sd">        max_features: Maximum number of features allowed to be selected.</span>
+<span class="sd">        prefer_intercept: If True, attempt to start with an intercept term (if detected).</span>
+<span class="sd">        verbose: If True, print progress messages.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Dict[str, Any]: A dictionary with:</span>
+<span class="sd">            - &quot;model&quot;: The best fitted model.</span>
+<span class="sd">            - &quot;selected_features&quot;: List of selected feature names.</span>
+<span class="sd">            - &quot;history&quot;: pd.DataFrame with stepwise history.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">keep_vars</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">keep_vars</span> <span class="ow">or</span> <span class="p">[])</span>
+
+    <span class="c1"># -------------------------</span>
+    <span class="c1"># Unwrap the provided model</span>
+    <span class="c1"># -------------------------</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s2">&quot;x_vars&quot;</span><span class="p">):</span>  <span class="c1"># SupervisedModel wrapper</span>
+        <span class="n">x_vars</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">x_vars</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">y_var</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">y_var</span>
+        <span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">data</span>
+        <span class="n">model_type</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">model_type</span>
+        <span class="n">feature_names</span> <span class="o">=</span> <span class="n">x_vars</span>
+
+        <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="n">subset_vars</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
+            <span class="n">X</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">subset_vars</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">y_var</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+            <span class="k">return</span> <span class="n">model_type</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+
+        <span class="c1"># Find intercept by name or const column</span>
+        <span class="n">intercept_name</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="s2">&quot;(intercept)&quot;</span> <span class="ow">in</span> <span class="n">feature_names</span><span class="p">:</span>
+            <span class="n">intercept_name</span> <span class="o">=</span> <span class="s2">&quot;(intercept)&quot;</span>
+        <span class="k">elif</span> <span class="n">prefer_intercept</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">feature_names</span><span class="p">:</span>
+                <span class="n">col</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+                <span class="k">if</span> <span class="n">_is_intercept_col</span><span class="p">(</span><span class="n">col</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+                    <span class="n">intercept_name</span> <span class="o">=</span> <span class="n">name</span>
+                    <span class="k">break</span>
+
+        <span class="n">all_pool</span> <span class="o">=</span> <span class="n">feature_names</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">start_set_vars</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">prefer_intercept</span> <span class="ow">and</span> <span class="n">intercept_name</span><span class="p">:</span>
+            <span class="n">start_set_vars</span> <span class="o">=</span> <span class="p">[</span><span class="n">intercept_name</span><span class="p">]</span>
+            <span class="n">keep_vars</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">intercept_name</span><span class="p">)</span>
+
+        <span class="n">current_vars</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">start_set_vars</span><span class="p">)</span> <span class="o">|</span> <span class="n">keep_vars</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">v</span><span class="p">:</span> <span class="n">feature_names</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">if</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">feature_names</span> <span class="k">else</span> <span class="mi">10</span><span class="o">**</span><span class="mi">9</span><span class="p">)</span>
+
+        <span class="c1"># initial fit on the full model we were given (for baseline score)</span>
+        <span class="n">full_model_score</span><span class="p">,</span> <span class="n">lower_is_better</span> <span class="o">=</span> <span class="n">_score_generic</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">model</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s2">&quot;model&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="n">model</span><span class="p">,</span> <span class="n">criterion</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>  <span class="c1"># raw supervised_model</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">x</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">y</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">feature_names</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;x</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">p</span><span class="p">)]</span>
+
+        <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="n">subset_idx</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]):</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">subset_idx</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="c1"># Can&#39;t fit a 0-column model; fallback to best single variable start</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Empty model: no columns to fit.&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="n">model</span><span class="p">)(</span><span class="n">X</span><span class="p">[:,</span> <span class="n">subset_idx</span><span class="p">],</span> <span class="n">y</span><span class="p">)</span>
+
+        <span class="c1"># Detect intercept column (constant)</span>
+        <span class="n">intercept_idx</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">prefer_intercept</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">p</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">_is_intercept_col</span><span class="p">(</span><span class="n">X</span><span class="p">[:,</span> <span class="n">j</span><span class="p">],</span> <span class="n">feature_names</span><span class="p">[</span><span class="n">j</span><span class="p">]):</span>
+                    <span class="n">intercept_idx</span> <span class="o">=</span> <span class="n">j</span>
+                    <span class="k">break</span>
+
+        <span class="n">all_pool_idx</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">p</span><span class="p">))</span>
+        <span class="n">current_idx</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">prefer_intercept</span> <span class="ow">and</span> <span class="n">intercept_idx</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">current_idx</span> <span class="o">=</span> <span class="p">[</span><span class="n">intercept_idx</span><span class="p">]</span>
+
+        <span class="c1"># baseline score from supplied model</span>
+        <span class="n">full_model_score</span><span class="p">,</span> <span class="n">lower_is_better</span> <span class="o">=</span> <span class="n">_score_generic</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">criterion</span><span class="p">)</span>
+
+    <span class="c1"># ----------------------------------------</span>
+    <span class="c1"># Helper to get candidates and do 1-step add</span>
+    <span class="c1"># ----------------------------------------</span>
+    <span class="n">history</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">step</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">def</span> <span class="nf">current_feature_list</span><span class="p">():</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s2">&quot;x_vars&quot;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">current_vars</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">feature_names</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">current_idx</span><span class="p">]</span>
+
+    <span class="c1"># Initialize with starting (possibly intercept-only or keep_vars)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s2">&quot;x_vars&quot;</span><span class="p">):</span>
+            <span class="n">init</span> <span class="o">=</span> <span class="n">fit</span><span class="p">(</span><span class="n">current_vars</span> <span class="k">if</span> <span class="n">current_vars</span> <span class="k">else</span> <span class="p">[])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">init</span> <span class="o">=</span> <span class="n">fit</span><span class="p">(</span><span class="n">current_idx</span> <span class="k">if</span> <span class="n">current_idx</span> <span class="k">else</span> <span class="p">[])</span>
+        <span class="n">best_score</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">_score_generic</span><span class="p">(</span><span class="n">init</span><span class="p">,</span> <span class="n">criterion</span><span class="p">)</span>
+        <span class="n">best_model</span> <span class="o">=</span> <span class="n">init</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+        <span class="c1"># If intercept-only (or empty) fails, fall back to greedy best single variable</span>
+        <span class="n">trial</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s2">&quot;x_vars&quot;</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="p">[</span><span class="n">v</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">all_pool</span> <span class="k">if</span> <span class="n">v</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">keep_vars</span><span class="p">]:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">m</span> <span class="o">=</span> <span class="n">fit</span><span class="p">([</span><span class="n">v</span><span class="p">]</span> <span class="o">+</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">keep_vars</span><span class="p">)))</span>
+                    <span class="n">s</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">_score_generic</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">criterion</span><span class="p">)</span>
+                    <span class="n">trial</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">v</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">m</span><span class="p">))</span>
+                <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                    <span class="k">continue</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">trial</span><span class="p">:</span>
+                <span class="k">raise</span>
+            <span class="n">v_best</span><span class="p">,</span> <span class="n">s_best</span><span class="p">,</span> <span class="n">m_best</span> <span class="o">=</span> <span class="p">(</span><span class="nb">min</span> <span class="k">if</span> <span class="n">lower_is_better</span> <span class="k">else</span> <span class="nb">max</span><span class="p">)(</span><span class="n">trial</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">t</span><span class="p">:</span> <span class="n">t</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">current_vars</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">v_best</span><span class="p">])</span> <span class="o">|</span> <span class="n">keep_vars</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">v</span><span class="p">:</span> <span class="n">feature_names</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">if</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">feature_names</span> <span class="k">else</span> <span class="mi">10</span><span class="o">**</span><span class="mi">9</span><span class="p">)</span>
+            <span class="n">best_score</span><span class="p">,</span> <span class="n">best_model</span> <span class="o">=</span> <span class="n">s_best</span><span class="p">,</span> <span class="n">m_best</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">pool</span> <span class="o">=</span> <span class="p">[</span><span class="n">j</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">all_pool_idx</span> <span class="k">if</span> <span class="n">j</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="n">current_idx</span><span class="p">)]</span>
+            <span class="n">trial</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">pool</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">m</span> <span class="o">=</span> <span class="n">fit</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">j</span><span class="p">])</span> <span class="o">|</span> <span class="nb">set</span><span class="p">(</span><span class="n">current_idx</span><span class="p">))))</span>
+                    <span class="n">s</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">_score_generic</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">criterion</span><span class="p">)</span>
+                    <span class="n">trial</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">j</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">m</span><span class="p">))</span>
+                <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                    <span class="k">continue</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">trial</span><span class="p">:</span>
+                <span class="k">raise</span>
+            <span class="n">j_best</span><span class="p">,</span> <span class="n">s_best</span><span class="p">,</span> <span class="n">m_best</span> <span class="o">=</span> <span class="p">(</span><span class="nb">min</span> <span class="k">if</span> <span class="n">lower_is_better</span> <span class="k">else</span> <span class="nb">max</span><span class="p">)(</span><span class="n">trial</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">t</span><span class="p">:</span> <span class="n">t</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">current_idx</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">j_best</span><span class="p">])</span> <span class="o">|</span> <span class="nb">set</span><span class="p">(</span><span class="n">current_idx</span><span class="p">))</span>
+            <span class="n">best_score</span><span class="p">,</span> <span class="n">best_model</span> <span class="o">=</span> <span class="n">s_best</span><span class="p">,</span> <span class="n">m_best</span>
+
+    <span class="n">history</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;step&quot;</span><span class="p">:</span> <span class="n">step</span><span class="p">,</span> <span class="s2">&quot;added&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;score&quot;</span><span class="p">:</span> <span class="n">best_score</span><span class="p">,</span> <span class="s2">&quot;features&quot;</span><span class="p">:</span> <span class="n">current_feature_list</span><span class="p">()})</span>
+
+    <span class="c1"># Limit size</span>
+    <span class="n">target_max</span> <span class="o">=</span> <span class="n">max_features</span> <span class="k">if</span> <span class="n">max_features</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">feature_names</span><span class="p">))</span>
+
+    <span class="c1"># ------------------------------------------------</span>
+    <span class="c1"># Greedy forward: add the single best new variable</span>
+    <span class="c1"># ------------------------------------------------</span>
+    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s2">&quot;x_vars&quot;</span><span class="p">):</span>
+            <span class="n">pool</span> <span class="o">=</span> <span class="p">[</span><span class="n">v</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">all_pool</span> <span class="k">if</span> <span class="n">v</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">current_vars</span><span class="p">]</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">current_vars</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">target_max</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">pool</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">break</span>
+
+            <span class="n">trials</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">pool</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">cand</span> <span class="o">=</span> <span class="n">current_vars</span> <span class="o">+</span> <span class="p">[</span><span class="n">v</span><span class="p">]</span>
+                    <span class="n">m</span> <span class="o">=</span> <span class="n">fit</span><span class="p">(</span><span class="n">cand</span><span class="p">)</span>
+                    <span class="n">sc</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">_score_generic</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">criterion</span><span class="p">)</span>
+                    <span class="n">trials</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">v</span><span class="p">,</span> <span class="n">sc</span><span class="p">,</span> <span class="n">m</span><span class="p">))</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;skip add </span><span class="si">{</span><span class="n">v</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="k">continue</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">trials</span><span class="p">:</span>
+                <span class="k">break</span>
+            <span class="n">v_best</span><span class="p">,</span> <span class="n">s_best</span><span class="p">,</span> <span class="n">m_best</span> <span class="o">=</span> <span class="p">(</span><span class="nb">min</span> <span class="k">if</span> <span class="n">lower_is_better</span> <span class="k">else</span> <span class="nb">max</span><span class="p">)(</span><span class="n">trials</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">t</span><span class="p">:</span> <span class="n">t</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">improved</span> <span class="o">=</span> <span class="p">(</span><span class="n">s_best</span> <span class="o">&lt;</span> <span class="n">best_score</span><span class="p">)</span> <span class="k">if</span> <span class="n">lower_is_better</span> <span class="k">else</span> <span class="p">(</span><span class="n">s_best</span> <span class="o">&gt;</span> <span class="n">best_score</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">improved</span><span class="p">:</span>
+                <span class="k">break</span>
+
+            <span class="n">current_vars</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">v_best</span><span class="p">)</span>
+            <span class="n">best_score</span><span class="p">,</span> <span class="n">best_model</span> <span class="o">=</span> <span class="n">s_best</span><span class="p">,</span> <span class="n">m_best</span>
+            <span class="n">step</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[+] add </span><span class="si">{</span><span class="n">v_best</span><span class="si">}</span><span class="s2"> -&gt; </span><span class="si">{</span><span class="n">criterion</span><span class="si">}</span><span class="s2">=</span><span class="si">{</span><span class="n">best_score</span><span class="si">:</span><span class="s2">.6g</span><span class="si">}</span><span class="s2"> (k=</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">current_vars</span><span class="p">)</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+            <span class="n">history</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;step&quot;</span><span class="p">:</span> <span class="n">step</span><span class="p">,</span> <span class="s2">&quot;added&quot;</span><span class="p">:</span> <span class="n">v_best</span><span class="p">,</span> <span class="s2">&quot;score&quot;</span><span class="p">:</span> <span class="n">best_score</span><span class="p">,</span> <span class="s2">&quot;features&quot;</span><span class="p">:</span> <span class="n">current_feature_list</span><span class="p">()})</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">pool</span> <span class="o">=</span> <span class="p">[</span><span class="n">j</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">all_pool_idx</span> <span class="k">if</span> <span class="n">j</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">current_idx</span><span class="p">]</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">current_idx</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">target_max</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">pool</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">break</span>
+
+            <span class="n">trials</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">pool</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">cand</span> <span class="o">=</span> <span class="n">current_idx</span> <span class="o">+</span> <span class="p">[</span><span class="n">j</span><span class="p">]</span>
+                    <span class="n">m</span> <span class="o">=</span> <span class="n">fit</span><span class="p">(</span><span class="n">cand</span><span class="p">)</span>
+                    <span class="n">sc</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">_score_generic</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">criterion</span><span class="p">)</span>
+                    <span class="n">trials</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">j</span><span class="p">,</span> <span class="n">sc</span><span class="p">,</span> <span class="n">m</span><span class="p">))</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;skip add </span><span class="si">{</span><span class="n">feature_names</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="k">continue</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">trials</span><span class="p">:</span>
+                <span class="k">break</span>
+            <span class="n">j_best</span><span class="p">,</span> <span class="n">s_best</span><span class="p">,</span> <span class="n">m_best</span> <span class="o">=</span> <span class="p">(</span><span class="nb">min</span> <span class="k">if</span> <span class="n">lower_is_better</span> <span class="k">else</span> <span class="nb">max</span><span class="p">)(</span><span class="n">trials</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">t</span><span class="p">:</span> <span class="n">t</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">improved</span> <span class="o">=</span> <span class="p">(</span><span class="n">s_best</span> <span class="o">&lt;</span> <span class="n">best_score</span><span class="p">)</span> <span class="k">if</span> <span class="n">lower_is_better</span> <span class="k">else</span> <span class="p">(</span><span class="n">s_best</span> <span class="o">&gt;</span> <span class="n">best_score</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">improved</span><span class="p">:</span>
+                <span class="k">break</span>
+
+            <span class="n">current_idx</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">j_best</span><span class="p">)</span>
+            <span class="n">best_score</span><span class="p">,</span> <span class="n">best_model</span> <span class="o">=</span> <span class="n">s_best</span><span class="p">,</span> <span class="n">m_best</span>
+            <span class="n">step</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[+] add </span><span class="si">{</span><span class="n">feature_names</span><span class="p">[</span><span class="n">j_best</span><span class="p">]</span><span class="si">}</span><span class="s2"> -&gt; </span><span class="si">{</span><span class="n">criterion</span><span class="si">}</span><span class="s2">=</span><span class="si">{</span><span class="n">best_score</span><span class="si">:</span><span class="s2">.6g</span><span class="si">}</span><span class="s2"> (k=</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">current_idx</span><span class="p">)</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+            <span class="n">history</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;step&quot;</span><span class="p">:</span> <span class="n">step</span><span class="p">,</span> <span class="s2">&quot;added&quot;</span><span class="p">:</span> <span class="n">feature_names</span><span class="p">[</span><span class="n">j_best</span><span class="p">],</span> <span class="s2">&quot;score&quot;</span><span class="p">:</span> <span class="n">best_score</span><span class="p">,</span> <span class="s2">&quot;features&quot;</span><span class="p">:</span> <span class="n">current_feature_list</span><span class="p">()})</span>
+
+    <span class="c1"># Wrap result consistently</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s2">&quot;x_vars&quot;</span><span class="p">):</span>
+        <span class="n">selected</span> <span class="o">=</span> <span class="n">current_vars</span>
+        <span class="n">final_model</span> <span class="o">=</span> <span class="n">best_model</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">selected</span> <span class="o">=</span> <span class="p">[</span><span class="n">feature_names</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">current_idx</span><span class="p">]</span>
+        <span class="n">final_model</span> <span class="o">=</span> <span class="n">best_model</span>
+
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">&quot;model&quot;</span><span class="p">:</span> <span class="n">final_model</span><span class="p">,</span>
+        <span class="s2">&quot;selected_features&quot;</span><span class="p">:</span> <span class="n">selected</span><span class="p">,</span>
+        <span class="s2">&quot;history&quot;</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">history</span><span class="p">),</span>
+    <span class="p">}</span></div>
+
+
+
+<span class="k">def</span> <span class="nf">_metric_value</span><span class="p">(</span><span class="n">m</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">metric</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Extract a metric value from a model or wrapper.</span>
+
+<span class="sd">    Tries, in order:</span>
+<span class="sd">      1) Direct attribute on the object.</span>
+<span class="sd">      2) Attribute on a wrapped `.model`.</span>
+<span class="sd">      3) Column in a `.glance` DataFrame.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        m: Model object or wrapper.</span>
+<span class="sd">        metric: Metric name (e.g., &quot;aic&quot;, &quot;bic&quot;, &quot;r_squared&quot;).</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        float: The extracted metric value.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        AttributeError: If the metric cannot be found anywhere.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">metric</span> <span class="o">=</span> <span class="n">metric</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+    <span class="c1"># direct attribute</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">metric</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">metric</span><span class="p">))</span>
+    <span class="c1"># wrapped model</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="s2">&quot;model&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">metric</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">metric</span><span class="p">))</span>
+    <span class="c1"># glance fallback</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="s2">&quot;glance&quot;</span><span class="p">):</span>
+        <span class="n">g</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">glance</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="ow">and</span> <span class="n">metric</span> <span class="ow">in</span> <span class="n">g</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">metric</span><span class="p">])</span>
+    <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Could not find metric &#39;</span><span class="si">{</span><span class="n">metric</span><span class="si">}</span><span class="s2">&#39; on model.&quot;</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_lower_is_better</span><span class="p">(</span><span class="n">metric</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Determine if the given metric is minimized.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        metric: Metric name.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        bool: True if lower values indicate better fit (e.g., AIC, BIC, MSE).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">metric</span> <span class="o">=</span> <span class="n">metric</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">metric</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;aic&quot;</span><span class="p">,</span> <span class="s2">&quot;bic&quot;</span><span class="p">,</span> <span class="s2">&quot;mse&quot;</span><span class="p">,</span> <span class="s2">&quot;misclassification_probability&quot;</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_compare_models</span><span class="p">(</span><span class="n">m1</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">m2</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">metrics</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">tol</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-12</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compare two models across multiple metrics by majority vote.</span>
+
+<span class="sd">    For each metric, the better model receives one vote. Ties on a metric</span>
+<span class="sd">    give no votes. If the total vote is tied, the first metric in `metrics`</span>
+<span class="sd">    is used as the final tie-breaker.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        m1: First model to compare.</span>
+<span class="sd">        m2: Second model to compare.</span>
+<span class="sd">        metrics: List of metrics to evaluate (e.g., [&quot;aic&quot;, &quot;bic&quot;]).</span>
+<span class="sd">        tol: Absolute tolerance for considering two values a tie.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Tuple[Any, Dict[str, str]]: (winner_model, per_metric_winner)</span>
+<span class="sd">            - winner_model: The better of (m1, m2) by the voting rule.</span>
+<span class="sd">            - per_metric_winner: Dict mapping metric → {&quot;m1&quot;,&quot;m2&quot;,&quot;tie&quot;}.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">votes</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;m1&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;m2&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;ties&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}</span>
+    <span class="n">per_metric</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">met</span> <span class="ow">in</span> <span class="n">metrics</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">v1</span> <span class="o">=</span> <span class="n">_metric_value</span><span class="p">(</span><span class="n">m1</span><span class="p">,</span> <span class="n">met</span><span class="p">)</span>
+            <span class="n">v2</span> <span class="o">=</span> <span class="n">_metric_value</span><span class="p">(</span><span class="n">m2</span><span class="p">,</span> <span class="n">met</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="c1"># if metric not available on either, skip</span>
+            <span class="k">continue</span>
+        <span class="n">better_is_lower</span> <span class="o">=</span> <span class="n">_lower_is_better</span><span class="p">(</span><span class="n">met</span><span class="p">)</span>
+        <span class="n">diff</span> <span class="o">=</span> <span class="n">v1</span> <span class="o">-</span> <span class="n">v2</span>
+        <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">diff</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">tol</span><span class="p">:</span>
+            <span class="n">votes</span><span class="p">[</span><span class="s2">&quot;ties&quot;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">per_metric</span><span class="p">[</span><span class="n">met</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;tie&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">diff</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="o">==</span> <span class="n">better_is_lower</span><span class="p">:</span>  <span class="c1"># m1 better</span>
+                <span class="n">votes</span><span class="p">[</span><span class="s2">&quot;m1&quot;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">per_metric</span><span class="p">[</span><span class="n">met</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;m1&quot;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">votes</span><span class="p">[</span><span class="s2">&quot;m2&quot;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">per_metric</span><span class="p">[</span><span class="n">met</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;m2&quot;</span>
+
+    <span class="k">if</span> <span class="n">votes</span><span class="p">[</span><span class="s2">&quot;m1&quot;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">votes</span><span class="p">[</span><span class="s2">&quot;m2&quot;</span><span class="p">]:</span>
+        <span class="n">winner</span> <span class="o">=</span> <span class="n">m1</span>
+    <span class="k">elif</span> <span class="n">votes</span><span class="p">[</span><span class="s2">&quot;m2&quot;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">votes</span><span class="p">[</span><span class="s2">&quot;m1&quot;</span><span class="p">]:</span>
+        <span class="n">winner</span> <span class="o">=</span> <span class="n">m2</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># tie across votes: fall back to first metric in the list (if available)</span>
+        <span class="n">first</span> <span class="o">=</span> <span class="n">metrics</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">v1</span> <span class="o">=</span> <span class="n">_metric_value</span><span class="p">(</span><span class="n">m1</span><span class="p">,</span> <span class="n">first</span><span class="p">)</span>
+            <span class="n">v2</span> <span class="o">=</span> <span class="n">_metric_value</span><span class="p">(</span><span class="n">m2</span><span class="p">,</span> <span class="n">first</span><span class="p">)</span>
+            <span class="n">better_is_lower</span> <span class="o">=</span> <span class="n">_lower_is_better</span><span class="p">(</span><span class="n">first</span><span class="p">)</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">v1</span> <span class="o">-</span> <span class="n">v2</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="o">==</span> <span class="n">better_is_lower</span><span class="p">:</span>
+                <span class="n">winner</span> <span class="o">=</span> <span class="n">m1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">winner</span> <span class="o">=</span> <span class="n">m2</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="c1"># if even that fails, default to m1</span>
+            <span class="n">winner</span> <span class="o">=</span> <span class="n">m1</span>
+
+    <span class="k">return</span> <span class="n">winner</span><span class="p">,</span> <span class="n">per_metric</span>
+
+
+<div class="viewcode-block" id="stepwise">
+<a class="viewcode-back" href="../../../source/cleands.Prediction.glm.html#cleands.Prediction.glm.stepwise">[docs]</a>
+<span class="k">def</span> <span class="nf">stepwise</span><span class="p">(</span>
+    <span class="n">model</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+    <span class="n">direction</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;both&quot;</span><span class="p">,</span>
+    <span class="n">criterion</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;aic&quot;</span><span class="p">,</span>
+    <span class="n">keep_vars</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">min_features</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="n">max_features</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">prefer_intercept</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Unified stepwise selection wrapper.</span>
+
+<span class="sd">    Routes to forward, backward, or both directions and returns the</span>
+<span class="sd">    best model by a vote across metrics when `direction=&quot;both&quot;`.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        model: Model object. Either:</span>
+<span class="sd">            - Raw supervised_model with `.x` and `.y`.</span>
+<span class="sd">            - SupervisedModel wrapper with `.x_vars`, `.y_var`, `.data`, `.model_type`.</span>
+<span class="sd">        direction: Stepwise direction:</span>
+<span class="sd">            - &quot;forwards&quot;: Forward selection.</span>
+<span class="sd">            - &quot;backwards&quot;: Backward elimination.</span>
+<span class="sd">            - &quot;both&quot;: Run both and select the better.</span>
+<span class="sd">        criterion: Model selection criterion (&quot;aic&quot;, &quot;bic&quot;, &quot;mse&quot;, etc.).</span>
+<span class="sd">        keep_vars: Variable names that must always be included.</span>
+<span class="sd">        min_features: Minimum number of features (for backward).</span>
+<span class="sd">        max_features: Maximum number of features (for forward).</span>
+<span class="sd">        prefer_intercept: If True, prefer/include an intercept where applicable.</span>
+<span class="sd">        verbose: If True, print selection progress.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Dict[str, Any]: A dictionary with:</span>
+<span class="sd">            - &quot;model&quot;: Best fitted model.</span>
+<span class="sd">            - &quot;selected_features&quot;: List of chosen features.</span>
+<span class="sd">            - &quot;history&quot;: pd.DataFrame of the chosen direction&#39;s history.</span>
+<span class="sd">            - &quot;direction_chosen&quot;: One of {&quot;forwards&quot;,&quot;backwards&quot;}.</span>
+<span class="sd">            - &quot;comparison&quot;: Dict of per-metric winners (only if direction=&quot;both&quot;).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">direction</span> <span class="o">=</span> <span class="n">direction</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+    <span class="n">keep_vars</span> <span class="o">=</span> <span class="n">keep_vars</span> <span class="ow">or</span> <span class="p">[]</span>
+
+    <span class="k">if</span> <span class="n">direction</span> <span class="o">==</span> <span class="s2">&quot;forwards&quot;</span><span class="p">:</span>
+        <span class="n">fwd</span> <span class="o">=</span> <span class="n">forward_stepwise</span><span class="p">(</span>
+            <span class="n">model</span><span class="p">,</span>
+            <span class="n">criterion</span><span class="o">=</span><span class="n">criterion</span><span class="p">,</span>
+            <span class="n">keep_vars</span><span class="o">=</span><span class="n">keep_vars</span><span class="p">,</span>
+            <span class="n">max_features</span><span class="o">=</span><span class="n">max_features</span><span class="p">,</span>
+            <span class="n">prefer_intercept</span><span class="o">=</span><span class="n">prefer_intercept</span><span class="p">,</span>
+            <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;model&quot;</span><span class="p">:</span> <span class="n">fwd</span><span class="p">[</span><span class="s2">&quot;model&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;selected_features&quot;</span><span class="p">:</span> <span class="n">fwd</span><span class="p">[</span><span class="s2">&quot;selected_features&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;history&quot;</span><span class="p">:</span> <span class="n">fwd</span><span class="p">[</span><span class="s2">&quot;history&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;direction_chosen&quot;</span><span class="p">:</span> <span class="s2">&quot;forwards&quot;</span><span class="p">,</span>
+        <span class="p">}</span>
+
+    <span class="k">if</span> <span class="n">direction</span> <span class="o">==</span> <span class="s2">&quot;backwards&quot;</span><span class="p">:</span>
+        <span class="n">bwd</span> <span class="o">=</span> <span class="n">backward_stepwise</span><span class="p">(</span>
+            <span class="n">model</span><span class="p">,</span>
+            <span class="n">criterion</span><span class="o">=</span><span class="n">criterion</span><span class="p">,</span>
+            <span class="n">keep_vars</span><span class="o">=</span><span class="n">keep_vars</span><span class="p">,</span>
+            <span class="n">min_features</span><span class="o">=</span><span class="n">min_features</span><span class="p">,</span>
+            <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;model&quot;</span><span class="p">:</span> <span class="n">bwd</span><span class="p">[</span><span class="s2">&quot;model&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;selected_features&quot;</span><span class="p">:</span> <span class="n">bwd</span><span class="p">[</span><span class="s2">&quot;selected_features&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;history&quot;</span><span class="p">:</span> <span class="n">bwd</span><span class="p">[</span><span class="s2">&quot;history&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;direction_chosen&quot;</span><span class="p">:</span> <span class="s2">&quot;backwards&quot;</span><span class="p">,</span>
+        <span class="p">}</span>
+
+    <span class="k">if</span> <span class="n">direction</span> <span class="o">!=</span> <span class="s2">&quot;both&quot;</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;direction must be one of {&#39;forwards&#39;,&#39;backwards&#39;,&#39;both&#39;}&quot;</span><span class="p">)</span>
+
+    <span class="c1"># run both</span>
+    <span class="n">fwd</span> <span class="o">=</span> <span class="n">forward_stepwise</span><span class="p">(</span>
+        <span class="n">model</span><span class="p">,</span>
+        <span class="n">criterion</span><span class="o">=</span><span class="n">criterion</span><span class="p">,</span>
+        <span class="n">keep_vars</span><span class="o">=</span><span class="n">keep_vars</span><span class="p">,</span>
+        <span class="n">max_features</span><span class="o">=</span><span class="n">max_features</span><span class="p">,</span>
+        <span class="n">prefer_intercept</span><span class="o">=</span><span class="n">prefer_intercept</span><span class="p">,</span>
+        <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">bwd</span> <span class="o">=</span> <span class="n">backward_stepwise</span><span class="p">(</span>
+        <span class="n">model</span><span class="p">,</span>
+        <span class="n">criterion</span><span class="o">=</span><span class="n">criterion</span><span class="p">,</span>
+        <span class="n">keep_vars</span><span class="o">=</span><span class="n">keep_vars</span><span class="p">,</span>
+        <span class="n">min_features</span><span class="o">=</span><span class="n">min_features</span><span class="p">,</span>
+        <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">m_fwd</span> <span class="o">=</span> <span class="n">fwd</span><span class="p">[</span><span class="s2">&quot;model&quot;</span><span class="p">]</span>
+    <span class="n">m_bwd</span> <span class="o">=</span> <span class="n">bwd</span><span class="p">[</span><span class="s2">&quot;model&quot;</span><span class="p">]</span>
+
+    <span class="c1"># build metric set: {criterion, aic, bic} (deduped, criterion first)</span>
+    <span class="n">metrics</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">met</span> <span class="ow">in</span> <span class="p">[</span><span class="n">criterion</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span> <span class="s2">&quot;aic&quot;</span><span class="p">,</span> <span class="s2">&quot;bic&quot;</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">met</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">metrics</span><span class="p">:</span>
+            <span class="n">metrics</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">met</span><span class="p">)</span>
+
+    <span class="n">winner_model</span><span class="p">,</span> <span class="n">per_metric</span> <span class="o">=</span> <span class="n">_compare_models</span><span class="p">(</span><span class="n">m_fwd</span><span class="p">,</span> <span class="n">m_bwd</span><span class="p">,</span> <span class="n">metrics</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">winner_model</span> <span class="ow">is</span> <span class="n">m_fwd</span><span class="p">:</span>
+        <span class="n">chosen</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;model&quot;</span><span class="p">:</span> <span class="n">fwd</span><span class="p">[</span><span class="s2">&quot;model&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;selected_features&quot;</span><span class="p">:</span> <span class="n">fwd</span><span class="p">[</span><span class="s2">&quot;selected_features&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;history&quot;</span><span class="p">:</span> <span class="n">fwd</span><span class="p">[</span><span class="s2">&quot;history&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;direction_chosen&quot;</span><span class="p">:</span> <span class="s2">&quot;forwards&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;comparison&quot;</span><span class="p">:</span> <span class="n">per_metric</span><span class="p">,</span>
+        <span class="p">}</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">chosen</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;model&quot;</span><span class="p">:</span> <span class="n">bwd</span><span class="p">[</span><span class="s2">&quot;model&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;selected_features&quot;</span><span class="p">:</span> <span class="n">bwd</span><span class="p">[</span><span class="s2">&quot;selected_features&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;history&quot;</span><span class="p">:</span> <span class="n">bwd</span><span class="p">[</span><span class="s2">&quot;history&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;direction_chosen&quot;</span><span class="p">:</span> <span class="s2">&quot;backwards&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;comparison&quot;</span><span class="p">:</span> <span class="n">per_metric</span><span class="p">,</span>
+        <span class="p">}</span>
+    <span class="k">return</span> <span class="n">chosen</span></div>
+
+
+
+<div class="viewcode-block" id="LeastSquaresRegressor">
+<a class="viewcode-back" href="../../../source/cleands.Prediction.glm.html#cleands.Prediction.glm.LeastSquaresRegressor">[docs]</a>
+<span class="k">class</span> <span class="nc">LeastSquaresRegressor</span><span class="p">(</span><span class="n">PredictionModel</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Ordinary least squares (OLS) regression.</span>
+
+<span class="sd">    A high-level wrapper around :class:`least_squares_regressor` that provides a</span>
+<span class="sd">    formula interface and pandas-aware prediction methods. Fits a linear model</span>
+<span class="sd">    by minimizing the sum of squared residuals.</span>
+
+<span class="sd">    This class inherits from :class:`PredictionModel`, which handles parsing the</span>
+<span class="sd">    formula, extracting variables from a DataFrame, and exposing tidy/glance</span>
+<span class="sd">    summaries consistent with the rest of the package.</span>
+
+<span class="sd">    Examples:</span>
+<span class="sd">        Fit an OLS regression from a formula:</span>
+
+<span class="sd">        &gt;&gt;&gt; model = LeastSquaresRegressor(&quot;y ~ x1 + x2&quot;, data=df)</span>
+<span class="sd">        &gt;&gt;&gt; model.tidy         # coefficient table</span>
+<span class="sd">        &gt;&gt;&gt; model.glance       # model summary</span>
+<span class="sd">        &gt;&gt;&gt; preds = model.predict(df)</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        MODEL_TYPE (Type[supervised_model]): The underlying implementation</span>
+<span class="sd">            (:class:`least_squares_regressor`).</span>
+<span class="sd">        formula (str): Formula string used to specify the model.</span>
+<span class="sd">        x_vars (list[str]): Predictor variable names.</span>
+<span class="sd">        y_var (str): Response variable name.</span>
+<span class="sd">        data (pd.DataFrame): Parsed DataFrame containing predictors and response.</span>
+<span class="sd">        model (least_squares_regressor): Fitted underlying OLS model.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">MODEL_TYPE</span> <span class="o">=</span> <span class="n">least_squares_regressor</span></div>
+
+
+
+<div class="viewcode-block" id="LogisticRegressor">
+<a class="viewcode-back" href="../../../source/cleands.Prediction.glm.html#cleands.Prediction.glm.LogisticRegressor">[docs]</a>
+<span class="k">class</span> <span class="nc">LogisticRegressor</span><span class="p">(</span><span class="n">PredictionModel</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Logistic regression for binary outcomes.</span>
+
+<span class="sd">    A high-level wrapper around :class:`logistic_regressor` that provides a</span>
+<span class="sd">    formula interface and pandas-aware prediction methods. Fits a generalized</span>
+<span class="sd">    linear model with a logit link, estimating probabilities for binary response</span>
+<span class="sd">    variables.</span>
+
+<span class="sd">    This class inherits from :class:`PredictionModel`, which handles parsing the</span>
+<span class="sd">    formula, extracting variables from a DataFrame, and exposing tidy/glance</span>
+<span class="sd">    summaries consistent with the rest of the package.</span>
+
+<span class="sd">    Examples:</span>
+<span class="sd">        Fit a logistic regression model from a formula:</span>
+
+<span class="sd">        &gt;&gt;&gt; model = LogisticRegressor(&quot;y ~ x1 + x2&quot;, data=df)</span>
+<span class="sd">        &gt;&gt;&gt; model.tidy          # coefficient table with log-odds</span>
+<span class="sd">        &gt;&gt;&gt; model.glance        # model fit summary (AIC, log-likelihood, etc.)</span>
+<span class="sd">        &gt;&gt;&gt; probs = model.predict(df)   # predicted probabilities</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        MODEL_TYPE (Type[supervised_model]): The underlying implementation</span>
+<span class="sd">            (:class:`logistic_regressor`).</span>
+<span class="sd">        formula (str): Formula string used to specify the model.</span>
+<span class="sd">        x_vars (list[str]): Predictor variable names.</span>
+<span class="sd">        y_var (str): Response variable name.</span>
+<span class="sd">        data (pd.DataFrame): Parsed DataFrame containing predictors and response.</span>
+<span class="sd">        model (logistic_regressor): Fitted underlying logistic regression model.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">MODEL_TYPE</span> <span class="o">=</span> <span class="n">logistic_regressor</span></div>
+
+
+
+<div class="viewcode-block" id="PoissonRegressor">
+<a class="viewcode-back" href="../../../source/cleands.Prediction.glm.html#cleands.Prediction.glm.PoissonRegressor">[docs]</a>
+<span class="k">class</span> <span class="nc">PoissonRegressor</span><span class="p">(</span><span class="n">PredictionModel</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Poisson regression for count outcomes.</span>
+
+<span class="sd">    A high-level wrapper around :class:`poisson_regressor` that provides a</span>
+<span class="sd">    formula interface and pandas-aware prediction methods. Fits a generalized</span>
+<span class="sd">    linear model with a log link, appropriate for count data where the variance</span>
+<span class="sd">    is proportional to the mean.</span>
+
+<span class="sd">    This class inherits from :class:`PredictionModel`, which handles parsing the</span>
+<span class="sd">    formula, extracting variables from a DataFrame, and exposing tidy/glance</span>
+<span class="sd">    summaries consistent with the rest of the package.</span>
+
+<span class="sd">    Examples:</span>
+<span class="sd">        Fit a Poisson regression model from a formula:</span>
+
+<span class="sd">        &gt;&gt;&gt; model = PoissonRegressor(&quot;y ~ x1 + x2&quot;, data=df)</span>
+<span class="sd">        &gt;&gt;&gt; model.tidy          # coefficient table with log-incidence ratios</span>
+<span class="sd">        &gt;&gt;&gt; model.glance        # model summary (deviance, AIC, etc.)</span>
+<span class="sd">        &gt;&gt;&gt; rates = model.predict(df)   # expected counts</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        MODEL_TYPE (Type[supervised_model]): The underlying implementation</span>
+<span class="sd">            (:class:`poisson_regressor`).</span>
+<span class="sd">        formula (str): Formula string used to specify the model.</span>
+<span class="sd">        x_vars (list[str]): Predictor variable names.</span>
+<span class="sd">        y_var (str): Response variable name.</span>
+<span class="sd">        data (pd.DataFrame): Parsed DataFrame containing predictors and response.</span>
+<span class="sd">        model (poisson_regressor): Fitted underlying Poisson regression model.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">MODEL_TYPE</span> <span class="o">=</span> <span class="n">poisson_regressor</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Jason Parker.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

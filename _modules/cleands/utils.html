@@ -1,0 +1,574 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>cleands.utils &mdash; cleands  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=92fd9be5" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            cleands
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../source/cleands.html">cleands package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../source/modules.html">cleands</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">cleands</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">cleands.utils</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for cleands.utils</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Utility functions for statistical modeling and machine learning.</span>
+
+<span class="sd">This module provides helper routines for array manipulation, encoding,</span>
+<span class="sd">optimization, resampling, and dataset splitting. Many of these utilities</span>
+<span class="sd">are thin wrappers around NumPy/SciPy/Pandas functionality but standardized</span>
+<span class="sd">for consistent use across the CleanDS framework.</span>
+
+<span class="sd">Key features:</span>
+<span class="sd">    • Encoding: one-hot, frequency, and probability encoding of categorical arrays.</span>
+<span class="sd">    • Math helpers: numerically stable sigmoid (`expit`), horizontal/vertical stack.</span>
+<span class="sd">    • Optimization: gradient descent, Newton’s method, grid search.</span>
+<span class="sd">    • Resampling: train/test split, k-fold cross-validation, bootstrap sampling.</span>
+<span class="sd">    • Combinatorics: set product and binomial coefficient matrix constructor (`C`).</span>
+<span class="sd">    • Intercept helpers: add or append intercept columns to data matrices.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">scipy</span> <span class="k">as</span> <span class="nn">sp</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Protocol</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Type</span>
+<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
+<span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span>
+<span class="kn">from</span> <span class="nn">.base</span> <span class="kn">import</span> <span class="n">supervised_model</span>
+
+
+<div class="viewcode-block" id="one_hot_encode">
+<a class="viewcode-back" href="../../source/cleands.utils.html#cleands.utils.one_hot_encode">[docs]</a>
+<span class="k">def</span> <span class="nf">one_hot_encode</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert integer vector to one-hot encoded matrix.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        x (np.ndarray): Integer labels of shape (n,).</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        np.ndarray: One-hot encoded array of shape (n, k),</span>
+<span class="sd">            where k = x.max() + 1.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">ohe</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="n">ohe</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n</span><span class="p">),</span> <span class="n">x</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="n">ohe</span></div>
+
+
+
+<div class="viewcode-block" id="itemfreq">
+<a class="viewcode-back" href="../../source/cleands.utils.html#cleands.utils.itemfreq">[docs]</a>
+<span class="k">def</span> <span class="nf">itemfreq</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">axis</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">classes</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Frequency count of integer labels.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        x (np.ndarray): Integer labels.</span>
+<span class="sd">        axis (Optional[int]): Axis to count over. Defaults to None (flattened).</span>
+<span class="sd">        classes (Optional[int]): Number of classes to assume. Defaults to x.max()+1.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        np.ndarray: Frequency counts.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([(</span><span class="n">x</span> <span class="o">==</span> <span class="n">i</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">classes</span><span class="o">==</span><span class="kc">None</span> <span class="k">else</span> <span class="n">classes</span><span class="p">)])</span><span class="o">.</span><span class="n">T</span></div>
+
+
+
+<div class="viewcode-block" id="itemprob">
+<a class="viewcode-back" href="../../source/cleands.utils.html#cleands.utils.itemprob">[docs]</a>
+<span class="k">def</span> <span class="nf">itemprob</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">axis</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">classes</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Relative frequencies (probabilities) of integer labels.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        x (np.ndarray): Integer labels.</span>
+<span class="sd">        axis (Optional[int]): Axis to compute proportions along.</span>
+<span class="sd">        classes (Optional[int]): Number of classes to assume. Defaults to x.max()+1.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        np.ndarray: Probabilities across classes.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([(</span><span class="n">x</span> <span class="o">==</span> <span class="n">i</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">classes</span><span class="o">==</span><span class="kc">None</span> <span class="k">else</span> <span class="n">classes</span><span class="p">)])</span><span class="o">.</span><span class="n">T</span></div>
+
+
+
+<div class="viewcode-block" id="expit">
+<a class="viewcode-back" href="../../source/cleands.utils.html#cleands.utils.expit">[docs]</a>
+<span class="k">def</span> <span class="nf">expit</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Numerically stable sigmoid function.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        x (np.ndarray): Input array.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        np.ndarray: Sigmoid-transformed values in (0,1).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty_like</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+
+    <span class="n">pos_mask</span> <span class="o">=</span> <span class="n">x</span> <span class="o">&gt;=</span> <span class="mi">0</span>
+    <span class="n">neg_mask</span> <span class="o">=</span> <span class="o">~</span><span class="n">pos_mask</span>
+
+    <span class="c1"># For positive x, compute normally</span>
+    <span class="n">out</span><span class="p">[</span><span class="n">pos_mask</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">x</span><span class="p">[</span><span class="n">pos_mask</span><span class="p">]))</span>
+
+    <span class="c1"># For negative x, rewrite sigmoid to avoid overflow in exp(-x)</span>
+    <span class="n">exp_x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">neg_mask</span><span class="p">])</span>
+    <span class="n">out</span><span class="p">[</span><span class="n">neg_mask</span><span class="p">]</span> <span class="o">=</span> <span class="n">exp_x</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">exp_x</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">out</span></div>
+
+
+
+<div class="viewcode-block" id="hstack">
+<a class="viewcode-back" href="../../source/cleands.utils.html#cleands.utils.hstack">[docs]</a>
+<span class="k">def</span> <span class="nf">hstack</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Column-wise stack with auto-reshaping of 1D arrays.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        *args (np.ndarray): Arrays to stack.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        np.ndarray: Horizontally stacked 2D array.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">([</span><span class="n">item</span> <span class="k">if</span> <span class="n">item</span><span class="o">.</span><span class="n">ndim</span><span class="o">==</span><span class="mi">2</span> <span class="k">else</span> <span class="n">item</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">args</span><span class="p">])</span></div>
+
+
+
+<div class="viewcode-block" id="vstack">
+<a class="viewcode-back" href="../../source/cleands.utils.html#cleands.utils.vstack">[docs]</a>
+<span class="k">def</span> <span class="nf">vstack</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Row-wise stack with auto-reshaping of 1D arrays.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        *args (np.ndarray): Arrays to stack.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        np.ndarray: Vertically stacked 2D array.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">item</span> <span class="k">if</span> <span class="n">item</span><span class="o">.</span><span class="n">ndim</span><span class="o">==</span><span class="mi">2</span> <span class="k">else</span> <span class="n">item</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">args</span><span class="p">])</span></div>
+
+
+
+<div class="viewcode-block" id="bind">
+<a class="viewcode-back" href="../../source/cleands.utils.html#cleands.utils.bind">[docs]</a>
+<span class="k">def</span> <span class="nf">bind</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Concatenate arrays along first axis.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        *args (np.ndarray): Arrays to concatenate.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        np.ndarray: Concatenated array.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">args</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="grid_search">
+<a class="viewcode-back" href="../../source/cleands.utils.html#cleands.utils.grid_search">[docs]</a>
+<span class="k">def</span> <span class="nf">grid_search</span><span class="p">(</span><span class="n">func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">space</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">axis</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">maximize</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Perform grid search by evaluating a function on a search space.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        func (Callable): Function mapping space -&gt; score array.</span>
+<span class="sd">        space (np.ndarray): Search points.</span>
+<span class="sd">        axis (Optional[int]): Axis to reduce along.</span>
+<span class="sd">        maximize (bool): Whether to maximize (default False).</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        np.ndarray: Index of optimum along axis.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">func</span><span class="p">(</span><span class="n">space</span><span class="p">)</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span> <span class="k">if</span> <span class="n">maximize</span> <span class="k">else</span> <span class="n">func</span><span class="p">(</span><span class="n">space</span><span class="p">)</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="gradient_descent">
+<a class="viewcode-back" href="../../source/cleands.utils.html#cleands.utils.gradient_descent">[docs]</a>
+<span class="k">def</span> <span class="nf">gradient_descent</span><span class="p">(</span>
+    <span class="n">gradient</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
+    <span class="n">init_x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">learning_rate</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.005</span><span class="p">,</span>
+    <span class="n">threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-10</span><span class="p">,</span>
+    <span class="n">max_reps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10000</span><span class="p">,</span>
+    <span class="n">maximize</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">obj</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">step_shrink</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">,</span>
+    <span class="n">min_step</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-12</span><span class="p">,</span>
+    <span class="n">tol_step</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-12</span><span class="p">,</span>
+    <span class="n">armijo_c1</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-4</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Basic gradient method with robust stopping and optional Armijo backtracking.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        gradient: Gradient function g(x).</span>
+<span class="sd">        init_x: Initial point.</span>
+<span class="sd">        learning_rate: Initial step size.</span>
+<span class="sd">        threshold: Convergence threshold on ||g(x)||_2.</span>
+<span class="sd">        max_reps: Maximum iterations.</span>
+<span class="sd">        maximize: If True, performs gradient ascent.</span>
+<span class="sd">        obj: Optional objective function f(x). If provided, perform Armijo backtracking.</span>
+<span class="sd">        step_shrink: Backtracking multiplier in (0,1) when Armijo fails.</span>
+<span class="sd">        min_step: Minimum allowable step size during backtracking before giving up.</span>
+<span class="sd">        tol_step: Convergence threshold on parameter step size ||Δx||_2.</span>
+<span class="sd">        armijo_c1: Armijo constant (typically 1e-4).</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        (x, converged): Final iterate and convergence flag.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">init_x</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">max_reps</span><span class="p">):</span>
+        <span class="n">g</span> <span class="o">=</span> <span class="n">gradient</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">g</span><span class="p">)):</span>
+            <span class="c1"># Bail out if gradient is invalid</span>
+            <span class="k">return</span> <span class="n">x</span><span class="p">,</span> <span class="kc">False</span>
+
+        <span class="n">gnorm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="nb">ord</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">gnorm</span> <span class="o">&lt;=</span> <span class="n">threshold</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">x</span><span class="p">,</span> <span class="kc">True</span>
+
+        <span class="c1"># Descent/ascent direction</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="n">g</span> <span class="k">if</span> <span class="n">maximize</span> <span class="k">else</span> <span class="o">-</span><span class="n">g</span>
+
+        <span class="c1"># Propose step</span>
+        <span class="n">step</span> <span class="o">=</span> <span class="n">learning_rate</span>
+
+        <span class="k">if</span> <span class="n">obj</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># Fixed step</span>
+            <span class="n">x_new</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="n">step</span> <span class="o">*</span> <span class="n">d</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Armijo backtracking line search</span>
+            <span class="n">f0</span> <span class="o">=</span> <span class="n">obj</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+            <span class="c1"># Directional derivative &lt;g, d&gt;</span>
+            <span class="n">dir_deriv</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span> <span class="n">d</span><span class="o">.</span><span class="n">ravel</span><span class="p">()))</span>
+            <span class="c1"># For descent: require f(x + t d) &lt;= f(x) + c1 t &lt;g,d&gt;</span>
+            <span class="c1"># For ascent:  require f(x + t d) &gt;= f(x) + c1 t &lt;g,d&gt;</span>
+            <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="n">x_new</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="n">step</span> <span class="o">*</span> <span class="n">d</span>
+                <span class="n">f1</span> <span class="o">=</span> <span class="n">obj</span><span class="p">(</span><span class="n">x_new</span><span class="p">)</span>
+                <span class="n">sufficient</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">f1</span> <span class="o">&gt;=</span> <span class="n">f0</span> <span class="o">+</span> <span class="n">armijo_c1</span> <span class="o">*</span> <span class="n">step</span> <span class="o">*</span> <span class="n">dir_deriv</span>
+                    <span class="k">if</span> <span class="n">maximize</span>
+                    <span class="k">else</span> <span class="n">f1</span> <span class="o">&lt;=</span> <span class="n">f0</span> <span class="o">+</span> <span class="n">armijo_c1</span> <span class="o">*</span> <span class="n">step</span> <span class="o">*</span> <span class="n">dir_deriv</span>
+                <span class="p">)</span>
+                <span class="k">if</span> <span class="n">sufficient</span> <span class="ow">or</span> <span class="n">step</span> <span class="o">&lt;</span> <span class="n">min_step</span><span class="p">:</span>
+                    <span class="k">break</span>
+                <span class="n">step</span> <span class="o">*=</span> <span class="n">step_shrink</span>
+
+        <span class="c1"># Check step size convergence</span>
+        <span class="n">delta</span> <span class="o">=</span> <span class="n">x_new</span> <span class="o">-</span> <span class="n">x</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">delta</span><span class="p">)):</span>
+            <span class="k">return</span> <span class="n">x</span><span class="p">,</span> <span class="kc">False</span>
+
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">delta</span><span class="p">,</span> <span class="nb">ord</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">tol_step</span><span class="p">:</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">x_new</span>
+            <span class="k">return</span> <span class="n">x</span><span class="p">,</span> <span class="kc">True</span>
+
+        <span class="n">x</span> <span class="o">=</span> <span class="n">x_new</span>
+
+    <span class="k">return</span> <span class="n">x</span><span class="p">,</span> <span class="kc">False</span></div>
+
+
+
+<div class="viewcode-block" id="newton">
+<a class="viewcode-back" href="../../source/cleands.utils.html#cleands.utils.newton">[docs]</a>
+<span class="k">def</span> <span class="nf">newton</span><span class="p">(</span><span class="n">gradient</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">hessian</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
+           <span class="n">init_x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">max_reps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span> <span class="n">tolerance</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-14</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Newton-Raphson optimizer for root-finding/maximum likelihood.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        gradient (Callable): Gradient function.</span>
+<span class="sd">        hessian (Callable): Hessian function.</span>
+<span class="sd">        init_x (np.ndarray): Initial guess.</span>
+<span class="sd">        max_reps (int): Max iterations.</span>
+<span class="sd">        tolerance (float): Stopping threshold for update size.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Tuple[np.ndarray, int]: (solution, iterations) if converged.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        Exception: If convergence not achieved.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">init_x</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">max_reps</span><span class="p">):</span>
+        <span class="n">hess</span> <span class="o">=</span> <span class="n">hessian</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">grad</span> <span class="o">=</span> <span class="n">gradient</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">update</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">hess</span><span class="p">,</span> <span class="n">grad</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">+=</span> <span class="n">update</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">update</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">&lt;</span> <span class="n">tolerance</span><span class="p">:</span> <span class="k">return</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Newton did not converge&#39;</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="add_intercept">
+<a class="viewcode-back" href="../../source/cleands.utils.html#cleands.utils.add_intercept">[docs]</a>
+<span class="k">def</span> <span class="nf">add_intercept</span><span class="p">(</span><span class="n">x_vars</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">y_var</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Add an intercept column to a DataFrame and feature list.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        x_vars (list[str]): Feature variable names.</span>
+<span class="sd">        y_var (str): Target variable name.</span>
+<span class="sd">        data (pd.DataFrame): Input dataset.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Tuple[list[str], str, pd.DataFrame]: Updated (x_vars, y_var, new data).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">newdf</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">x_vars</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;(intercept)&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">x_vars</span>
+    <span class="n">newdf</span><span class="p">[</span><span class="s1">&#39;(intercept)&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],))</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">x_vars</span><span class="p">,</span> <span class="n">y_var</span><span class="p">,</span> <span class="n">newdf</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="test_train_split">
+<a class="viewcode-back" href="../../source/cleands.utils.html#cleands.utils.test_train_split">[docs]</a>
+<span class="k">def</span> <span class="nf">test_train_split</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">test_ratio</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">,</span> <span class="n">seed</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Split arrays into train/test sets.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        x (np.ndarray): Features.</span>
+<span class="sd">        y (np.ndarray): Targets.</span>
+<span class="sd">        test_ratio (float): Proportion for test set.</span>
+<span class="sd">        seed (Optional[int]): RNG seed.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Tuple[np.ndarray]: (x_train, x_test, y_train, y_test).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">n_test</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">n</span> <span class="o">*</span> <span class="n">test_ratio</span><span class="p">)</span>
+    <span class="n">n_train</span> <span class="o">=</span> <span class="n">n</span> <span class="o">-</span> <span class="n">n_test</span>
+    <span class="k">if</span> <span class="n">seed</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+    <span class="n">shuffle</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">permutation</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+    <span class="n">x_test</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">shuffle</span><span class="p">,</span> <span class="p">:][:</span><span class="n">n_test</span><span class="p">,</span> <span class="p">:]</span>
+    <span class="n">x_train</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">shuffle</span><span class="p">,</span> <span class="p">:][</span><span class="n">n_test</span><span class="p">:,</span> <span class="p">:]</span>
+    <span class="n">y_test</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="n">shuffle</span><span class="p">][:</span><span class="n">n_test</span><span class="p">]</span>
+    <span class="n">y_train</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="n">shuffle</span><span class="p">][</span><span class="n">n_test</span><span class="p">:]</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">x_train</span><span class="p">,</span> <span class="n">x_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="test_split_pandas">
+<a class="viewcode-back" href="../../source/cleands.utils.html#cleands.utils.test_split_pandas">[docs]</a>
+<span class="k">def</span> <span class="nf">test_split_pandas</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">seed</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">test_ratio</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Split a Pandas DataFrame into train/test subsets.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        data (pd.DataFrame): Dataset.</span>
+<span class="sd">        seed (Optional[int]): RNG seed.</span>
+<span class="sd">        test_ratio (float): Proportion for test set.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Tuple[pd.DataFrame]: (x_train, x_test).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">n_test</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">n</span> <span class="o">*</span> <span class="n">test_ratio</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">seed</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+    <span class="n">shuffle</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">permutation</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+    <span class="n">x_test</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">shuffle</span><span class="p">[:</span><span class="n">n_test</span><span class="p">],</span> <span class="p">:]</span>
+    <span class="n">x_train</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">shuffle</span><span class="p">[</span><span class="n">n_test</span><span class="p">:],</span> <span class="p">:]</span>
+    <span class="k">return</span> <span class="n">x_train</span><span class="p">,</span> <span class="n">x_test</span></div>
+
+
+
+<div class="viewcode-block" id="k_fold_cross_validation">
+<a class="viewcode-back" href="../../source/cleands.utils.html#cleands.utils.k_fold_cross_validation">[docs]</a>
+<span class="k">def</span> <span class="nf">k_fold_cross_validation</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">folds</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span> <span class="n">seed</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate train/test splits for k-fold cross-validation.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        x (np.ndarray): Features.</span>
+<span class="sd">        y (np.ndarray): Targets.</span>
+<span class="sd">        folds (int): Number of folds.</span>
+<span class="sd">        seed (Optional[int]): RNG seed.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        list[Tuple[np.ndarray]]: List of (x_train, x_test, y_train, y_test).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">deck</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">deck</span><span class="p">)</span>
+    <span class="n">outp</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">folds</span><span class="p">):</span>
+        <span class="n">test</span> <span class="o">=</span> <span class="n">deck</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="n">n</span> <span class="o">/</span> <span class="n">folds</span><span class="p">):</span><span class="nb">int</span><span class="p">((</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">n</span> <span class="o">/</span> <span class="n">folds</span><span class="p">)]</span>
+        <span class="n">train_lower</span> <span class="o">=</span> <span class="n">deck</span><span class="p">[:</span><span class="nb">int</span><span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="n">n</span> <span class="o">/</span> <span class="n">folds</span><span class="p">)]</span>
+        <span class="n">train_upper</span> <span class="o">=</span> <span class="n">deck</span><span class="p">[</span><span class="nb">int</span><span class="p">((</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">n</span> <span class="o">/</span> <span class="n">folds</span><span class="p">):]</span>
+        <span class="n">train</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">train_lower</span><span class="p">,</span> <span class="n">train_upper</span><span class="p">))</span>
+        <span class="n">outp</span> <span class="o">+=</span> <span class="p">[(</span><span class="n">x</span><span class="p">[</span><span class="n">train</span><span class="p">,:],</span><span class="n">x</span><span class="p">[</span><span class="n">test</span><span class="p">,:],</span><span class="n">y</span><span class="p">[</span><span class="n">train</span><span class="p">],</span><span class="n">y</span><span class="p">[</span><span class="n">test</span><span class="p">])]</span>
+    <span class="k">return</span> <span class="n">outp</span></div>
+
+
+
+<div class="viewcode-block" id="bootstrap">
+<a class="viewcode-back" href="../../source/cleands.utils.html#cleands.utils.bootstrap">[docs]</a>
+<span class="k">def</span> <span class="nf">bootstrap</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">supervised_model</span><span class="p">],</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+              <span class="n">seed</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">bootstraps</span><span class="p">:</span> <span class="nb">int</span><span class="o">=</span><span class="mi">1000</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate bootstrap resamples and fit a model on each.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        model (Type[supervised_model]): Model class to fit.</span>
+<span class="sd">        x (np.ndarray): Features.</span>
+<span class="sd">        y (np.ndarray): Targets.</span>
+<span class="sd">        seed (Optional[int]): RNG seed.</span>
+<span class="sd">        bootstraps (int): Number of bootstrap samples.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        list[supervised_model]: Fitted models from bootstrap samples.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">outp</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="n">seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">bootstraps</span><span class="p">):</span>
+        <span class="n">sample</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],))</span>
+        <span class="n">outp</span> <span class="o">+=</span> <span class="p">[</span><span class="n">model</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">sample</span><span class="p">],</span><span class="n">y</span><span class="p">[</span><span class="n">sample</span><span class="p">])]</span>
+    <span class="k">return</span> <span class="n">outp</span></div>
+
+
+
+<div class="viewcode-block" id="set_product">
+<a class="viewcode-back" href="../../source/cleands.utils.html#cleands.utils.set_product">[docs]</a>
+<span class="k">def</span> <span class="nf">set_product</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Iterable</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Cartesian product of multiple iterables.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        *args (Tuple[Iterable]): Iterables to combine.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        list[Tuple]: Cartesian product tuples.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">bind_item</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">this_iterable</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">bind_item</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">item</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">this_iterable</span><span class="p">]</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">this_iterable</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">Iterable</span><span class="p">)</span> <span class="k">else</span> <span class="p">[(</span><span class="n">item</span><span class="p">,)</span> <span class="o">+</span> <span class="n">item</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">this_iterable</span><span class="p">]</span>
+    <span class="k">return</span> <span class="p">[(</span><span class="n">x</span><span class="p">,)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="p">[</span><span class="n">bind_item</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">set_product</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">:]))</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span></div>
+
+
+
+<div class="viewcode-block" id="intercept">
+<a class="viewcode-back" href="../../source/cleands.utils.html#cleands.utils.intercept">[docs]</a>
+<span class="k">def</span> <span class="nf">intercept</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Prepend an intercept column of ones to feature matrix.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        x (np.ndarray): Feature matrix.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        np.ndarray: Feature matrix with intercept column added.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">hstack</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span><span class="n">x</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="C">
+<a class="viewcode-back" href="../../source/cleands.utils.html#cleands.utils.C">[docs]</a>
+<span class="k">def</span> <span class="nf">C</span><span class="p">(</span><span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">r</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Construct combinatorial matrix for n choose r.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        n (int): Number of elements.</span>
+<span class="sd">        r (int): Number chosen.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        np.ndarray: Binary matrix representing subsets.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        Exception: If n &lt; r.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">n</span><span class="o">==</span><span class="n">r</span><span class="p">:</span> <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span><span class="n">r</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">r</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span> <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">n</span><span class="o">&lt;</span><span class="n">r</span><span class="p">:</span> <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Invalid input n&lt;r&#39;</span><span class="p">)</span>
+    <span class="n">top_right</span> <span class="o">=</span> <span class="n">C</span><span class="p">(</span><span class="n">n</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">r</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">bottom_right</span> <span class="o">=</span> <span class="n">C</span><span class="p">(</span><span class="n">n</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">r</span><span class="p">)</span>
+    <span class="n">top</span> <span class="o">=</span> <span class="n">cds</span><span class="o">.</span><span class="n">hstack</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">top_right</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span><span class="n">top_right</span><span class="p">)</span>
+    <span class="n">bottom</span> <span class="o">=</span> <span class="n">cds</span><span class="o">.</span><span class="n">hstack</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">bottom_right</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span><span class="n">bottom_right</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">cds</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span><span class="n">top</span><span class="p">,</span><span class="n">bottom</span><span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Jason Parker.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

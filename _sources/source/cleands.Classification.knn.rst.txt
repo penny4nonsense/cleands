@@ -1,0 +1,7 @@
+cleands.Classification.knn module
+=================================
+
+.. automodule:: cleands.Classification.knn
+   :members:
+   :undoc-members:
+   :show-inheritance:

@@ -1,0 +1,15 @@
+cleands.Clustering package
+==========================
+
+.. automodule:: cleands.Clustering
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 2
+
+   cleands.Clustering.kmeans

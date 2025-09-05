@@ -1,0 +1,405 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>cleands.Classification.glm module &mdash; cleands  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=92fd9be5" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="cleands.Classification.knn module" href="cleands.Classification.knn.html" />
+    <link rel="prev" title="cleands.Classification.ensemble module" href="cleands.Classification.ensemble.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            cleands
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="cleands.html">cleands package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="cleands.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="cleands.Classification.html">cleands.Classification package</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="cleands.Classification.html#submodules">Submodules</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="cleands.Clustering.html">cleands.Clustering package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cleands.DimensionReduction.html">cleands.DimensionReduction package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cleands.Distribution.html">cleands.Distribution package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cleands.Prediction.html">cleands.Prediction package</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cleands.html#submodules">Submodules</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">cleands</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="cleands.html">cleands package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="cleands.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="cleands.Classification.html">cleands.Classification package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="cleands.Clustering.html">cleands.Clustering package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="cleands.DimensionReduction.html">cleands.DimensionReduction package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="cleands.Distribution.html">cleands.Distribution package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="cleands.Prediction.html">cleands.Prediction package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="cleands.html#submodules">Submodules</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">cleands</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="cleands.html">cleands package</a></li>
+          <li class="breadcrumb-item"><a href="cleands.Classification.html">cleands.Classification package</a></li>
+      <li class="breadcrumb-item active">cleands.Classification.glm module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/source/cleands.Classification.glm.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-cleands.Classification.glm">
+<span id="cleands-classification-glm-module"></span><h1>cleands.Classification.glm module<a class="headerlink" href="#module-cleands.Classification.glm" title="Link to this heading"></a></h1>
+<p>Classification models based on generalized linear models (GLMs).</p>
+<p>This module implements classifiers built on top of GLM regression models:
+logistic regression for binary classification and multinomial logistic
+regression for multi-class classification. Both models integrate with the
+broader <cite>cleands</cite> framework and expose <cite>tidy</cite> and <cite>glance</cite> methods for
+summarized model output.</p>
+<dl class="simple">
+<dt>Classes:</dt><dd><dl class="simple">
+<dt>logistic_classifier:</dt><dd><p>Binary classification model using logistic regression.</p>
+</dd>
+<dt>multinomial_classifier:</dt><dd><p>Multi-class classification model using a one-vs-rest approach
+with multiple logistic regressions.</p>
+</dd>
+</dl>
+</dd>
+<dt>Factory Aliases:</dt><dd><dl class="simple">
+<dt>LogisticClassifier:</dt><dd><p>Wrapper for constructing a logistic_classifier via ClassificationModel.</p>
+</dd>
+<dt>MultinomialClassifier:</dt><dd><p>Wrapper for constructing a multinomial_classifier via ClassificationModel.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p>Typical usage example:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">cleands.Classification.glm</span> <span class="kn">import</span> <span class="n">LogisticClassifier</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">x</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">LogisticClassifier</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">tidy</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">glance</span>
+</pre></div>
+</div>
+<dl class="py class">
+<dt class="sig sig-object py" id="cleands.Classification.glm.logistic_classifier">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cleands.Classification.glm.</span></span><span class="sig-name descname"><span class="pre">logistic_classifier</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">probability</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/Classification/glm.html#logistic_classifier"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.Classification.glm.logistic_classifier" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="cleands.base.html#cleands.base.classification_model" title="cleands.base.classification_model"><code class="xref py py-class docutils literal notranslate"><span class="pre">classification_model</span></code></a></p>
+<p>Logistic regression classifier.</p>
+<p>Wraps a logistic regression model for binary classification tasks.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model</strong> (<a class="reference internal" href="cleands.Prediction.glm.html#cleands.Prediction.glm.logistic_regressor" title="cleands.Prediction.glm.logistic_regressor"><em>logistic_regressor</em></a>) – Underlying logistic regression estimator.</p></li>
+<li><p><strong>params</strong> (<em>np.ndarray</em>) – Estimated model parameters.</p></li>
+<li><p><strong>probability</strong> (<em>float</em>) – Threshold probability for classification.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>probability</strong> (<em>float</em>)</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="cleands.Classification.glm.logistic_classifier.predict_proba">
+<span class="sig-name descname"><span class="pre">predict_proba</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/Classification/glm.html#logistic_classifier.predict_proba"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.Classification.glm.logistic_classifier.predict_proba" title="Link to this definition"></a></dt>
+<dd><p>Predict class probabilities for new observations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>target</strong> (<em>np.ndarray</em><em> or </em><em>pd.DataFrame</em>) – Feature matrix for predictions.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>Predicted probabilities with shape (n_samples, 2).</dt><dd><p>Column 0 = probability of class 0, Column 1 = probability of class 1.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="cleands.Classification.glm.logistic_classifier.tidy">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">tidy</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">DataFrame</span></em><a class="headerlink" href="#cleands.Classification.glm.logistic_classifier.tidy" title="Link to this definition"></a></dt>
+<dd><p>Return parameter estimates in tidy format without confidence intervals.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Table of variables, estimates, standard errors, test statistics, and p-values.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cleands.Classification.glm.logistic_classifier.tidyci">
+<span class="sig-name descname"><span class="pre">tidyci</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.95</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ci</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/Classification/glm.html#logistic_classifier.tidyci"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.Classification.glm.logistic_classifier.tidyci" title="Link to this definition"></a></dt>
+<dd><p>Return parameter estimates with optional confidence intervals.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>level</strong> (<em>float</em><em>, </em><em>optional</em>) – Confidence level. Defaults to 0.95.</p></li>
+<li><p><strong>ci</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, include confidence intervals. Defaults to True.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Table of coefficient estimates and statistics.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="cleands.Classification.glm.logistic_classifier.vcov_params">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">vcov_params</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span></em><a class="headerlink" href="#cleands.Classification.glm.logistic_classifier.vcov_params" title="Link to this definition"></a></dt>
+<dd><p>Variance–covariance matrix of parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Estimated covariance matrix.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="cleands.Classification.glm.logistic_classifier.glance">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">glance</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">DataFrame</span></em><a class="headerlink" href="#cleands.Classification.glm.logistic_classifier.glance" title="Link to this definition"></a></dt>
+<dd><p>Return model-level summary statistics.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Summary with fit metrics, information criteria, and classification accuracy.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cleands.Classification.glm.multinomial_classifier">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cleands.Classification.glm.</span></span><span class="sig-name descname"><span class="pre">multinomial_classifier</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/Classification/glm.html#multinomial_classifier"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.Classification.glm.multinomial_classifier" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="cleands.base.html#cleands.base.classification_model" title="cleands.base.classification_model"><code class="xref py py-class docutils literal notranslate"><span class="pre">classification_model</span></code></a></p>
+<p>Multinomial logistic regression classifier.</p>
+<p>Fits a one-vs-rest set of logistic regressions for multi-class classification.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="cleands.Classification.glm.multinomial_classifier.predict_proba">
+<span class="sig-name descname"><span class="pre">predict_proba</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/Classification/glm.html#multinomial_classifier.predict_proba"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.Classification.glm.multinomial_classifier.predict_proba" title="Link to this definition"></a></dt>
+<dd><p>Predict class probabilities for new observations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>target</strong> (<em>np.ndarray</em><em> or </em><em>pd.DataFrame</em>) – Feature matrix for predictions.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Predicted probabilities of shape (n_samples, n_classes).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cleands.Classification.glm.multinomial_classifier.tidyci">
+<span class="sig-name descname"><span class="pre">tidyci</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.95</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ci</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/Classification/glm.html#multinomial_classifier.tidyci"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.Classification.glm.multinomial_classifier.tidyci" title="Link to this definition"></a></dt>
+<dd><p>Return parameter estimates for each logistic regression.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>level</strong> (<em>float</em><em>, </em><em>optional</em>) – Confidence level. Defaults to 0.95.</p></li>
+<li><p><strong>ci</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, include confidence intervals. Defaults to True.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Stacked table of coefficient estimates for all models.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="cleands.Classification.glm.multinomial_classifier.tidy">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">tidy</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">DataFrame</span></em><a class="headerlink" href="#cleands.Classification.glm.multinomial_classifier.tidy" title="Link to this definition"></a></dt>
+<dd><p>Return parameter estimates without confidence intervals.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Table of estimates for all models.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="cleands.Classification.glm.multinomial_classifier.glance">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">glance</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">DataFrame</span></em><a class="headerlink" href="#cleands.Classification.glm.multinomial_classifier.glance" title="Link to this definition"></a></dt>
+<dd><p>Return model-level summary statistics for each logistic regression.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Concatenated DataFrame of summaries.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cleands.Classification.glm.LogisticClassifier">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cleands.Classification.glm.</span></span><span class="sig-name descname"><span class="pre">LogisticClassifier</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">formula</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/Classification/glm.html#LogisticClassifier"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.Classification.glm.LogisticClassifier" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="cleands.base.html#cleands.base.ClassificationModel" title="cleands.base.ClassificationModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">ClassificationModel</span></code></a></p>
+<p>Convenience wrapper for binary logistic regression classifier.</p>
+<p>Provides a formula/DataFrame interface for the
+<a class="reference internal" href="#cleands.Classification.glm.logistic_classifier" title="cleands.Classification.glm.logistic_classifier"><code class="xref py py-class docutils literal notranslate"><span class="pre">logistic_classifier</span></code></a>, which fits a logistic regression
+model for binary outcomes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>MODEL_TYPE</strong> (<em>ClassVar</em><em>[</em><em>Type</em><em>[</em><a class="reference internal" href="cleands.base.html#cleands.base.supervised_model" title="cleands.base.supervised_model"><em>cleands.base.supervised_model</em></a><em>]</em><em>]</em>) – Underlying model type, fixed to
+<a class="reference internal" href="#cleands.Classification.glm.logistic_classifier" title="cleands.Classification.glm.logistic_classifier"><code class="xref py py-class docutils literal notranslate"><span class="pre">logistic_classifier</span></code></a>.</p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>formula</strong> (<em>str</em>)</p></li>
+<li><p><strong>data</strong> (<em>DataFrame</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">LogisticClassifier</span><span class="o">.</span><span class="n">from_formula</span><span class="p">(</span><span class="s2">&quot;y ~ x1 + x2&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">classify</span><span class="p">(</span><span class="n">df</span><span class="p">[[</span><span class="s2">&quot;x1&quot;</span><span class="p">,</span> <span class="s2">&quot;x2&quot;</span><span class="p">]])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">df</span><span class="p">[[</span><span class="s2">&quot;x1&quot;</span><span class="p">,</span> <span class="s2">&quot;x2&quot;</span><span class="p">]])</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cleands.Classification.glm.MultinomialClassifier">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cleands.Classification.glm.</span></span><span class="sig-name descname"><span class="pre">MultinomialClassifier</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">formula</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/Classification/glm.html#MultinomialClassifier"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.Classification.glm.MultinomialClassifier" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="cleands.base.html#cleands.base.ClassificationModel" title="cleands.base.ClassificationModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">ClassificationModel</span></code></a></p>
+<p>Convenience wrapper for multinomial logistic regression classifier.</p>
+<p>Provides a formula/DataFrame interface for the
+<a class="reference internal" href="#cleands.Classification.glm.multinomial_classifier" title="cleands.Classification.glm.multinomial_classifier"><code class="xref py py-class docutils literal notranslate"><span class="pre">multinomial_classifier</span></code></a>, which fits a multinomial logistic
+regression model for multi-class classification problems.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>MODEL_TYPE</strong> (<em>ClassVar</em><em>[</em><em>Type</em><em>[</em><a class="reference internal" href="cleands.base.html#cleands.base.supervised_model" title="cleands.base.supervised_model"><em>cleands.base.supervised_model</em></a><em>]</em><em>]</em>) – Underlying model type, fixed to
+<a class="reference internal" href="#cleands.Classification.glm.multinomial_classifier" title="cleands.Classification.glm.multinomial_classifier"><code class="xref py py-class docutils literal notranslate"><span class="pre">multinomial_classifier</span></code></a>.</p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>formula</strong> (<em>str</em>)</p></li>
+<li><p><strong>data</strong> (<em>DataFrame</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">MultinomialClassifier</span><span class="o">.</span><span class="n">from_formula</span><span class="p">(</span><span class="s2">&quot;y ~ x1 + x2 + x3&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">classify</span><span class="p">(</span><span class="n">df</span><span class="p">[[</span><span class="s2">&quot;x1&quot;</span><span class="p">,</span> <span class="s2">&quot;x2&quot;</span><span class="p">,</span> <span class="s2">&quot;x3&quot;</span><span class="p">]])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">df</span><span class="p">[[</span><span class="s2">&quot;x1&quot;</span><span class="p">,</span> <span class="s2">&quot;x2&quot;</span><span class="p">,</span> <span class="s2">&quot;x3&quot;</span><span class="p">]])</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="cleands.Classification.ensemble.html" class="btn btn-neutral float-left" title="cleands.Classification.ensemble module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="cleands.Classification.knn.html" class="btn btn-neutral float-right" title="cleands.Classification.knn module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Jason Parker.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

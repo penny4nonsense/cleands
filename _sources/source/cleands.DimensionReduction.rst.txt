@@ -1,0 +1,15 @@
+cleands.DimensionReduction package
+==================================
+
+.. automodule:: cleands.DimensionReduction
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 2
+
+   cleands.DimensionReduction.pca

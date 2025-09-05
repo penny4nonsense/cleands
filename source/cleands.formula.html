@@ -1,0 +1,669 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>cleands.formula module &mdash; cleands  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=92fd9be5" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="cleands.utils module" href="cleands.utils.html" />
+    <link rel="prev" title="cleands.base module" href="cleands.base.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            cleands
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="cleands.html">cleands package</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="cleands.html#subpackages">Subpackages</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="cleands.html#submodules">Submodules</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="cleands.base.html">cleands.base module</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">cleands.formula module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#cleands.formula.USE_CARET"><code class="docutils literal notranslate"><span class="pre">USE_CARET</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cleands.formula.LOGGING"><code class="docutils literal notranslate"><span class="pre">LOGGING</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cleands.formula.bind"><code class="docutils literal notranslate"><span class="pre">bind()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cleands.formula.unique"><code class="docutils literal notranslate"><span class="pre">unique()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cleands.formula.split_expression"><code class="docutils literal notranslate"><span class="pre">split_expression()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cleands.formula.match_parens"><code class="docutils literal notranslate"><span class="pre">match_parens()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cleands.formula.make_pretty_minus"><code class="docutils literal notranslate"><span class="pre">make_pretty_minus()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cleands.formula.bin"><code class="docutils literal notranslate"><span class="pre">bin()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cleands.formula.parse"><code class="docutils literal notranslate"><span class="pre">parse()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cleands.formula.parse_expression"><code class="docutils literal notranslate"><span class="pre">parse_expression()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cleands.formula.parse_basic"><code class="docutils literal notranslate"><span class="pre">parse_basic()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cleands.formula.parse_complex"><code class="docutils literal notranslate"><span class="pre">parse_complex()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cleands.formula.parse_complex_expression_by_splitting_on_string"><code class="docutils literal notranslate"><span class="pre">parse_complex_expression_by_splitting_on_string()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cleands.formula.parse_term"><code class="docutils literal notranslate"><span class="pre">parse_term()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cleands.formula.is_interaction"><code class="docutils literal notranslate"><span class="pre">is_interaction()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cleands.formula.in_numpy"><code class="docutils literal notranslate"><span class="pre">in_numpy()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cleands.formula.is_as_is"><code class="docutils literal notranslate"><span class="pre">is_as_is()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cleands.formula.generate_interactions"><code class="docutils literal notranslate"><span class="pre">generate_interactions()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cleands.formula.special_power"><code class="docutils literal notranslate"><span class="pre">special_power()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cleands.formula.special_power_funcs"><code class="docutils literal notranslate"><span class="pre">special_power_funcs</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cleands.formula.check_special_power_funcs"><code class="docutils literal notranslate"><span class="pre">check_special_power_funcs()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="cleands.utils.html">cleands.utils module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">cleands</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="cleands.html">cleands package</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="cleands.html#subpackages">Subpackages</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="cleands.html#submodules">Submodules</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="cleands.base.html">cleands.base module</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">cleands.formula module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="cleands.utils.html">cleands.utils module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">cleands</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="cleands.html">cleands package</a></li>
+      <li class="breadcrumb-item active">cleands.formula module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/source/cleands.formula.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-cleands.formula">
+<span id="cleands-formula-module"></span><h1>cleands.formula module<a class="headerlink" href="#module-cleands.formula" title="Link to this heading"></a></h1>
+<p>Formula parsing utilities for building design matrices from strings.</p>
+<p>This module provides a lightweight, NumPy/Pandas-friendly parser for model
+formulas. It supports:</p>
+<ul class="simple">
+<li><p>Intercept handling via the special column “(intercept)”.</p></li>
+<li><p>Basic terms (column names), interactions with “:” and products with “*”.</p></li>
+<li><p>Inclusion/exclusion using “+” and “-” (handled via <cite>make_pretty_minus</cite>).</p></li>
+<li><p>Parentheses grouping.</p></li>
+<li><p>Powers using “**” (or “^” if <cite>USE_CARET=True</cite>).</p></li>
+<li><p>“As-is” expressions via <cite>I(&lt;python expression&gt;)</cite>, evaluated against <cite>data</cite>.</p></li>
+<li><p>A curated set of NumPy elementwise functions (see <cite>NUMPY_FUNCS</cite>).</p></li>
+<li><p>Special polynomial generators such as “quadratic(x1,x2)”, “cubic(…)”, etc.</p></li>
+</ul>
+<dl class="simple">
+<dt>Key entry points:</dt><dd><ul class="simple">
+<li><p>parse(): returns x_vars, y_var, conditionals, and the processed DataFrame.</p></li>
+<li><p>design helpers such as generate_interactions().</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>The parser mutates a <em>copy</em> of the input DataFrame and returns it.</p></li>
+<li><p>(intercept) is always added as a column with value 1 unless excluded.</p></li>
+</ul>
+<dl class="py data">
+<dt class="sig sig-object py" id="cleands.formula.USE_CARET">
+<span class="sig-prename descclassname"><span class="pre">cleands.formula.</span></span><span class="sig-name descname"><span class="pre">USE_CARET</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#cleands.formula.USE_CARET" title="Link to this definition"></a></dt>
+<dd><p>Whether to accept ‘^’ as a power operator (translated to ‘**’).</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="cleands.formula.LOGGING">
+<span class="sig-prename descclassname"><span class="pre">cleands.formula.</span></span><span class="sig-name descname"><span class="pre">LOGGING</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#cleands.formula.LOGGING" title="Link to this definition"></a></dt>
+<dd><p>Enable debug prints from parse steps when True.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cleands.formula.bind">
+<span class="sig-prename descclassname"><span class="pre">cleands.formula.</span></span><span class="sig-name descname"><span class="pre">bind</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/formula.html#bind"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.formula.bind" title="Link to this definition"></a></dt>
+<dd><p>Flatten a list of lists by one level.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>x</strong> (<em>list</em>) – List whose elements are iterables to be chained.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Single flattened list.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cleands.formula.unique">
+<span class="sig-prename descclassname"><span class="pre">cleands.formula.</span></span><span class="sig-name descname"><span class="pre">unique</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/formula.html#unique"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.formula.unique" title="Link to this definition"></a></dt>
+<dd><p>Return list with original order but unique entries.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>x</strong> (<em>list</em>) – Input list.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>De-duplicated list preserving first occurrence order.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cleands.formula.split_expression">
+<span class="sig-prename descclassname"><span class="pre">cleands.formula.</span></span><span class="sig-name descname"><span class="pre">split_expression</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expression</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delimiter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'+'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/formula.html#split_expression"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.formula.split_expression" title="Link to this definition"></a></dt>
+<dd><p>Split an expression by a delimiter respecting parentheses depth.</p>
+<p>This avoids splitting inside nested parentheses.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>expression</strong> (<em>str</em>) – Expression string to split.</p></li>
+<li><p><strong>delimiter</strong> (<em>str</em>) – Delimiter character (default: ‘+’).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The top-level fragments.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list[str]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cleands.formula.match_parens">
+<span class="sig-prename descclassname"><span class="pre">cleands.formula.</span></span><span class="sig-name descname"><span class="pre">match_parens</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expression</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/formula.html#match_parens"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.formula.match_parens" title="Link to this definition"></a></dt>
+<dd><p>If <cite>expression</cite> is fully parenthesized, return the inside; else None.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>expression</strong> (<em>str</em>) – Candidate string like “(a+b)”.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Inner content without outer parentheses if valid; otherwise None.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Optional[str]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cleands.formula.make_pretty_minus">
+<span class="sig-prename descclassname"><span class="pre">cleands.formula.</span></span><span class="sig-name descname"><span class="pre">make_pretty_minus</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expression</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/formula.html#make_pretty_minus"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.formula.make_pretty_minus" title="Link to this definition"></a></dt>
+<dd><p>Normalize ‘-’ to ‘+-’ at top level to simplify inclusion/exclusion logic.</p>
+<p class="rubric">Example</p>
+<p>“x - y + z” -&gt; “x+-y+z” (and leading ‘+’ removed if present)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>expression</strong> (<em>str</em>) – Raw expression.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Normalized expression.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cleands.formula.bin">
+<span class="sig-prename descclassname"><span class="pre">cleands.formula.</span></span><span class="sig-name descname"><span class="pre">bin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/formula.html#bin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.formula.bin" title="Link to this definition"></a></dt>
+<dd><p>Count occurrences of each element in a list.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>x</strong> (<em>list</em>) – Input list.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Mapping item -&gt; count.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cleands.formula.parse">
+<span class="sig-prename descclassname"><span class="pre">cleands.formula.</span></span><span class="sig-name descname"><span class="pre">parse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">formula</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/formula.html#parse"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.formula.parse" title="Link to this definition"></a></dt>
+<dd><p>Parse a full formula into design metadata and a processed DataFrame.</p>
+<dl class="simple">
+<dt>Syntax:</dt><dd><p>y ~ rhs [| conditionals]</p>
+</dd>
+<dt>Where <cite>rhs</cite> can contain:</dt><dd><ul class="simple">
+<li><p>column names</p></li>
+<li><p>interactions with ‘:’ (e.g., a:b)</p></li>
+<li><p>products with ‘*’ (expanded to main effects + interactions unless
+distribution is detected)</p></li>
+<li><p>‘+’ and ‘-’ to include/exclude terms</p></li>
+<li><p>powers via ‘**’ (or ‘^’ if <cite>USE_CARET=True</cite>)</p></li>
+<li><p>‘.’ to include all columns</p></li>
+<li><p>special generators like ‘quadratic(a,b)’, etc.</p></li>
+<li><p>‘I(expr)’ to evaluate raw Python/NumPy expressions on columns</p></li>
+</ul>
+</dd>
+<dt>The function:</dt><dd><ul class="simple">
+<li><p>adds ‘(intercept)’ to <cite>data</cite>,</p></li>
+<li><p>parses the left-hand side (y),</p></li>
+<li><p>returns selected x-vars (after inclusion/exclusion),</p></li>
+<li><p>returns optional <cite>conditionals</cite> to be passed downstream.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>formula</strong> (<em>str</em>) – Full formula string.</p></li>
+<li><p><strong>data</strong> (<em>pd.DataFrame</em>) – Source data.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p>x_vars: Ordered unique design column names (includes ‘(intercept)’ unless removed).</p></li>
+<li><p>y_var: Dependent variable name.</p></li>
+<li><p>conditionals: Parsed conditional columns (after inclusion/exclusion).</p></li>
+<li><p>processed: A copy of data with derived columns added, restricted to
+[y_var] + x_vars + conditionals.</p></li>
+</ul>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Tuple[list[str], str, list[str], pd.DataFrame]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cleands.formula.parse_expression">
+<span class="sig-prename descclassname"><span class="pre">cleands.formula.</span></span><span class="sig-name descname"><span class="pre">parse_expression</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expression</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/formula.html#parse_expression"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.formula.parse_expression" title="Link to this definition"></a></dt>
+<dd><p>Parse a right-hand-side-like expression into included and excluded terms.</p>
+<dl class="simple">
+<dt>This function orchestrates:</dt><dd><ol class="arabic simple">
+<li><p>normalization (<cite>make_pretty_minus</cite>, removing “np.” / “numpy.”, caret handling),</p></li>
+<li><p>attempting <cite>parse_basic</cite>,</p></li>
+<li><p>falling back to <cite>parse_complex</cite>.</p></li>
+</ol>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>expression</strong> (<em>str</em>) – RHS-like expression (may be empty).</p></li>
+<li><p><strong>data</strong> (<em>pd.DataFrame</em>) – DataFrame to mutate with derived columns.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>(included_terms, excluded_terms)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple[list[str], list[str]]</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>Returns <cite>None</cite> on failure, but callers typically rely on truthiness and
+do not expect <cite>None</cite> in normal flows.</p></li>
+</ul>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cleands.formula.parse_basic">
+<span class="sig-prename descclassname"><span class="pre">cleands.formula.</span></span><span class="sig-name descname"><span class="pre">parse_basic</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expression</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/formula.html#parse_basic"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.formula.parse_basic" title="Link to this definition"></a></dt>
+<dd><p>Handle simple cases: literals, parentheses, single terms, all-cols, powers, sums.</p>
+<dl class="simple">
+<dt>Rules (order matters):</dt><dd><ul class="simple">
+<li><p>Empty string -&gt; ([], [])</p></li>
+<li><p>Parenthesized -&gt; parse inner</p></li>
+<li><p>“1” -&gt; intercept</p></li>
+<li><p>Valid term -&gt; [term]</p></li>
+<li><p>“.” -&gt; all current columns</p></li>
+<li><p>“(… )**k” -&gt; expand to interactions up to power k</p></li>
+<li><p>“a+b+…” -&gt; sum of sub-expressions (recursively parsed)</p></li>
+<li><p>“-expr” -&gt; invert included/excluded sets (for minus handling)</p></li>
+<li><p>Special power funcs (e.g., “quadratic(a,b)”)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>expression</strong> (<em>str</em>) – Candidate expression.</p></li>
+<li><p><strong>data</strong> (<em>pd.DataFrame</em>) – Data to mutate with derived columns.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>(included, excluded) or None.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Optional[tuple[list[str], list[str]]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cleands.formula.parse_complex">
+<span class="sig-prename descclassname"><span class="pre">cleands.formula.</span></span><span class="sig-name descname"><span class="pre">parse_complex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expression</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/formula.html#parse_complex"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.formula.parse_complex" title="Link to this definition"></a></dt>
+<dd><p>Handle products ‘*’ and interactions ‘:’ with distribution/expansion logic.</p>
+<dl class="simple">
+<dt>Strategy:</dt><dd><ul class="simple">
+<li><p>Try splitting by ‘*’ via <cite>parse_complex_expression_by_splitting_on_string</cite>.
+If distributed=True, the product was distributable and we return terms.
+Otherwise, we add generated interactions.</p></li>
+<li><p>Try ‘:’ similarly; ensure resulting string is a valid interaction.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>expression</strong> (<em>str</em>) – Candidate expression with ‘*’ or ‘:’.</p></li>
+<li><p><strong>data</strong> (<em>pd.DataFrame</em>) – Data to mutate.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>(included, excluded) or None.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Optional[Tuple[list[str], list[str]]]</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If negations are detected in product/interaction contexts or
+    invalid interaction strings are produced.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cleands.formula.parse_complex_expression_by_splitting_on_string">
+<span class="sig-prename descclassname"><span class="pre">cleands.formula.</span></span><span class="sig-name descname"><span class="pre">parse_complex_expression_by_splitting_on_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expression</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delimiter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'*'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/formula.html#parse_complex_expression_by_splitting_on_string"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.formula.parse_complex_expression_by_splitting_on_string" title="Link to this definition"></a></dt>
+<dd><p>Split by a delimiter (‘*’ or ‘:’) and attempt recursive parsing/distribution.</p>
+<dl class="simple">
+<dt>For ‘*’:</dt><dd><ul class="simple">
+<li><p>If any sub-expression yields multiple included terms (and no excluded),
+attempt distribution across the product.</p></li>
+<li><p>If distribution succeeds, return the distributed terms with
+{‘error’: False, ‘distributed’: True, ‘terms’: […]}.</p></li>
+<li><p>Otherwise, return the collected simple terms and mark
+{‘error’: False, ‘distributed’: False, ‘terms’: […]}, leaving the caller
+to generate interactions.</p></li>
+</ul>
+</dd>
+<dt>For ‘:’:</dt><dd><ul class="simple">
+<li><p>Just return the list of terms; the caller will validate/construct the
+final interaction string.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>expression</strong> (<em>str</em>) – Input expression.</p></li>
+<li><p><strong>data</strong> (<em>pd.DataFrame</em>) – Data to mutate during parsing/evaluation.</p></li>
+<li><p><strong>delimiter</strong> (<em>str</em>) – Either ‘*’ or ‘:’.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>A dictionary with keys:</dt><dd><ul class="simple">
+<li><p>’error’ (bool): True if excluded terms invalidated the operation.</p></li>
+<li><p>’distributed’ (bool): True if product distribution occurred.</p></li>
+<li><p>’terms’ (list[str] | None): Collected raw terms when successful.</p></li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Optional[Dict[str, Any]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cleands.formula.parse_term">
+<span class="sig-prename descclassname"><span class="pre">cleands.formula.</span></span><span class="sig-name descname"><span class="pre">parse_term</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">term</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/formula.html#parse_term"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.formula.parse_term" title="Link to this definition"></a></dt>
+<dd><p>Parse a single term by attempting NumPy func, interaction, or as-is.</p>
+<dl class="simple">
+<dt>Order:</dt><dd><ol class="arabic simple">
+<li><p>in_numpy()</p></li>
+<li><p>is_interaction()</p></li>
+<li><p>is_as_is()</p></li>
+</ol>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>term</strong> (<em>str</em>) – A candidate term string.</p></li>
+<li><p><strong>data</strong> (<em>pd.DataFrame</em>) – Data to be mutated if term is derived.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if the term was successfully parsed/applied to <cite>data</cite>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cleands.formula.is_interaction">
+<span class="sig-prename descclassname"><span class="pre">cleands.formula.</span></span><span class="sig-name descname"><span class="pre">is_interaction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expression</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/formula.html#is_interaction"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.formula.is_interaction" title="Link to this definition"></a></dt>
+<dd><p>Create interaction column for colon-separated terms.</p>
+<p class="rubric">Example</p>
+<p>“a:b:c” -&gt; data[“a:b:c”] = data[“a”] * data[“b”] * data[“c”]</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>expression</strong> (<em>str</em>) – Interaction expression with ‘:’.</p></li>
+<li><p><strong>data</strong> (<em>pd.DataFrame</em>) – Data to mutate.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if an interaction was created; False otherwise.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cleands.formula.in_numpy">
+<span class="sig-prename descclassname"><span class="pre">cleands.formula.</span></span><span class="sig-name descname"><span class="pre">in_numpy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expression</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/formula.html#in_numpy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.formula.in_numpy" title="Link to this definition"></a></dt>
+<dd><p>Evaluate a recognized NumPy unary function or treat as existing column.</p>
+<p>If <cite>expression</cite> matches a key in <cite>NUMPY_FUNCS</cite> in the form “&lt;func&gt;(col)”,
+the new column is added as that function applied to <cite>data[col]</cite>. If the
+expression is already a column name, this returns True.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>expression</strong> (<em>str</em>) – Either a column name or “&lt;func&gt;(col)”.</p></li>
+<li><p><strong>data</strong> (<em>pd.DataFrame</em>) – Data to mutate.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if the expression is a known column or created successfully.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cleands.formula.is_as_is">
+<span class="sig-prename descclassname"><span class="pre">cleands.formula.</span></span><span class="sig-name descname"><span class="pre">is_as_is</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expression</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/formula.html#is_as_is"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.formula.is_as_is" title="Link to this definition"></a></dt>
+<dd><p>Evaluate a raw Python/NumPy expression with <cite>I(…)</cite>.</p>
+<p>Replaces bare column names in the interior with <cite>data[‘col’]</cite> and ensures
+bare NumPy function names are qualified with <cite>np.</cite> if present in NUMPY_FUNCS.</p>
+<p class="rubric">Example</p>
+<p>I((x1 + x2)**2) or I(sqrt(x))</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>expression</strong> (<em>str</em>) – Expression beginning with ‘I’.</p></li>
+<li><p><strong>data</strong> (<em>pd.DataFrame</em>) – Data to evaluate against.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if successfully evaluated and assigned; False otherwise.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cleands.formula.generate_interactions">
+<span class="sig-prename descclassname"><span class="pre">cleands.formula.</span></span><span class="sig-name descname"><span class="pre">generate_interactions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">power</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/formula.html#generate_interactions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.formula.generate_interactions" title="Link to this definition"></a></dt>
+<dd><p>Generate all unique interaction terms up to a given order.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>list</em><em>[</em><em>str</em><em>]</em>) – Base term names (already validated/created in <cite>data</cite>).</p></li>
+<li><p><strong>data</strong> (<em>pd.DataFrame</em>) – Data to mutate with interactions.</p></li>
+<li><p><strong>power</strong> (<em>Optional</em><em>[</em><em>int</em><em>]</em>) – Maximum interaction order. Defaults to len(x).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Sorted, unique interaction strings that were generated.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list[str]</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If any generated term fails to create an interaction in <cite>data</cite>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cleands.formula.special_power">
+<span class="sig-prename descclassname"><span class="pre">cleands.formula.</span></span><span class="sig-name descname"><span class="pre">special_power</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">terms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">power</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/formula.html#special_power"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.formula.special_power" title="Link to this definition"></a></dt>
+<dd><p>Generate special-power terms (linear, quadratic, etc.) for a set of terms.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>terms</strong> (<em>list</em><em>[</em><em>str</em><em>]</em>) – Base terms to expand.</p></li>
+<li><p><strong>data</strong> (<em>pd.DataFrame</em>) – DataFrame where generated columns will be stored.</p></li>
+<li><p><strong>power</strong> (<em>int</em><em>, </em><em>optional</em>) – Maximum power to generate. Defaults to 1.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Names of generated terms stored in <code class="docutils literal notranslate"><span class="pre">data</span></code>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list[str]</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>For a single term <code class="docutils literal notranslate"><span class="pre">x</span></code>, quadratic produces <code class="docutils literal notranslate"><span class="pre">x</span></code> and <code class="docutils literal notranslate"><span class="pre">I(x**2)</span></code>.</p></li>
+<li><p>For multiple terms, interaction powers like <code class="docutils literal notranslate"><span class="pre">I(x*y)</span></code> and <code class="docutils literal notranslate"><span class="pre">I(x**2*y)</span></code> may be created.</p></li>
+</ul>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="cleands.formula.special_power_funcs">
+<span class="sig-prename descclassname"><span class="pre">cleands.formula.</span></span><span class="sig-name descname"><span class="pre">special_power_funcs</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'cubic':</span> <span class="pre">functools.partial(&lt;function</span> <span class="pre">special_power&gt;,</span> <span class="pre">power=3),</span> <span class="pre">'decic':</span> <span class="pre">functools.partial(&lt;function</span> <span class="pre">special_power&gt;,</span> <span class="pre">power=10),</span> <span class="pre">'duodecic':</span> <span class="pre">functools.partial(&lt;function</span> <span class="pre">special_power&gt;,</span> <span class="pre">power=12),</span> <span class="pre">'hexic':</span> <span class="pre">functools.partial(&lt;function</span> <span class="pre">special_power&gt;,</span> <span class="pre">power=6),</span> <span class="pre">'linear':</span> <span class="pre">functools.partial(&lt;function</span> <span class="pre">special_power&gt;,</span> <span class="pre">power=1),</span> <span class="pre">'nonic':</span> <span class="pre">functools.partial(&lt;function</span> <span class="pre">special_power&gt;,</span> <span class="pre">power=9),</span> <span class="pre">'octic':</span> <span class="pre">functools.partial(&lt;function</span> <span class="pre">special_power&gt;,</span> <span class="pre">power=8),</span> <span class="pre">'quadratic':</span> <span class="pre">functools.partial(&lt;function</span> <span class="pre">special_power&gt;,</span> <span class="pre">power=2),</span> <span class="pre">'quartic':</span> <span class="pre">functools.partial(&lt;function</span> <span class="pre">special_power&gt;,</span> <span class="pre">power=4),</span> <span class="pre">'quintic':</span> <span class="pre">functools.partial(&lt;function</span> <span class="pre">special_power&gt;,</span> <span class="pre">power=5),</span> <span class="pre">'septic':</span> <span class="pre">functools.partial(&lt;function</span> <span class="pre">special_power&gt;,</span> <span class="pre">power=7),</span> <span class="pre">'sextic':</span> <span class="pre">functools.partial(&lt;function</span> <span class="pre">special_power&gt;,</span> <span class="pre">power=6),</span> <span class="pre">'vigintic':</span> <span class="pre">functools.partial(&lt;function</span> <span class="pre">special_power&gt;,</span> <span class="pre">power=20)}</span></em><a class="headerlink" href="#cleands.formula.special_power_funcs" title="Link to this definition"></a></dt>
+<dd><p>Registry mapping special polynomial keywords to generator callables.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cleands.formula.check_special_power_funcs">
+<span class="sig-prename descclassname"><span class="pre">cleands.formula.</span></span><span class="sig-name descname"><span class="pre">check_special_power_funcs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expression</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cleands/formula.html#check_special_power_funcs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cleands.formula.check_special_power_funcs" title="Link to this definition"></a></dt>
+<dd><p>Detect and expand special polynomial helpers like ‘quadratic(…)’.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>expression</strong> (<em>str</em>) – Expression beginning with a registered keyword.</p></li>
+<li><p><strong>data</strong> (<em>pd.DataFrame</em>) – Data to mutate with generated terms.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Generated term list if matched; otherwise None.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Optional[list[str]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="cleands.base.html" class="btn btn-neutral float-left" title="cleands.base module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="cleands.utils.html" class="btn btn-neutral float-right" title="cleands.utils module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Jason Parker.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

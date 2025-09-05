@@ -1,0 +1,7 @@
+cleands.Classification.nb module
+================================
+
+.. automodule:: cleands.Classification.nb
+   :members:
+   :undoc-members:
+   :show-inheritance:
