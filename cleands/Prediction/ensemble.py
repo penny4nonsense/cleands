@@ -245,22 +245,200 @@ class random_forest_regressor(bagging_recursive_partitioning_regressor):
     """Random Forest regressor using recursive partitioning trees.
 
     This class implements a random forest by combining multiple
-    recursive partitioning trees with bootstrapping and feature
-    sub-sampling. At each split, only a random subset of predictors
-    is considered, reducing correlation between trees.
+    recursive partitioning trees with bootstrapping and random
+    feature sub-sampling. At each split, each tree considers only
+    a random subset of predictors, which reduces correlation
+    across trees relative to plain bagging.
 
     Args:
         x (np.ndarray): Training feature matrix of shape (n_obs, n_feat).
         y (np.ndarray): Training response vector of shape (n_obs,).
         seed (int, optional): Random seed for reproducibility.
-        bootstraps (int, optional): Number of bootstrap resamples. Defaults to 1000.
-        sign_level (float, optional): Significance level for splitting. Defaults to 0.95.
-        max_level (int, optional): Maximum tree depth. If None, grows until no valid splits remain.
+        bootstraps (int, optional): Number of bootstrap resamples.
+            Defaults to 1000.
+        sign_level (float, optional): Significance level for splitting.
+            Defaults to 0.95.
+        max_level (int | None, optional): Maximum tree depth. If None,
+            grows until no valid splits remain.
 
     Inherits:
-        bagging_recursive_partitioning_regressor: Provides the ensemble
-        logic and base tree structure.
+        bagging_recursive_partitioning_regressor: Provides the bagging
+        ensemble logic and recursive partitioning tree base learner.
     """
+
+    def __init__(
+        self,
+        x,
+        y,
+        seed=None,
+        bootstraps=1000,
+        sign_level=0.95,
+        max_level=None,
+    ):
+        super().__init__(
+            x=x,
+            y=y,
+            seed=seed,
+            bootstraps=bootstraps,
+            sign_level=sign_level,
+            max_level=max_level,
+            random_x=True,
+        )
+
+
+class adaboost_regressor(recursive_partitioning_regressor):
+    """AdaBoost.R2 regressor using recursive partitioning trees as weak learners.
+
+    This class implements the AdaBoost.R2 algorithm for regression. Weak learners
+    are fit sequentially on weighted bootstrap resamples of the training data.
+    After each iteration, observation weights are updated to emphasize cases
+    with larger normalized absolute prediction errors.
+
+    By default, the weak learner is a shallow recursive partitioning regressor,
+    which is the standard boosting-style choice. Because the underlying tree
+    implementation does not currently support observation weights directly,
+    weighted resampling is used instead.
+
+    Args:
+        x (np.ndarray): Training feature matrix of shape (n_obs, n_feat).
+        y (np.ndarray): Training response vector of shape (n_obs,).
+        seed (int, optional): Random seed for reproducibility.
+        iterations (int, optional): Number of boosting rounds. Defaults to 100.
+        sign_level (float, optional): Significance level for splitting in each
+            weak learner. Defaults to 0.95.
+        max_level (int | None, optional): Maximum tree depth for each weak
+            learner. Defaults to 2.
+        loss (str, optional): Loss normalization to use. One of
+            {"linear", "square", "exponential"}. Defaults to "linear".
+
+    Attributes:
+        seed (int | None): Random seed used for weighted resampling.
+        n_iter (int): Number of boosting rounds.
+        learners (list[recursive_partitioning_regressor]): Fitted weak learners.
+        learner_weights (np.ndarray): Boosting weights for each weak learner.
+        observation_weights (np.ndarray): Final observation weights after the
+            last boosting round.
+        fitted (np.ndarray): In-sample boosted predictions.
+    """
+
+    def __init__(
+        self,
+        x,
+        y,
+        seed=None,
+        iterations=100,
+        sign_level=0.95,
+        max_level=2,
+        loss="linear",
+    ):
+        super().__init__(x, y, max_level=1)
+
+        self.seed = seed
+        self.n_iter = iterations
+        self.loss = loss
+        self.learners = []
+        self.learner_weights = []
+
+        rng = np.random.default_rng(seed)
+        n_obs = x.shape[0]
+        weights = np.full(n_obs, 1 / n_obs, dtype=float)
+
+        for _ in range(iterations):
+            sample = rng.choice(n_obs, size=n_obs, replace=True, p=weights)
+
+            learner = recursive_partitioning_regressor(
+                x[sample],
+                y[sample],
+                sign_level=sign_level,
+                max_level=max_level,
+                random_x=False,
+            )
+
+            pred = learner.predict(x)
+            error_vect = np.abs(y - pred)
+
+            max_error = error_vect.max()
+            if max_error <= 0:
+                self.learners.append(learner)
+                self.learner_weights.append(1.0)
+                weights = np.full(n_obs, 1 / n_obs, dtype=float)
+                break
+
+            loss_vect = error_vect / max_error
+
+            match loss:
+                case "linear":
+                    pass
+                case "square":
+                    loss_vect = loss_vect ** 2
+                case "exponential":
+                    loss_vect = 1 - np.exp(-loss_vect)
+                case _:
+                    raise ValueError("loss must be 'linear', 'square', or 'exponential'")
+
+            avg_loss = np.sum(weights * loss_vect)
+
+            # AdaBoost.R2 stopping rules
+            if avg_loss <= 0:
+                self.learners.append(learner)
+                self.learner_weights.append(1.0)
+                weights = np.full(n_obs, 1 / n_obs, dtype=float)
+                break
+
+            if avg_loss >= 0.5:
+                # Do not include a useless learner
+                if len(self.learners) == 0:
+                    self.learners.append(learner)
+                    self.learner_weights.append(1.0)
+                break
+
+            beta = avg_loss / (1 - avg_loss)
+            learner_weight = np.log(1 / beta)
+
+            self.learners.append(learner)
+            self.learner_weights.append(learner_weight)
+
+            weights *= np.power(beta, 1 - loss_vect)
+            weights /= weights.sum()
+
+        self.learner_weights = np.array(self.learner_weights, dtype=float)
+        self.observation_weights = weights
+
+        # Copy one learner's tree structure onto self for consistency with your
+        # ensemble style, but prediction is always aggregated across learners.
+        if len(self.learners) > 0:
+            model = self.learners[np.argmax(self.learner_weights)]
+            for key, value in vars(model).items():
+                setattr(self, key, value)
+
+    def predict(self, newx, fitted: bool = False):
+        """Predict using the weighted median of weak learner predictions.
+
+        Args:
+            newx (np.ndarray): Feature matrix for prediction.
+            fitted (bool): Included for interface compatibility with
+                recursive_partitioning_regressor. Ignored here.
+
+        Returns:
+            np.ndarray: Boosted predictions.
+        """
+        if len(self.learners) == 0:
+            return np.full(newx.shape[0], self.y.mean())
+
+        preds = np.array([learner.predict(newx) for learner in self.learners])
+        weights = self.learner_weights
+
+        out = np.empty(newx.shape[0], dtype=float)
+        half_weight = 0.5 * weights.sum()
+
+        for i in range(newx.shape[0]):
+            order = np.argsort(preds[:, i])
+            sorted_preds = preds[order, i]
+            sorted_weights = weights[order]
+            cum_weights = np.cumsum(sorted_weights)
+            out[i] = sorted_preds[np.searchsorted(cum_weights, half_weight)]
+
+        return out
 
 
 class BaggingLogisticRegressor(PredictionModel):
@@ -316,4 +494,23 @@ class RandomForestRegressor(PredictionModel):
         >>> model.predict(df[["x1", "x2", "x3"]])
     """
 
-    MODEL_TYPE = random_forest_regressor
+
+class AdaBoostRegressor(PredictionModel):
+    """Convenience wrapper for AdaBoost regression.
+
+    Provides a formula/DataFrame interface for the
+    :class:`adaboost_regressor`.
+
+    Attributes:
+        MODEL_TYPE: Underlying model type, fixed to
+            :class:`adaboost_regressor`.
+
+    Example:
+        >>> model = AdaBoostRegressor.from_formula("y ~ x1 + x2 + x3", data=df)
+        >>> model.predict(df[["x1", "x2", "x3"]])
+    """
+
+    MODEL_TYPE = adaboost_regressor
+
+MODEL_TYPE = random_forest_regressor
+

@@ -158,6 +158,165 @@ class random_forest_classifier(bagging_recursive_partitioning_classifier):
     """
 
 
+class adaboost_classifier(classification_model):
+    """Classic AdaBoost classifier using recursive partitioning weak learners.
+
+    This class implements the original AdaBoost-style boosting procedure for
+    binary classification. Weak learners are fit sequentially using observation
+    weights, and each learner receives a vote proportional to its accuracy.
+
+    By default, the weak learner is a shallow recursive partitioning classifier
+    (typically a stump), which is the classic boosting choice.
+
+    Args:
+        x (np.ndarray): Training feature matrix of shape (n_obs, n_feat).
+        y (np.ndarray): Binary class labels of shape (n_obs,), coded as 0/1.
+        seed (int, optional): Random seed for reproducibility.
+        iterations (int, optional): Number of boosting rounds. Defaults to 100.
+        sign_level (float, optional): Significance level for splitting in each
+            weak learner. Defaults to 0.95.
+        max_level (int | None, optional): Maximum tree depth for each weak
+            learner. Defaults to 2.
+
+    Attributes:
+        seed (int | None): Random seed used for reproducibility.
+        n_boot (int): Number of boosting rounds.
+        learners (list[recursive_partitioning_classifier]): Fitted weak learners.
+        learner_weights (np.ndarray): Vote weights for each weak learner.
+        observation_weights (np.ndarray): Final observation weights after the
+            last boosting round.
+    """
+
+    def __init__(
+            self,
+            x,
+            y,
+            seed=None,
+            iterations=100,
+            sign_level=0.95,
+            max_level=2,
+    ):
+        super().__init__(x, y)
+
+        if np.unique(y).shape[0] != 2:
+            raise ValueError("adaboost_classifier currently supports binary classification only.")
+        if not np.array_equal(np.sort(np.unique(y)), np.array([0, 1])):
+            raise ValueError("adaboost_classifier requires binary labels coded as 0 and 1.")
+
+        self.seed = seed
+        self.n_boot = iterations
+        self.learners = []
+        self.learner_weights = []
+
+        n_obs = x.shape[0]
+        weights = np.full(n_obs, 1 / n_obs, dtype=float)
+
+        # Optional reproducibility hook for any downstream numpy randomness
+        if seed is not None:
+            np.random.seed(seed)
+
+        for _ in range(iterations):
+            learner = recursive_partitioning_classifier(
+                x,
+                y,
+                sign_level=sign_level,
+                max_level=max_level,
+                random_x=False,
+                weights=weights,
+            )
+
+            pred = learner.classify(x)
+            incorrect = (pred != y).astype(float)
+
+            # Weighted misclassification rate
+            error = np.sum(weights * incorrect)
+
+            # Stopping rules
+            if error <= 0:
+                self.learners.append(learner)
+                self.learner_weights.append(1.0)
+                weights = np.full(n_obs, 1 / n_obs, dtype=float)
+                break
+
+            if error >= 0.5:
+                if len(self.learners) == 0:
+                    self.learners.append(learner)
+                    self.learner_weights.append(1.0)
+                break
+
+            alpha = 0.5 * np.log((1 - error) / error)
+
+            self.learners.append(learner)
+            self.learner_weights.append(alpha)
+
+            # Convert labels/predictions from {0,1} to {-1,+1}
+            y_signed = 2 * y - 1
+            pred_signed = 2 * pred - 1
+
+            weights *= np.exp(-alpha * y_signed * pred_signed)
+            weights /= weights.sum()
+
+        self.learner_weights = np.array(self.learner_weights, dtype=float)
+        self.observation_weights = weights
+
+    def decision_function(self, newx):
+        """Compute the boosted decision score for each observation.
+
+        Args:
+            newx (np.ndarray): Feature matrix for prediction.
+
+        Returns:
+            np.ndarray: Signed decision scores. Positive values favor class 1,
+            negative values favor class 0.
+        """
+        if len(self.learners) == 0:
+            return np.zeros(newx.shape[0], dtype=float)
+
+        scores = np.zeros(newx.shape[0], dtype=float)
+        for alpha, learner in zip(self.learner_weights, self.learners):
+            pred = learner.classify(newx)
+            pred_signed = 2 * pred - 1
+            scores += alpha * pred_signed
+        return scores
+
+    def classify(self, newx):
+        """Predict hard class labels by weighted majority vote.
+
+        Args:
+            newx (np.ndarray): Feature matrix for prediction.
+
+        Returns:
+            np.ndarray: Predicted binary class labels of shape (n_new,).
+        """
+        return (self.decision_function(newx) > 0).astype(int)
+
+    def predict_proba(self, newx):
+        """Predict class probabilities from boosted decision scores.
+
+        Uses the logistic transform of the AdaBoost decision function to produce
+        a probability-like output for binary classification.
+
+        Args:
+            newx (np.ndarray): Feature matrix for prediction.
+
+        Returns:
+            np.ndarray: Predicted probabilities of shape (n_new, 2), with
+            columns corresponding to class 0 and class 1.
+        """
+        scores = self.decision_function(newx)
+        p1 = 1 / (1 + np.exp(-2 * scores))
+        return np.column_stack((1 - p1, p1))
+
+    @property
+    def fitted(self):
+        """Return hard labels for the training data.
+
+        Returns:
+            np.ndarray: Integer class labels of shape (n_obs,).
+        """
+        return self.classify(self.x)
+
+
 class BaggingLogisticClassifier(ClassificationModel):
     """Convenience wrapper for bagging logistic classification.
 
@@ -212,3 +371,22 @@ class RandomForestClassifier(ClassificationModel):
     """
 
     MODEL_TYPE = random_forest_classifier
+
+
+class AdaBoostClassifier(ClassificationModel):
+    """Convenience wrapper for AdaBoost classification.
+
+    Provides a formula/DataFrame interface for the
+    :class:`adaboost_classifier`.
+
+    Attributes:
+        MODEL_TYPE: Underlying model type, fixed to
+            :class:`adaboost_classifier`.
+
+    Example:
+        >>> model = AdaBoostClassifier.from_formula("y ~ x1 + x2 + x3", data=df)
+        >>> model.classify(df[["x1", "x2", "x3"]])
+        >>> model.predict_proba(df[["x1", "x2", "x3"]])
+    """
+
+    MODEL_TYPE = adaboost_classifier

@@ -229,6 +229,7 @@ def parse(formula: str, data: pd.DataFrame) -> Tuple[list[str], str, list[str], 
             - processed: A copy of data with derived columns added, restricted to
               [y_var] + x_vars + conditionals.
     """
+    formula = formula.replace(' ', '')  # add this line at the top
     y_var, rhs = formula.split('~')
     if '|' in formula:
         rhs, conditionals = formula.split('|')
